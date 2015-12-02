@@ -18,7 +18,10 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Fixed
 
-- Nothing.
+- [#1](https://github.com/zendframework/zend-expressive-router/pull/1) fixes the
+  coveralls support to trigger after scripts, so the status of the check does
+  not make the tests fail. Additionally, ensured that coveralls can receive
+  the coverage report!
 
 ## 1.0.0 - 2015-12-02
 
