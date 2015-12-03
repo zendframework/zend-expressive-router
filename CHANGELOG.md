@@ -20,7 +20,7 @@ All notable changes to this project will be documented in this file, in reverse 
 
 - Nothing.
 
-## 1.0.1 - TBD
+## 1.0.1 - 2015-12-03
 
 ### Added
 
@@ -28,7 +28,8 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Deprecated
 
-- Nothing.
+- [#3](https://github.com/zendframework/zend-expressive-router/pull/3) deprecates `RouteResultObserverInterface`, which
+  [has been moved to the `Zend\Expressive` namespace and package](https://github.com/zendframework/zend-expressive/pull/206).
 
 ### Removed
 
