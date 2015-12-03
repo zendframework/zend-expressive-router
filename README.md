@@ -11,9 +11,6 @@ This package provides the following classes and interfaces:
   `ServerRequest` messages.
 - `Route`, a value object describing routed middleware.
 - `RouteResult`, a value object describing the results of routing.
-- `RouteResultObserverInterface`, which allows you to create observers for
-  `Zend\Expressive\Application` that will be updated when a `RouteResult` has
-  been obtained.
 
 ## Installation
 

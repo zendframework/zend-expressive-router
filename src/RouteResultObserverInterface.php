@@ -9,6 +9,10 @@
 
 namespace Zend\Expressive\Router;
 
+/**
+ * @deprecated Since 1.0.1. Use Zend\Expressive\RouteResultObserverInterface
+ *     from the zendframework/zend-expressive package instead.
+ */
 interface RouteResultObserverInterface
 {
     /**
