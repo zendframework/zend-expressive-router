@@ -2,11 +2,16 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
-## 1.0.2 - TBD
+## 1.1.0 - 2015-12-06
 
 ### Added
 
-- Nothing.
+- [#4](https://github.com/zendframework/zend-expressive-router/pull/4) adds
+  `RouteResultSubjectInterface`, a complement to `RouteResultObserverInterface`,
+  defining the following methods:
+  - `attachRouteResultObserver(RouteResultObserverInterface $observer)`
+  - `detachRouteResultObserver(RouteResultObserverInterface $observer)`
+  - `notifyRouteResultObservers(RouteResult $result)`
 
 ### Deprecated
 
@@ -14,7 +19,8 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Removed
 
-- Nothing.
+- [#4](https://github.com/zendframework/zend-expressive-router/pull/4) removes
+  the deprecation notice from `RouteResultObserverInterface`.
 
 ### Fixed
 
