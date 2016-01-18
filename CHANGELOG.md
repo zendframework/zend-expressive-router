@@ -10,7 +10,11 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Deprecated
 
-- Nothing.
+- [#5](https://github.com/zendframework/zend-expressive-router/pull/5)
+  deprecates both `RouteResultObserverInterface` and
+  `RouteResultSubjectInterface`. The changes introduced in
+  [zend-expressive #270](https://github.com/zendframework/zend-expressive/pull/270)
+  make the system obsolete. The interfaces will be removed in 2.0.0.
 
 ### Removed
 
