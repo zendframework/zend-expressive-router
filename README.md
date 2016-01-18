@@ -2,7 +2,7 @@
 
 [![Build Status](https://secure.travis-ci.org/zendframework/zend-expressive-router.svg?branch=master)](https://secure.travis-ci.org/zendframework/zend-expressive-router)
 
-Router subcomponent for [Expressive](https://github.com/zendframework/zend-expressive].
+Router subcomponent for [Expressive](https://github.com/zendframework/zend-expressive).
 
 This package provides the following classes and interfaces:
 
