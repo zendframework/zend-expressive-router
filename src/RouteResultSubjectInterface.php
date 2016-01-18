@@ -17,6 +17,8 @@ namespace Zend\Expressive\Router;
  * is typically the subject.
  *
  * @since 1.1.0
+ * @deprecated since 1.2.0; will be removed in 2.0.0. Zend\Expressive\Application
+ *     stopped implementing this as of 1.0.0RC6.
  */
 interface RouteResultSubjectInterface
 {

@@ -11,6 +11,8 @@ namespace Zend\Expressive\Router;
 
 /**
  * An object that is interested in the route results.
+ *
+ * @deprecated since 1.2.0; will be removed in 2.0.0.
  */
 interface RouteResultObserverInterface
 {
