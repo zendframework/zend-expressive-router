@@ -17,26 +17,6 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 interface RouterInterface
 {
     /**
-     * Add a route.
-     *
-     * This method adds a route against which the underlying implementation may
-     * match. Implementations MUST aggregate route instances, but MUST NOT use
-     * the details to inject the underlying router until `match()` and/or
-     * `generateUri()` is called.  This is required to allow consumers to
-     * modify route instances before matching (e.g., to provide route options,
-     * inject a name, etc.).
-     *
-     * The method MUST raise Exception\RuntimeException if called after either `match()`
-     * or `generateUri()` have already been called, to ensure integrity of the
-     * router between invocations of either of those methods.
-     *
-     * @param Route $route
-     * @throws Exception\RuntimeException when called after match() or
-     *     generateUri() have been called.
-     */
-    public function addRoute(Route $route);
-
-    /**
      * Match a request against the known routes.
      *
      * Implementations will aggregate required information from the provided
@@ -53,7 +33,7 @@ interface RouterInterface
      * Generate a URI from the named route.
      *
      * Takes the named route and any substitutions, and attempts to generate a
-     * URI from it.
+     * URI from it. Additional router-dependent options may be passed.
      *
      * The URI generated MUST NOT be escaped. If you wish to escape any part of
      * the URI, this should be performed afterwards; consider passing the URI
@@ -63,8 +43,9 @@ interface RouterInterface
      * @see http://framework.zend.com/manual/current/en/modules/zend.mvc.routing.html
      * @param string $name
      * @param array $substitutions
+     * @param array $options
      * @return string
      * @throws Exception\RuntimeException if unable to generate the given URI.
      */
-    public function generateUri($name, array $substitutions = []);
+    public function generateUri($name, array $substitutions = [], array $options = []);
 }
