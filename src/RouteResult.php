@@ -52,6 +52,11 @@ class RouteResult
     private $matchedMiddleware;
 
     /**
+     * @var array
+     */
+    private $options;
+
+    /**
      * @var bool Success state of routing.
      */
     private $success;
@@ -63,15 +68,17 @@ class RouteResult
      * @param callable|string $middleware Middleware associated with the
      *     matched route.
      * @param array $params Parameters associated with the matched route.
+     * @param array $options Optional options bag associated with the matched route.
      * @return static
      */
-    public static function fromRouteMatch($name, $middleware, array $params)
+    public static function fromRouteMatch($name, $middleware, array $params, array $options = [])
     {
         $result                    = new self();
         $result->success           = true;
         $result->matchedRouteName  = $name;
         $result->matchedMiddleware = $middleware;
         $result->matchedParams     = $params;
+        $result->options           = $options;
         return $result;
     }
 
@@ -149,6 +156,21 @@ class RouteResult
     public function getMatchedParams()
     {
         return $this->matchedParams;
+    }
+
+    /**
+     * Returns the optional options.
+     *
+     * Note that this is different from the matched params. Those are optional options that are transmitted to
+     * the underlying router, but can also be used to embed metadata for the route. For instance, you may want
+     * some routes to be used in an unauthenticated way, so you could use the options to add this information
+     * as part of the route.
+     *
+     * @return array
+     */
+    public function getOptions()
+    {
+        return $this->options;
     }
 
     /**
