@@ -28,7 +28,7 @@ We currently support and provide the following routing integrations:
   `composer require zendframework/zend-expressive-aurarouter`
 - [FastRoute](https://github.com/nikic/FastRoute):
   `composer require zendframework/zend-expressive-fastroute`
-- [ZF2 MVC Router](https://github.com/zendframework/zend-mvc):
+- [zend-router](https://github.com/zendframework/zend-router):
   `composer require zendframework/zend-expressive-zendrouter`
 
 ## Documentation
