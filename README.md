@@ -33,4 +33,4 @@ We currently support and provide the following routing integrations:
 
 ## Documentation
 
-Expressive provides [routing documentation](http://zend-expressive.readthedocs.org/en/latest/router/intro/).
+Expressive provides [routing documentation](https://zendframework.github.io/zend-expressive/features/router/intro/).
