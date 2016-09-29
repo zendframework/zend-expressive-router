@@ -2,11 +2,12 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
-## 1.2.1 - TBD
+## 1.3.0 - TBD
 
 ### Added
 
-- Nothing.
+- Adds a new `getOptions` method as part of the `RouteResult` object. The options are optional and are
+retrieved from your route configuration.
 
 ### Deprecated
 
