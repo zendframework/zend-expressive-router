@@ -44,7 +44,7 @@
             "@cs",
             "@test"
         ],
-        "coveralls": "coveralls",
+        "coveralls": "coveralls -v",
         "cs": "phpcs",
         "cs-fix": "phpcbf",
         "test": "phpunit",

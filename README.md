@@ -1,6 +1,7 @@
 # zend-expressive-router
 
 [![Build Status](https://secure.travis-ci.org/zendframework/zend-expressive-router.svg?branch=master)](https://secure.travis-ci.org/zendframework/zend-expressive-router)
+[![Coverage Status](https://coveralls.io/repos/zendframework/zend-expressive-router/badge.svg?branch=master)](https://coveralls.io/r/zendframework/zend-expressive-router?branch=master)
 
 Router subcomponent for [Expressive](https://github.com/zendframework/zend-expressive).
 
