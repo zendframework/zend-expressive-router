@@ -10,6 +10,7 @@
 namespace ZendTest\Expressive\Router;
 
 use PHPUnit_Framework_TestCase as TestCase;
+use Zend\Expressive\Router\Exception\InvalidArgumentException;
 use Zend\Expressive\Router\Route;
 
 /**
@@ -17,6 +18,11 @@ use Zend\Expressive\Router\Route;
  */
 class RouteTest extends TestCase
 {
+    /**
+     * @var callable
+     */
+    private $noopMiddleware;
+
     public function setUp()
     {
         $this->noopMiddleware = function ($req, $res, $next) {
@@ -112,5 +118,62 @@ class RouteTest extends TestCase
     {
         $route = new Route('/test', $this->noopMiddleware, [ 'GET', 'POST' ]);
         $this->assertSame('/test^GET' . Route::HTTP_METHOD_SEPARATOR . 'POST', $route->getName());
+    }
+
+    public function testThrowsExceptionDuringConstructionIfPathIsNotString()
+    {
+        $this->setExpectedException(InvalidArgumentException::class, 'Invalid path; must be a string');
+
+        new Route(12345, $this->noopMiddleware);
+    }
+
+    public function testThrowsExceptionDuringConstructionOnInvalidMiddleware()
+    {
+        $this->setExpectedException(
+            InvalidArgumentException::class,
+            'Invalid middleware; must be callable or a service name'
+        );
+
+        new Route('/foo', 12345);
+    }
+
+    public function testThrowsExceptionDuringConstructionOnInvalidHttpMethod()
+    {
+        $this->setExpectedException(
+            InvalidArgumentException::class,
+            'Invalid HTTP methods; must be an array or ' . Route::class . '::HTTP_METHOD_ANY'
+        );
+
+        new Route('/foo', $this->noopMiddleware, 'FOO');
+    }
+
+    public function testRouteNameIsMutable()
+    {
+        $route = new Route('/foo', $this->noopMiddleware, ['GET'], 'foo');
+        $route->setName('bar');
+
+        $this->assertSame('bar', $route->getName());
+    }
+
+    public function invalidHttpMethodsProvider()
+    {
+        return [
+            [[123]],
+            [[123, 456]],
+            [['@@@']],
+            [['@@@', '@@@']],
+        ];
+    }
+
+    /**
+     * @dataProvider invalidHttpMethodsProvider
+     */
+    public function testThrowsExceptionIfInvalidHttpMethodsAreProvided(array $invalidHttpMethods)
+    {
+        $this->setExpectedException(InvalidArgumentException::class, 'One or more HTTP methods were invalid');
+
+        $route = new Route('/test', $this->noopMiddleware, $invalidHttpMethods);
+
+        $this->assertFalse($route->getAllowedMethods());
     }
 }
