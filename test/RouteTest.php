@@ -14,7 +14,7 @@ use Zend\Expressive\Router\Exception\InvalidArgumentException;
 use Zend\Expressive\Router\Route;
 
 /**
- * @covers Zend\Expressive\Router\Route
+ * @covers \Zend\Expressive\Router\Route
  */
 class RouteTest extends TestCase
 {
@@ -167,6 +167,8 @@ class RouteTest extends TestCase
 
     /**
      * @dataProvider invalidHttpMethodsProvider
+     *
+     * @param array $invalidHttpMethods
      */
     public function testThrowsExceptionIfInvalidHttpMethodsAreProvided(array $invalidHttpMethods)
     {

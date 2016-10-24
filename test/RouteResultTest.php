@@ -14,7 +14,7 @@ use Zend\Expressive\Router\Route;
 use Zend\Expressive\Router\RouteResult;
 
 /**
- * @covers Zend\Expressive\Router\RouteResult
+ * @covers \Zend\Expressive\Router\RouteResult
  */
 class RouteResultTest extends TestCase
 {
