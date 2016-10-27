@@ -31,7 +31,8 @@ class RouteResultTest extends TestCase
         $result = RouteResult::fromRouteMatch(
             '/foo',
             $this->middleware,
-            []
+            [],
+            '/foo'
         );
         $this->assertSame($this->middleware, $result->getMatchedMiddleware());
     }
@@ -47,7 +48,8 @@ class RouteResultTest extends TestCase
         $result = RouteResult::fromRouteMatch(
             '/foo',
             $this->middleware,
-            []
+            [],
+            '/foo'
         );
         $this->assertEquals('/foo', $result->getMatchedRouteName());
     }
@@ -75,7 +77,8 @@ class RouteResultTest extends TestCase
         $result = RouteResult::fromRouteMatch(
             '/foo',
             $this->middleware,
-            []
+            [],
+            '/foo'
         );
         $this->assertSame([], $result->getAllowedMethods());
     }
@@ -86,7 +89,8 @@ class RouteResultTest extends TestCase
         $result = RouteResult::fromRouteMatch(
             '/foo',
             $this->middleware,
-            $params
+            $params,
+            '/foo'
         );
         $this->assertSame($params, $result->getMatchedParams());
     }
@@ -103,8 +107,15 @@ class RouteResultTest extends TestCase
         $result = RouteResult::fromRouteMatch(
             '/foo',
             $this->middleware,
-            $params
+            $params,
+            '/foo'
         );
         $this->assertFalse($result->isMethodFailure());
+    }
+
+    public function testMatchedPathIsRetrievable()
+    {
+        $result = RouteResult::fromRouteMatch('/foo', $this->middleware, [], '/foo[/bar]');
+        $this->assertSame('/foo[/bar]', $result->getMatchedPath());
     }
 }
