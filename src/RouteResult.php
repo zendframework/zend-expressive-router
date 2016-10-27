@@ -44,6 +44,11 @@ class RouteResult
     /**
      * @var string
      */
+    private $matchedPath;
+
+    /**
+     * @var string
+     */
     private $matchedRouteName;
 
     /**
@@ -63,15 +68,17 @@ class RouteResult
      * @param callable|string $middleware Middleware associated with the
      *     matched route.
      * @param array $params Parameters associated with the matched route.
+     * @param string $path The path expression from the route config for the matched route.
      * @return static
      */
-    public static function fromRouteMatch($name, $middleware, array $params)
+    public static function fromRouteMatch($name, $middleware, array $params, $path)
     {
         $result                    = new self();
         $result->success           = true;
         $result->matchedRouteName  = $name;
         $result->matchedMiddleware = $middleware;
         $result->matchedParams     = $params;
+        $result->matchedPath       = $path;
         return $result;
     }
 
@@ -149,6 +156,16 @@ class RouteResult
     public function getMatchedParams()
     {
         return $this->matchedParams;
+    }
+
+    /**
+     * Returns the matched path.
+     *
+     * @return string
+     */
+    public function getMatchedPath()
+    {
+        return $this->matchedPath;
     }
 
     /**
