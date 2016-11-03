@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file, in reverse 
 
 - [#6](https://github.com/zendframework/zend-expressive-router/pull/6) modifies `RouterInterface::generateUri` to
   support an `$options` parameter, which may pass additional configuration options to the actual router.
+- [#21](https://github.com/zendframework/zend-expressive-router/pull/21) makes the configured path definition
+  accessible in the `RouteResult`.
 
 ### Deprecated
 
