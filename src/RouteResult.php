@@ -52,13 +52,38 @@ class RouteResult
     private $matchedMiddleware;
 
     /**
+     * Route matched during routing
+     *
+     * @since 1.3.0
+     * @var Route $route
+     */
+    private $route;
+
+    /**
      * @var bool Success state of routing.
      */
     private $success;
 
     /**
+     * Create an instance representing a route succes from the matching route.
+     *
+     * @param Route $route
+     * @param array $params Parameters associated with the matched route, if any.
+     * @return static
+     */
+    public static function fromRoute(Route $route, array $params = [])
+    {
+        $result                = new self();
+        $result->success       = true;
+        $result->route         = $route;
+        $result->matchedParams = $params;
+        return $result;
+    }
+
+    /**
      * Create an instance repesenting a route success.
      *
+     * @deprecated since 1.3.0; will be removed in 2.0.0.
      * @param string $name Name of matched route.
      * @param callable|string $middleware Middleware associated with the
      *     matched route.
@@ -108,6 +133,17 @@ class RouteResult
     }
 
     /**
+     * Retrieve the route that resulted in the route match.
+     *
+     * @return false|null|Route false if representing a routing failure;
+     *     null if not created via fromRoute(); Route instance otherwise.
+     */
+    public function getMatchedRoute()
+    {
+        return $this->isFailure() ? false : $this->route;
+    }
+
+    /**
      * Retrieve the matched route name, if possible.
      *
      * If this result represents a failure, return false; otherwise, return the
@@ -119,6 +155,10 @@ class RouteResult
     {
         if ($this->isFailure()) {
             return false;
+        }
+
+        if (! $this->matchedRouteName && $this->route) {
+            $this->matchedRouteName = $this->route->getName();
         }
 
         return $this->matchedRouteName;
@@ -134,6 +174,10 @@ class RouteResult
     {
         if ($this->isFailure()) {
             return false;
+        }
+
+        if (! $this->matchedMiddleware && $this->route) {
+            $this->matchedMiddleware = $this->route->getMiddleware();
         }
 
         return $this->matchedMiddleware;
@@ -183,7 +227,9 @@ class RouteResult
     public function getAllowedMethods()
     {
         if ($this->isSuccess()) {
-            return [];
+            return $this->route
+                ? $this->route->getAllowedMethods()
+                : [];
         }
 
         if (null === $this->allowedMethods) {
