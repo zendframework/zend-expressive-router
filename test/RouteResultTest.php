@@ -107,4 +107,33 @@ class RouteResultTest extends TestCase
         );
         $this->assertFalse($result->isMethodFailure());
     }
+
+    public function testFromRouteShouldComposeRouteInResult()
+    {
+        $route = $this->prophesize(Route::class);
+
+        $result = RouteResult::fromRoute($route->reveal(), ['foo' => 'bar']);
+        $this->assertInstanceOf(RouteResult::class, $result);
+        $this->assertTrue($result->isSuccess());
+        $this->assertSame($route->reveal(), $result->getMatchedRoute());
+
+        return ['route' => $route, 'result' => $result];
+    }
+
+    /**
+     * @depends testFromRouteShouldComposeRouteInResult
+     */
+    public function testAllAccessorsShouldReturnExpectedDataWhenResultCreatedViaFromRoute(array $data)
+    {
+        $result = $data['result'];
+        $route = $data['route'];
+
+        $route->getName()->willReturn('route');
+        $route->getMiddleware()->willReturn(__METHOD__);
+        $route->getAllowedMethods()->willReturn(['HEAD', 'OPTIONS', 'GET']);
+
+        $this->assertEquals('route', $result->getMatchedRouteName());
+        $this->assertEquals(__METHOD__, $result->getMatchedMiddleware());
+        $this->assertEquals(['HEAD', 'OPTIONS', 'GET'], $result->getAllowedMethods());
+    }
 }

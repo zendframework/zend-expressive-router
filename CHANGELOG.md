@@ -6,11 +6,18 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Added
 
-- Nothing.
+- [#23](https://github.com/zendframework/zend-expressive-router/pull/23) adds a
+  new static method on the `RouteResult` class, `fromRoute(Route $route, array
+  $params = [])`, for creating a new `RouteResult` instance. It also adds
+  `getMatchedRoute()` for retrieving the `Route` instance provided to that
+  method. Doing so allows retrieving the list of supported HTTP methods, path,
+  and route options from the matched route.
 
 ### Deprecated
 
-- Nothing.
+- [#23](https://github.com/zendframework/zend-expressive-router/pull/23)
+  deprecates `RouteResult::fromRouteMatch()` in favor of the new `fromRoute()`
+  method.
 
 ### Removed
 
