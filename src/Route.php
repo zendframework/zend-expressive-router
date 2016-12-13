@@ -33,13 +33,13 @@ class Route
      * @var bool If HEAD was not provided to the Route instance, indicate
      *     support for the method is implicit.
      */
-    private $implicitHead = true;
+    private $implicitHead = false;
 
     /**
      * @var bool If OPTIONS was not provided to the Route instance, indicate
      *     support for the method is implicit.
      */
-    private $implicitOptions = true;
+    private $implicitOptions = false;
 
     /**
      * @var int|string[] HTTP methods allowed with this route.
@@ -99,14 +99,9 @@ class Route
         if (empty($name)) {
             $name = ($this->methods === self::HTTP_METHOD_ANY)
                 ? $path
-                : $path . '^' . implode(self::HTTP_METHOD_SEPARATOR, $this->methods);
+                : $path . '^' . implode(self::HTTP_METHOD_SEPARATOR, $this->retrieveExplicitMethods($this->methods));
         }
         $this->name = $name;
-
-        $this->implicitHead = is_array($this->methods)
-            && ! in_array(RequestMethod::METHOD_HEAD, $this->methods, true);
-        $this->implicitOptions = is_array($this->methods)
-            && ! in_array(RequestMethod::METHOD_OPTIONS, $this->methods, true);
     }
 
     /**
@@ -160,9 +155,7 @@ class Route
     public function allowsMethod($method)
     {
         $method = strtoupper($method);
-        if (RequestMethod::METHOD_HEAD === $method
-            || RequestMethod::METHOD_OPTIONS === $method
-            || $this->methods === self::HTTP_METHOD_ANY
+        if ($this->methods === self::HTTP_METHOD_ANY
             || in_array($method, $this->methods, true)
         ) {
             return true;
@@ -236,6 +229,40 @@ class Route
             throw new Exception\InvalidArgumentException('One or more HTTP methods were invalid');
         }
 
+        if (! in_array(RequestMethod::METHOD_HEAD, $methods, true)) {
+            $this->implicitHead = true;
+            $methods[] = RequestMethod::METHOD_HEAD;
+        }
+
+        if (! in_array(RequestMethod::METHOD_OPTIONS, $methods, true)) {
+            $this->implicitOptions = true;
+            $methods[] = RequestMethod::METHOD_OPTIONS;
+        }
+
         return array_map('strtoupper', $methods);
+    }
+
+    /**
+     * Return a list of methods explicitly set when creating the route.
+     *
+     * Filters out HEAD and/or OPTIONS if they were set implicitly.
+     */
+    private function retrieveExplicitMethods(array $methods)
+    {
+        return array_filter($methods, function ($method) {
+            if (! in_array($method, [RequestMethod::METHOD_HEAD, RequestMethod::METHOD_OPTIONS], true)) {
+                return true;
+            }
+
+            if ($method === RequestMethod::METHOD_HEAD && ! $this->implicitHead) {
+                return true;
+            }
+
+            if ($method === RequestMethod::METHOD_OPTIONS && ! $this->implicitOptions) {
+                return true;
+            }
+
+            return false;
+        });
     }
 }
