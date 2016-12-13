@@ -13,6 +13,13 @@ All notable changes to this project will be documented in this file, in reverse 
   method. Doing so allows retrieving the list of supported HTTP methods, path,
   and route options from the matched route.
 
+- [#24](https://github.com/zendframework/zend-expressive-router/pull/24) adds
+  two new methods to the `Route` class, `implicitHead()` and
+  `implicitOptions()`. These can be used by routers or dispatchers to determine
+  if a match based on `HEAD` or `OPTIONS` requests was due to the developer
+  specifying the methods explicitly when creating the route (the `implicit*()`
+  methods will return `false` if explicitly specified).
+
 ### Deprecated
 
 - [#23](https://github.com/zendframework/zend-expressive-router/pull/23)
