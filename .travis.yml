@@ -19,7 +19,6 @@ matrix:
     - php: 7
     - php: hhvm 
   allow_failures:
-    - php: 7
     - php: hhvm
 
 before_install:
@@ -34,6 +33,7 @@ install:
 script:
   - if [[ $TEST_COVERAGE == 'true' ]]; then composer test-coverage ; else composer test ; fi
   - if [[ $CS_CHECK == 'true' ]]; then composer cs ; fi
+  - if [[ $CS_CHECK == 'true' ]]; then composer license-check ; fi
 
 after_script:
   - if [[ $TEST_COVERAGE == 'true' ]]; then composer coveralls ; fi
