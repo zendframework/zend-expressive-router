@@ -3,11 +3,13 @@
  * Zend Framework (http://framework.zend.com/)
  *
  * @see       https://github.com/zendframework/zend-expressive for the canonical source repository
- * @copyright Copyright (c) 2015 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2015-2016 Zend Technologies USA Inc. (http://www.zend.com)
  * @license   https://github.com/zendframework/zend-expressive/blob/master/LICENSE.md New BSD License
  */
 
 namespace Zend\Expressive\Router;
+
+use Fig\Http\Message\RequestMethodInterface as RequestMethod;
 
 /**
  * Value object representing a single route.
@@ -28,6 +30,18 @@ class Route
 {
     const HTTP_METHOD_ANY = 0xff;
     const HTTP_METHOD_SEPARATOR = ':';
+
+    /**
+     * @var bool If HEAD was not provided to the Route instance, indicate
+     *     support for the method is implicit.
+     */
+    private $implicitHead = true;
+
+    /**
+     * @var bool If OPTIONS was not provided to the Route instance, indicate
+     *     support for the method is implicit.
+     */
+    private $implicitOptions = true;
 
     /**
      * @var int|string[] HTTP methods allowed with this route.
@@ -90,6 +104,11 @@ class Route
                 : $path . '^' . implode(self::HTTP_METHOD_SEPARATOR, $this->methods);
         }
         $this->name = $name;
+
+        $this->implicitHead = is_array($this->methods)
+            && ! in_array(RequestMethod::METHOD_HEAD, $this->methods, true);
+        $this->implicitOptions = is_array($this->methods)
+            && ! in_array(RequestMethod::METHOD_OPTIONS, $this->methods, true);
     }
 
     /**
@@ -143,8 +162,8 @@ class Route
     public function allowsMethod($method)
     {
         $method = strtoupper($method);
-        if ('HEAD' === $method
-            || 'OPTIONS' === $method
+        if (RequestMethod::METHOD_HEAD === $method
+            || RequestMethod::METHOD_OPTIONS === $method
             || $this->methods === self::HTTP_METHOD_ANY
             || in_array($method, $this->methods, true)
         ) {
@@ -168,6 +187,26 @@ class Route
     public function getOptions()
     {
         return $this->options;
+    }
+
+    /**
+     * Whether or not HEAD support is implicit (i.e., not explicitly specified)
+     *
+     * @return bool
+     */
+    public function implicitHead()
+    {
+        return $this->implicitHead;
+    }
+
+    /**
+     * Whether or not OPTIONS support is implicit (i.e., not explicitly specified)
+     *
+     * @return bool
+     */
+    public function implicitOptions()
+    {
+        return $this->implicitOptions;
     }
 
     /**

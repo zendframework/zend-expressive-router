@@ -3,12 +3,13 @@
  * Zend Framework (http://framework.zend.com/)
  *
  * @see       https://github.com/zendframework/zend-expressive for the canonical source repository
- * @copyright Copyright (c) 2015 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2015-2016 Zend Technologies USA Inc. (http://www.zend.com)
  * @license   https://github.com/zendframework/zend-expressive/blob/master/LICENSE.md New BSD License
  */
 
 namespace ZendTest\Expressive\Router;
 
+use Fig\Http\Message\RequestMethodInterface as RequestMethod;
 use PHPUnit_Framework_TestCase as TestCase;
 use Zend\Expressive\Router\Exception\InvalidArgumentException;
 use Zend\Expressive\Router\Route;
@@ -55,31 +56,31 @@ class RouteTest extends TestCase
 
     public function testRouteAllowsSpecifyingHttpMethods()
     {
-        $methods = ['GET', 'POST'];
+        $methods = [RequestMethod::METHOD_GET, RequestMethod::METHOD_POST];
         $route = new Route('/foo', $this->noopMiddleware, $methods);
         $this->assertSame($methods, $route->getAllowedMethods($methods));
     }
 
     public function testRouteCanMatchMethod()
     {
-        $methods = ['GET', 'POST'];
+        $methods = [RequestMethod::METHOD_GET, RequestMethod::METHOD_POST];
         $route = new Route('/foo', $this->noopMiddleware, $methods);
-        $this->assertTrue($route->allowsMethod('GET'));
-        $this->assertTrue($route->allowsMethod('POST'));
-        $this->assertFalse($route->allowsMethod('PATCH'));
-        $this->assertFalse($route->allowsMethod('DELETE'));
+        $this->assertTrue($route->allowsMethod(RequestMethod::METHOD_GET));
+        $this->assertTrue($route->allowsMethod(RequestMethod::METHOD_POST));
+        $this->assertFalse($route->allowsMethod(RequestMethod::METHOD_PATCH));
+        $this->assertFalse($route->allowsMethod(RequestMethod::METHOD_DELETE));
     }
 
     public function testRouteAlwaysAllowsHeadMethod()
     {
         $route = new Route('/foo', $this->noopMiddleware, []);
-        $this->assertTrue($route->allowsMethod('HEAD'));
+        $this->assertTrue($route->allowsMethod(RequestMethod::METHOD_HEAD));
     }
 
     public function testRouteAlwaysAllowsOptionsMethod()
     {
         $route = new Route('/foo', $this->noopMiddleware, []);
-        $this->assertTrue($route->allowsMethod('OPTIONS'));
+        $this->assertTrue($route->allowsMethod(RequestMethod::METHOD_OPTIONS));
     }
 
     public function testRouteAllowsSpecifyingOptions()
@@ -110,13 +111,13 @@ class RouteTest extends TestCase
 
     public function testRouteNameWithGET()
     {
-        $route = new Route('/test', $this->noopMiddleware, [ 'GET' ]);
+        $route = new Route('/test', $this->noopMiddleware, [ RequestMethod::METHOD_GET ]);
         $this->assertSame('/test^GET', $route->getName());
     }
 
     public function testRouteNameWithGetAndPost()
     {
-        $route = new Route('/test', $this->noopMiddleware, [ 'GET', 'POST' ]);
+        $route = new Route('/test', $this->noopMiddleware, [ RequestMethod::METHOD_GET, RequestMethod::METHOD_POST ]);
         $this->assertSame('/test^GET' . Route::HTTP_METHOD_SEPARATOR . 'POST', $route->getName());
     }
 
@@ -149,7 +150,7 @@ class RouteTest extends TestCase
 
     public function testRouteNameIsMutable()
     {
-        $route = new Route('/foo', $this->noopMiddleware, ['GET'], 'foo');
+        $route = new Route('/foo', $this->noopMiddleware, [RequestMethod::METHOD_GET], 'foo');
         $route->setName('bar');
 
         $this->assertSame('bar', $route->getName());
@@ -175,5 +176,36 @@ class RouteTest extends TestCase
         $route = new Route('/test', $this->noopMiddleware, $invalidHttpMethods);
 
         $this->assertFalse($route->getAllowedMethods());
+    }
+
+    public function testProvidingArrayOfMethodsWithoutHeadOrOptionsImpliesBoth()
+    {
+        $route = new Route('/test', $this->noopMiddleware, [RequestMethod::METHOD_GET, RequestMethod::METHOD_POST]);
+        $this->assertTrue($route->implicitHead());
+        $this->assertTrue($route->implicitOptions());
+    }
+
+    public function headAndOptions()
+    {
+        return [
+            'head'    => [RequestMethod::METHOD_HEAD, 'implicitHead'],
+            'options' => [RequestMethod::METHOD_OPTIONS, 'implicitOptions'],
+        ];
+    }
+
+    /**
+     * @dataProvider headAndOptions
+     */
+    public function testPassingHeadOrOptionsInMethodArrayDoesNotMarkAsImplicit($httpMethod, $implicitMethod)
+    {
+        $route = new Route('/test', $this->noopMiddleware, [$httpMethod]);
+        $this->assertFalse($route->{$implicitMethod}());
+    }
+
+    public function testPassingWildcardMethodDoesNotMarkAsImplicit()
+    {
+        $route = new Route('/test', $this->noopMiddleware, Route::HTTP_METHOD_ANY);
+        $this->assertFalse($route->implicitHead());
+        $this->assertFalse($route->implicitOptions());
     }
 }
