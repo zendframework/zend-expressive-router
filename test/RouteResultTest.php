@@ -1,10 +1,8 @@
 <?php
 /**
- * Zend Framework (http://framework.zend.com/)
- *
- * @see       https://github.com/zendframework/zend-expressive for the canonical source repository
- * @copyright Copyright (c) 2015 Zend Technologies USA Inc. (http://www.zend.com)
- * @license   https://github.com/zendframework/zend-expressive/blob/master/LICENSE.md New BSD License
+ * @see       https://github.com/zendframework/zend-expressive-router for the canonical source repository
+ * @copyright Copyright (c) 2015-2016 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   https://github.com/zendframework/zend-expressive-router/blob/master/LICENSE.md New BSD License
  */
 
 namespace ZendTest\Expressive\Router;
@@ -113,9 +111,32 @@ class RouteResultTest extends TestCase
         $this->assertFalse($result->isMethodFailure());
     }
 
-    public function testMatchedPathIsRetrievable()
+    public function testFromRouteShouldComposeRouteInResult()
     {
-        $result = RouteResult::fromRouteMatch('/foo', $this->middleware, [], '/foo[/bar]');
-        $this->assertSame('/foo[/bar]', $result->getMatchedPath());
+        $route = $this->prophesize(Route::class);
+
+        $result = RouteResult::fromRoute($route->reveal(), ['foo' => 'bar']);
+        $this->assertInstanceOf(RouteResult::class, $result);
+        $this->assertTrue($result->isSuccess());
+        $this->assertSame($route->reveal(), $result->getMatchedRoute());
+
+        return ['route' => $route, 'result' => $result];
+    }
+
+    /**
+     * @depends testFromRouteShouldComposeRouteInResult
+     */
+    public function testAllAccessorsShouldReturnExpectedDataWhenResultCreatedViaFromRoute(array $data)
+    {
+        $result = $data['result'];
+        $route = $data['route'];
+
+        $route->getName()->willReturn('route');
+        $route->getMiddleware()->willReturn(__METHOD__);
+        $route->getAllowedMethods()->willReturn(['HEAD', 'OPTIONS', 'GET']);
+
+        $this->assertEquals('route', $result->getMatchedRouteName());
+        $this->assertEquals(__METHOD__, $result->getMatchedMiddleware());
+        $this->assertEquals(['HEAD', 'OPTIONS', 'GET'], $result->getAllowedMethods());
     }
 }
