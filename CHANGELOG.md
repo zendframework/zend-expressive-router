@@ -23,7 +23,7 @@ All notable changes to this project will be documented in this file, in reverse 
 
 - Nothing.
 
-## 1.3.0 - TBD
+## 1.3.0 - 2016-12-13
 
 ### Added
 
@@ -46,24 +46,6 @@ All notable changes to this project will be documented in this file, in reverse 
 - [#23](https://github.com/zendframework/zend-expressive-router/pull/23)
   deprecates `RouteResult::fromRouteMatch()` in favor of the new `fromRoute()`
   method.
-
-### Removed
-
-- Nothing.
-
-### Fixed
-
-- Nothing.
-
-## 1.2.1 - TBD
-
-### Added
-
-- Nothing.
-
-### Deprecated
-
-- Nothing.
 
 ### Removed
 
