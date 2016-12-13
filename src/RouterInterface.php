@@ -51,7 +51,7 @@ interface RouterInterface
      * Generate a URI from the named route.
      *
      * Takes the named route and any substitutions, and attempts to generate a
-     * URI from it.
+     * URI from it. Additional router-dependent options may be passed.
      *
      * The URI generated MUST NOT be escaped. If you wish to escape any part of
      * the URI, this should be performed afterwards; consider passing the URI
@@ -61,8 +61,9 @@ interface RouterInterface
      * @see http://framework.zend.com/manual/current/en/modules/zend.mvc.routing.html
      * @param string $name
      * @param array $substitutions
+     * @param array $options
      * @return string
      * @throws Exception\RuntimeException if unable to generate the given URI.
      */
-    public function generateUri($name, array $substitutions = []);
+    public function generateUri($name, array $substitutions = [], array $options = []);
 }
