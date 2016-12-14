@@ -56,9 +56,7 @@ class RouteTest extends TestCase
     {
         $methods = [RequestMethod::METHOD_GET, RequestMethod::METHOD_POST];
         $route = new Route('/foo', $this->noopMiddleware, $methods);
-        foreach ($methods as $method) {
-            $this->assertContains($method, $route->getAllowedMethods());
-        }
+        $this->assertSame($methods, $route->getAllowedMethods($methods));
     }
 
     public function testRouteCanMatchMethod()
@@ -185,8 +183,6 @@ class RouteTest extends TestCase
         $route = new Route('/test', $this->noopMiddleware, [RequestMethod::METHOD_GET, RequestMethod::METHOD_POST]);
         $this->assertTrue($route->implicitHead());
         $this->assertTrue($route->implicitOptions());
-        $this->assertContains(RequestMethod::METHOD_HEAD, $route->getAllowedMethods());
-        $this->assertContains(RequestMethod::METHOD_OPTIONS, $route->getAllowedMethods());
     }
 
     public function headAndOptions()
@@ -204,8 +200,6 @@ class RouteTest extends TestCase
     {
         $route = new Route('/test', $this->noopMiddleware, [$httpMethod]);
         $this->assertFalse($route->{$implicitMethod}());
-        $this->assertContains(RequestMethod::METHOD_HEAD, $route->getAllowedMethods());
-        $this->assertContains(RequestMethod::METHOD_OPTIONS, $route->getAllowedMethods());
     }
 
     public function testPassingWildcardMethodDoesNotMarkAsImplicit()
