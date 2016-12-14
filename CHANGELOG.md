@@ -23,7 +23,7 @@ All notable changes to this project will be documented in this file, in reverse 
 
 - Nothing.
 
-## 1.3.2 - TBD
+## 1.3.2 - 2016-12-14
 
 ### Added
 
@@ -39,7 +39,12 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Fixed
 
-- Nothing.
+- [#29](https://github.com/zendframework/zend-expressive-router/pull/29) removes
+  the patch introduced with [#27](https://github.com/zendframework/zend-expressive-router/pull/27)
+  and 1.3.1, as it causes `Zend\Expressive\Application` to raise exceptions
+  regarding duplicate routes, and because some implementations, including
+  FastRoute, also raise errors on duplication. It will be up to individual
+  routers to determine how to handle implicit HEAD and OPTIONS support.
 
 ## 1.3.1 - 2016-12-13
 
