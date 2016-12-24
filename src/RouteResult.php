@@ -79,26 +79,6 @@ class RouteResult
     }
 
     /**
-     * Create an instance repesenting a route success.
-     *
-     * @deprecated since 1.3.0; will be removed in 2.0.0.
-     * @param string $name Name of matched route.
-     * @param callable|string $middleware Middleware associated with the
-     *     matched route.
-     * @param array $params Parameters associated with the matched route.
-     * @return static
-     */
-    public static function fromRouteMatch($name, $middleware, array $params)
-    {
-        $result                    = new self();
-        $result->success           = true;
-        $result->matchedRouteName  = $name;
-        $result->matchedMiddleware = $middleware;
-        $result->matchedParams     = $params;
-        return $result;
-    }
-
-    /**
      * Create an instance representing a route failure.
      *
      * @param null|int|array $methods HTTP methods allowed for the current URI, if any

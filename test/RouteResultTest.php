@@ -24,32 +24,10 @@ class RouteResultTest extends TestCase
         };
     }
 
-    public function testRouteMiddlewareIsRetrievable()
-    {
-        $result = RouteResult::fromRouteMatch(
-            '/foo',
-            $this->middleware,
-            [],
-            '/foo'
-        );
-        $this->assertSame($this->middleware, $result->getMatchedMiddleware());
-    }
-
     public function testRouteMiddlewareIsNotRetrievable()
     {
         $result = RouteResult::fromRouteFailure();
         $this->assertFalse($result->getMatchedMiddleware());
-    }
-
-    public function testRouteRouteNameIsRetrievable()
-    {
-        $result = RouteResult::fromRouteMatch(
-            '/foo',
-            $this->middleware,
-            [],
-            '/foo'
-        );
-        $this->assertEquals('/foo', $result->getMatchedRouteName());
     }
 
     public function testRouteNameIsNotRetrievable()
@@ -70,26 +48,12 @@ class RouteResultTest extends TestCase
         $this->assertSame([], $result->getAllowedMethods());
     }
 
-    public function testRouteRetrieveHttpMethods()
-    {
-        $result = RouteResult::fromRouteMatch(
-            '/foo',
-            $this->middleware,
-            [],
-            '/foo'
-        );
-        $this->assertSame([], $result->getAllowedMethods());
-    }
-
     public function testRouteMatchedParams()
     {
         $params = ['foo' => 'bar'];
-        $result = RouteResult::fromRouteMatch(
-            '/foo',
-            $this->middleware,
-            $params,
-            '/foo'
-        );
+        $route = $this->prophesize(Route::class);
+        $result = RouteResult::fromRoute($route->reveal(), $params);
+
         $this->assertSame($params, $result->getMatchedParams());
     }
 
@@ -102,12 +66,9 @@ class RouteResultTest extends TestCase
     public function testRouteSuccessMethodFailure()
     {
         $params = ['foo' => 'bar'];
-        $result = RouteResult::fromRouteMatch(
-            '/foo',
-            $this->middleware,
-            $params,
-            '/foo'
-        );
+        $route = $this->prophesize(Route::class);
+        $result = RouteResult::fromRoute($route->reveal(), $params);
+
         $this->assertFalse($result->isMethodFailure());
     }
 
