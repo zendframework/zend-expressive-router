@@ -47,6 +47,7 @@
             "@license-check",
             "@test"
         ],
+        "check-coverage": "vendor/bin/php-coverage-checker clover.xml 100",
         "coveralls": "coveralls -v",
         "cs": "phpcs",
         "cs-fix": "phpcbf",
