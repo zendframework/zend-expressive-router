@@ -2,12 +2,14 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
-## 2.0.0 - TBD
+## 2.0.0 - 2017-01-06
 
 ### Added
 
 - [#6](https://github.com/zendframework/zend-expressive-router/pull/6) modifies `RouterInterface::generateUri` to
   support an `$options` parameter, which may pass additional configuration options to the actual router.
+- [#21](https://github.com/zendframework/zend-expressive-router/pull/21) makes the configured path definition
+  accessible in the `RouteResult`.
 
 ### Deprecated
 
@@ -15,7 +17,7 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Removed
 
-- Nothing.
+- Removed `RouteResultObserverInterface` and `RouteResultSubjectInterface`, as they were deprecated in 1.2.0.
 
 ### Fixed
 
