@@ -8,6 +8,7 @@
 namespace ZendTest\Expressive\Router;
 
 use Fig\Http\Message\RequestMethodInterface as RequestMethod;
+use Interop\Http\ServerMiddleware\MiddlewareInterface;
 use PHPUnit_Framework_TestCase as TestCase;
 use Zend\Expressive\Router\Exception\InvalidArgumentException;
 use Zend\Expressive\Router\Route;
@@ -128,11 +129,7 @@ class RouteTest extends TestCase
 
     public function testThrowsExceptionDuringConstructionOnInvalidMiddleware()
     {
-        $this->setExpectedException(
-            InvalidArgumentException::class,
-            'Invalid middleware; must be callable or a service name'
-        );
-
+        $this->setExpectedException(InvalidArgumentException::class, 'Invalid middleware');
         new Route('/foo', 12345);
     }
 
@@ -207,5 +204,47 @@ class RouteTest extends TestCase
         $route = new Route('/test', $this->noopMiddleware, Route::HTTP_METHOD_ANY);
         $this->assertFalse($route->implicitHead());
         $this->assertFalse($route->implicitOptions());
+    }
+
+    public function testAllowsHttpInteropMiddleware()
+    {
+        $middleware = $this->prophesize(MiddlewareInterface::class)->reveal();
+        $route = new Route('/test', $middleware, Route::HTTP_METHOD_ANY);
+        $this->assertSame($middleware, $route->getMiddleware());
+    }
+
+    /**
+     * This is to allow passing an array of middleware for use in creating a MiddlewarePipe
+     * instance; Route should simply check if it's a non-callable array, and, if so, store
+     * the entry as it would a non-callable string.
+     */
+    public function testAllowsNonCallableArraysAsMiddleware()
+    {
+        $middleware = ['Non', 'Callable', 'Middleware'];
+        $route = new Route('/test', $middleware, Route::HTTP_METHOD_ANY);
+        $this->assertSame($middleware, $route->getMiddleware());
+    }
+
+    public function invalidMiddleware()
+    {
+        // Strings are allowed, because they could be service names.
+        return [
+            'null'                => [null],
+            'true'                => [true],
+            'false'               => [false],
+            'zero'                => [0],
+            'int'                 => [1],
+            'int'                 => [1],
+            'non-callable-object' => [(object) ['handler' => 'foo']],
+        ];
+    }
+
+    /**
+     * @dataProvider invalidMiddleware
+     */
+    public function testConstructorRaisesExceptionForInvalidMiddleware($middleware)
+    {
+        $this->setExpectedException(InvalidArgumentException::class, 'Invalid middleware');
+        new Route('/test', $middleware);
     }
 }

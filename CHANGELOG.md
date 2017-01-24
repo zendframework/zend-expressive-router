@@ -6,7 +6,9 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Added
 
-- Nothing.
+- [#32](https://github.com/zendframework/zend-expressive-router/pull/32) adds
+  support for [http-interop/http-middleware](https://github.com/http-interop/http-middleware)
+  server middleware in `Route` instances.
 
 ### Deprecated
 

@@ -7,6 +7,8 @@
 
 namespace Zend\Expressive\Router;
 
+use Interop\Http\ServerMiddleware\MiddlewareInterface;
+
 /**
  * Value object representing the results of routing.
  *
@@ -45,7 +47,7 @@ class RouteResult
     private $matchedRouteName;
 
     /**
-     * @var callable|string
+     * @var callable|string|MiddlewareInterface|array
      */
     private $matchedMiddleware;
 
@@ -145,8 +147,10 @@ class RouteResult
     /**
      * Retrieve the matched middleware, if possible.
      *
-     * @return false|callable|string|array Returns false if the result represents a
-     *     failure; otherwise, a callable or a string service name.
+     * @return false|callable|string|MiddlewareInterface|array Returns false if
+     *     the result represents a failure; otherwise, a callable, a string
+     *     service name, a MiddlewareInterface instance, or array of any of
+     *     these types.
      */
     public function getMatchedMiddleware()
     {
