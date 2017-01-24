@@ -2,31 +2,13 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
-## 2.1.0 - TBD
+## 2.1.0 - 2017-01-24
 
 ### Added
 
 - [#32](https://github.com/zendframework/zend-expressive-router/pull/32) adds
   support for [http-interop/http-middleware](https://github.com/http-interop/http-middleware)
   server middleware in `Route` instances.
-
-### Deprecated
-
-- Nothing.
-
-### Removed
-
-- Nothing.
-
-### Fixed
-
-- Nothing.
-
-## 2.0.1 - TBD
-
-### Added
-
-- Nothing.
 
 ### Deprecated
 
