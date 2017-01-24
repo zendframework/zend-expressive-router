@@ -8,6 +8,7 @@
 namespace Zend\Expressive\Router;
 
 use Fig\Http\Message\RequestMethodInterface as RequestMethod;
+use Interop\Http\ServerMiddleware\MiddlewareInterface;
 
 /**
  * Value object representing a single route.
@@ -68,7 +69,7 @@ class Route
 
     /**
      * @param string $path Path to match.
-     * @param string|callable $middleware Middleware to use when this route is matched.
+     * @param string|callable|MiddlewareInterface $middleware Middleware to use when this route is matched.
      * @param int|array Allowed HTTP methods; defaults to HTTP_METHOD_ANY.
      * @param string|null $name the route name
      * @throws Exception\InvalidArgumentException for invalid path type.
@@ -81,8 +82,16 @@ class Route
             throw new Exception\InvalidArgumentException('Invalid path; must be a string');
         }
 
-        if (! is_callable($middleware) && ! is_string($middleware) && ! is_array($middleware)) {
-            throw new Exception\InvalidArgumentException('Invalid middleware; must be callable or a service name');
+        if (! is_callable($middleware)
+            && ! $middleware instanceof MiddlewareInterface
+            && ! is_string($middleware)
+            && ! is_array($middleware)
+        ) {
+            throw new Exception\InvalidArgumentException(sprintf(
+                'Invalid middleware; must be a callable, a %s instance, a service name, '
+                . 'or an array of any of these types',
+                MiddlewareInterface::class
+            ));
         }
 
         if ($methods !== self::HTTP_METHOD_ANY && ! is_array($methods)) {
@@ -136,7 +145,7 @@ class Route
     }
 
     /**
-     * @return string|callable|array
+     * @return string|callable|MiddlewareInterface
      */
     public function getMiddleware()
     {
