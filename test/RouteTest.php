@@ -1,7 +1,7 @@
 <?php
 /**
  * @see       https://github.com/zendframework/zend-expressive-router for the canonical source repository
- * @copyright Copyright (c) 2015-2016 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2015-2017 Zend Technologies USA Inc. (http://www.zend.com)
  * @license   https://github.com/zendframework/zend-expressive-router/blob/master/LICENSE.md New BSD License
  */
 
@@ -9,7 +9,7 @@ namespace ZendTest\Expressive\Router;
 
 use Fig\Http\Message\RequestMethodInterface as RequestMethod;
 use Interop\Http\ServerMiddleware\MiddlewareInterface;
-use PHPUnit_Framework_TestCase as TestCase;
+use PHPUnit\Framework\TestCase;
 use Zend\Expressive\Router\Exception\InvalidArgumentException;
 use Zend\Expressive\Router\Route;
 
@@ -57,7 +57,7 @@ class RouteTest extends TestCase
     {
         $methods = [RequestMethod::METHOD_GET, RequestMethod::METHOD_POST];
         $route = new Route('/foo', $this->noopMiddleware, $methods);
-        $this->assertSame($methods, $route->getAllowedMethods($methods));
+        $this->assertSame($methods, $route->getAllowedMethods());
     }
 
     public function testRouteCanMatchMethod()
@@ -122,23 +122,27 @@ class RouteTest extends TestCase
 
     public function testThrowsExceptionDuringConstructionIfPathIsNotString()
     {
-        $this->setExpectedException(InvalidArgumentException::class, 'Invalid path; must be a string');
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid path; must be a string');
 
         new Route(12345, $this->noopMiddleware);
     }
 
     public function testThrowsExceptionDuringConstructionOnInvalidMiddleware()
     {
-        $this->setExpectedException(InvalidArgumentException::class, 'Invalid middleware');
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid middleware');
+
         new Route('/foo', 12345);
     }
 
     public function testThrowsExceptionDuringConstructionOnInvalidHttpMethod()
     {
-        $this->setExpectedException(
-            InvalidArgumentException::class,
-            'Invalid HTTP methods; must be an array or ' . Route::class . '::HTTP_METHOD_ANY'
-        );
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage(sprintf(
+            'Invalid HTTP methods; must be an array or %s::HTTP_METHOD_ANY',
+            Route::class
+        ));
 
         new Route('/foo', $this->noopMiddleware, 'FOO');
     }
@@ -168,11 +172,10 @@ class RouteTest extends TestCase
      */
     public function testThrowsExceptionIfInvalidHttpMethodsAreProvided(array $invalidHttpMethods)
     {
-        $this->setExpectedException(InvalidArgumentException::class, 'One or more HTTP methods were invalid');
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('One or more HTTP methods were invalid');
 
-        $route = new Route('/test', $this->noopMiddleware, $invalidHttpMethods);
-
-        $this->assertFalse($route->getAllowedMethods());
+        new Route('/test', $this->noopMiddleware, $invalidHttpMethods);
     }
 
     public function testProvidingArrayOfMethodsWithoutHeadOrOptionsImpliesBoth()
@@ -192,6 +195,9 @@ class RouteTest extends TestCase
 
     /**
      * @dataProvider headAndOptions
+     *
+     * @param string $httpMethod
+     * @param string $implicitMethod
      */
     public function testPassingHeadOrOptionsInMethodArrayDoesNotMarkAsImplicit($httpMethod, $implicitMethod)
     {
@@ -234,17 +240,20 @@ class RouteTest extends TestCase
             'false'               => [false],
             'zero'                => [0],
             'int'                 => [1],
-            'int'                 => [1],
             'non-callable-object' => [(object) ['handler' => 'foo']],
         ];
     }
 
     /**
      * @dataProvider invalidMiddleware
+     *
+     * @param mixed $middleware
      */
     public function testConstructorRaisesExceptionForInvalidMiddleware($middleware)
     {
-        $this->setExpectedException(InvalidArgumentException::class, 'Invalid middleware');
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid middleware');
+
         new Route('/test', $middleware);
     }
 }

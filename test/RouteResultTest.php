@@ -1,13 +1,13 @@
 <?php
 /**
  * @see       https://github.com/zendframework/zend-expressive-router for the canonical source repository
- * @copyright Copyright (c) 2015-2016 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2015-2017 Zend Technologies USA Inc. (http://www.zend.com)
  * @license   https://github.com/zendframework/zend-expressive-router/blob/master/LICENSE.md New BSD License
  */
 
 namespace ZendTest\Expressive\Router;
 
-use PHPUnit_Framework_TestCase as TestCase;
+use PHPUnit\Framework\TestCase;
 use Zend\Expressive\Router\Route;
 use Zend\Expressive\Router\RouteResult;
 
@@ -86,6 +86,8 @@ class RouteResultTest extends TestCase
 
     /**
      * @depends testFromRouteShouldComposeRouteInResult
+     *
+     * @param array $data
      */
     public function testAllAccessorsShouldReturnExpectedDataWhenResultCreatedViaFromRoute(array $data)
     {
