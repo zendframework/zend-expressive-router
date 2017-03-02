@@ -70,7 +70,7 @@ class Route
     /**
      * @param string $path Path to match.
      * @param string|callable|MiddlewareInterface $middleware Middleware to use when this route is matched.
-     * @param int|array Allowed HTTP methods; defaults to HTTP_METHOD_ANY.
+     * @param int|array $methods Allowed HTTP methods; defaults to HTTP_METHOD_ANY.
      * @param string|null $name the route name
      * @throws Exception\InvalidArgumentException for invalid path type.
      * @throws Exception\InvalidArgumentException for invalid middleware type.
