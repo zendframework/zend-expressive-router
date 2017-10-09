@@ -8,7 +8,7 @@
 namespace Zend\Expressive\Router;
 
 use Fig\Http\Message\RequestMethodInterface as RequestMethod;
-use Interop\Http\ServerMiddleware\MiddlewareInterface;
+use Webimpress\HttpMiddlewareCompatibility\MiddlewareInterface;
 
 /**
  * Value object representing a single route.
