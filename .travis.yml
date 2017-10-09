@@ -5,8 +5,6 @@ language: php
 cache:
   directories:
     - $HOME/.composer/cache
-    - $HOME/.local
-    - vendor
 
 env:
   global:
@@ -45,20 +43,20 @@ matrix:
     - php: 7.1
       env:
         - DEPS=latest
-    - php: hhvm
+    - php: 7.2
       env:
         - DEPS=lowest
-    - php: hhvm
+    - php: 7.2
       env:
         - DEPS=locked
-    - php: hhvm
+    - php: 7.2
       env:
         - DEPS=latest
   allow_failures:
-    - php: hhvm
+    - php: 7.2
 
 before_install:
-  - if [[ $TEST_COVERAGE != 'true' ]]; then phpenv config-rm xdebug.ini || return 0 ; fi
+  - if [[ $TEST_COVERAGE != 'true' && "$(php --version | grep xdebug -ci)" -ge 1 ]]; then phpenv config-rm xdebug.ini || return 0 ; fi
   - travis_retry composer self-update
 
 install:
@@ -67,7 +65,7 @@ install:
   - if [[ $DEPS == 'latest' ]]; then travis_retry composer update $COMPOSER_ARGS ; fi
   - if [[ $DEPS == 'lowest' ]]; then travis_retry composer update --prefer-lowest --prefer-stable $COMPOSER_ARGS ; fi
   - if [[ $TEST_COVERAGE == 'true' ]]; then travis_retry composer require --dev $COMPOSER_ARGS $COVERAGE_DEPS ; fi
-  - composer show
+  - stty cols 120 && composer show
 
 script:
   - if [[ $TEST_COVERAGE == 'true' ]]; then composer test-coverage ; else composer test ; fi
@@ -79,13 +77,3 @@ after_script:
 
 notifications:
   email: false
-  irc:
-    channels:
-      - "irc.freenode.org#zftalk.dev"
-    on_success: change
-    on_failure: always
-  slack:
-    rooms:
-      - secure: "ymA3a0hNAXszPcr678eMffWYsVH32truVUDF5TR0nKEPfUbrkjUfjOvK5uV+hw+BqevShBWYTznSOhkN6Dl4yoxzT+JnvAVBwTozFcDQU6RdZySYXNAEWyTCbQwcj3zTY3j4vME4l2rKASoLRPBkVO6oEGObAgVcpfPGfN34DWtB8/+9vZwqQGMasE3nOumf5YoCzosFE7JA5PGaQ2EqpDzaGkMV8HSBZKf4hL5MGLVNZeDlbIHcq5LFkTxntyb2fwd5Fqy1VSmtTCBpnj/FikpVEZzyJSlsWOe7qHBgifGG96P4+K2vsFaZcOJBx7eRbFEzPg54HZS5KG49+P/TpQeLegYAs+xQtTQ2OaLXkHw3934mfP8P+Vc7CfzC+uh7qXlcs20YB4lXn6T08vOCZ5CB+3hCQSocFm5CxRZY7L9C6vejWlrCO6pKBDhkF0pBRR8uCDTcuDGbl7fCiB4QGv8CUzNJbFs5OmM00UQk/8VYqkeCPPW9ev4jgilDogiih8EKHh0V33cCcmbXvdXbsI36Dp5ub+Mpt1S+Xg/veIK0An2PYRVlH2UHKLu7unYpPWpayhHzrFQWqL3uz7UwhBFfnwLJS8aD034SV35PbKcowgtsv6/VjHHWDsFivSq+Zpp/Nb/L+SkxcSC1+C25qHp58Kvpz/KRoLxer3xOleo="
-    on_success: change
-    on_failure: always
