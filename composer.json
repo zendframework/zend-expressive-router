@@ -1,14 +1,16 @@
 {
     "name": "zendframework/zend-expressive-router",
     "description": "Router subcomponent for Expressive",
-    "type": "library",
     "license": "BSD-3-Clause",
     "keywords": [
         "expressive",
         "http",
         "middleware",
         "psr",
-        "psr-7"
+        "psr-7",
+        "zf",
+        "zendframework",
+        "zend-expressive"
     ],
     "config": {
         "sort-packages": true
@@ -19,6 +21,13 @@
             "dev-develop": "2.3-dev"
         }
     },
+    "support": {
+        "issues": "https://github.com/zendframework/zend-expressive-router/issues",
+        "source": "https://github.com/zendframework/zend-expressive-router",
+        "rss": "https://github.com/zendframework/zend-expressive-router/releases.atom",
+        "slack": "https://zendframework-slack.herokuapp.com",
+        "forum": "https://discourse.zendframework.com/c/questions/expressive"
+    },
     "require": {
         "php": "^5.6 || ^7.0",
         "fig/http-message-util": "^1.1.2",
@@ -26,19 +35,19 @@
         "webimpress/http-middleware-compatibility": "^0.1.1"
     },
     "require-dev": {
-      "malukenho/docheader": "^0.1.5",
-      "phpunit/phpunit": "^6.0.8 || ^5.7.15",
-      "zendframework/zend-coding-standard": "~1.0.0"
+        "malukenho/docheader": "^0.1.5",
+        "phpunit/phpunit": "^5.7.23 || ^6.4.3",
+        "zendframework/zend-coding-standard": "~1.0.0"
     },
     "autoload": {
-      "psr-4": {
-        "Zend\\Expressive\\Router\\": "src/"
-      }
+        "psr-4": {
+            "Zend\\Expressive\\Router\\": "src/"
+        }
     },
     "autoload-dev": {
-      "psr-4": {
-        "ZendTest\\Expressive\\Router\\": "test/"
-      }
+        "psr-4": {
+            "ZendTest\\Expressive\\Router\\": "test/"
+        }
     },
     "suggest": {
         "zendframework/zend-expressive-aurarouter": "^1.0 to use the Aura.Router routing adapter",
@@ -51,11 +60,11 @@
             "@cs-check",
             "@test"
         ],
-        "upload-coverage": "coveralls -v",
-        "cs-check": "phpcs --colors",
-        "cs-fix": "phpcbf --colors",
-        "license-check": "docheader check src/ test/",
+        "cs-check": "phpcs",
+        "cs-fix": "phpcbf",
         "test": "phpunit --colors=always",
-        "test-coverage": "phpunit --coverage-clover clover.xml"
+        "test-coverage": "phpunit --colors=always --coverage-clover clover.xml",
+        "upload-coverage": "coveralls -v",
+        "license-check": "vendor/bin/docheader check src/ test/"
     }
 }
