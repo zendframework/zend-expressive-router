@@ -12,15 +12,6 @@
         "zendframework",
         "zend-expressive"
     ],
-    "config": {
-        "sort-packages": true
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "2.2-dev",
-            "dev-develop": "2.3-dev"
-        }
-    },
     "support": {
         "issues": "https://github.com/zendframework/zend-expressive-router/issues",
         "source": "https://github.com/zendframework/zend-expressive-router",
@@ -39,6 +30,11 @@
         "phpunit/phpunit": "^5.7.23 || ^6.4.3",
         "zendframework/zend-coding-standard": "~1.0.0"
     },
+    "suggest": {
+        "zendframework/zend-expressive-aurarouter": "^1.0 to use the Aura.Router routing adapter",
+        "zendframework/zend-expressive-fastroute": "^1.2 to use the FastRoute routing adapter",
+        "zendframework/zend-expressive-zendrouter": "^1.2 to use the zend-router routing adapter"
+    },
     "autoload": {
         "psr-4": {
             "Zend\\Expressive\\Router\\": "src/"
@@ -49,10 +45,14 @@
             "ZendTest\\Expressive\\Router\\": "test/"
         }
     },
-    "suggest": {
-        "zendframework/zend-expressive-aurarouter": "^1.0 to use the Aura.Router routing adapter",
-        "zendframework/zend-expressive-fastroute": "^1.2 to use the FastRoute routing adapter",
-        "zendframework/zend-expressive-zendrouter": "^1.2 to use the zend-router routing adapter"
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "2.2-dev",
+            "dev-develop": "2.3-dev"
+        }
     },
     "scripts": {
         "check": [
@@ -65,6 +65,6 @@
         "test": "phpunit --colors=always",
         "test-coverage": "phpunit --colors=always --coverage-clover clover.xml",
         "upload-coverage": "coveralls -v",
-        "license-check": "vendor/bin/docheader check src/ test/"
+        "license-check": "docheader check src/ test/"
     }
 }
