@@ -70,27 +70,15 @@ class Route
 
     /**
      * @param string $path Path to match.
-     * @param string|callable|MiddlewareInterface $middleware Middleware to use when this route is matched.
+     * @param MiddlewareInterface $middleware Middleware to use when this route is matched.
      * @param int|array $methods Allowed HTTP methods; defaults to HTTP_METHOD_ANY.
      * @param null|string $name the route name
      * @throws Exception\InvalidArgumentException for invalid path type.
      * @throws Exception\InvalidArgumentException for invalid middleware type.
      * @throws Exception\InvalidArgumentException for any invalid HTTP method names.
      */
-    public function __construct(string $path, $middleware, $methods = self::HTTP_METHOD_ANY, string $name = null)
+    public function __construct(string $path, MiddlewareInterface $middleware, $methods = self::HTTP_METHOD_ANY, string $name = null)
     {
-        if (! is_callable($middleware)
-            && ! $middleware instanceof MiddlewareInterface
-            && ! is_string($middleware)
-            && ! is_array($middleware)
-        ) {
-            throw new Exception\InvalidArgumentException(sprintf(
-                'Invalid middleware; must be a callable, a %s instance, a service name, '
-                . 'or an array of any of these types',
-                MiddlewareInterface::class
-            ));
-        }
-
         if ($methods !== self::HTTP_METHOD_ANY && ! is_array($methods)) {
             throw new Exception\InvalidArgumentException(sprintf(
                 'Invalid HTTP methods; must be an array or %s::HTTP_METHOD_ANY',

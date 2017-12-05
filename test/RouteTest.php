@@ -27,8 +27,7 @@ class RouteTest extends TestCase
 
     public function setUp()
     {
-        $this->noopMiddleware = function ($req, $res, $next) {
-        };
+        $this->noopMiddleware = $this->prophesize(MiddlewareInterface::class)->reveal();
     }
 
     public function testRoutePathIsRetrievable()
@@ -41,12 +40,6 @@ class RouteTest extends TestCase
     {
         $route = new Route('/foo', $this->noopMiddleware);
         $this->assertSame($this->noopMiddleware, $route->getMiddleware());
-    }
-
-    public function testRouteMiddlewareMayBeANonCallableString()
-    {
-        $route = new Route('/foo', 'Application\Middleware\HelloWorld');
-        $this->assertSame('Application\Middleware\HelloWorld', $route->getMiddleware());
     }
 
     public function testRouteInstanceAcceptsAllHttpMethodsByDefault()
@@ -132,8 +125,11 @@ class RouteTest extends TestCase
 
     public function testThrowsExceptionDuringConstructionOnInvalidMiddleware()
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid middleware');
+        $this->expectException(TypeError::class);
+        $this->expectExceptionMessage(sprintf(
+            'must implement interface %s',
+            MiddlewareInterface::class
+        ));
 
         new Route('/foo', 12345);
     }
@@ -221,18 +217,6 @@ class RouteTest extends TestCase
         $this->assertSame($middleware, $route->getMiddleware());
     }
 
-    /**
-     * This is to allow passing an array of middleware for use in creating a MiddlewarePipe
-     * instance; Route should simply check if it's a non-callable array, and, if so, store
-     * the entry as it would a non-callable string.
-     */
-    public function testAllowsNonCallableArraysAsMiddleware()
-    {
-        $middleware = ['Non', 'Callable', 'Middleware'];
-        $route = new Route('/test', $middleware, Route::HTTP_METHOD_ANY);
-        $this->assertSame($middleware, $route->getMiddleware());
-    }
-
     public function invalidMiddleware()
     {
         // Strings are allowed, because they could be service names.
@@ -243,6 +227,9 @@ class RouteTest extends TestCase
             'zero'                => [0],
             'int'                 => [1],
             'non-callable-object' => [(object) ['handler' => 'foo']],
+            'callback'            => [function () {}],
+            'array'               => [['Class', 'method']],
+            'string'              => ['Application\Middleware\HelloWorld'],
         ];
     }
 
@@ -253,8 +240,11 @@ class RouteTest extends TestCase
      */
     public function testConstructorRaisesExceptionForInvalidMiddleware($middleware)
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid middleware');
+        $this->expectException(TypeError::class);
+        $this->expectExceptionMessage(sprintf(
+            'must implement interface %s',
+            MiddlewareInterface::class
+        ));
 
         new Route('/test', $middleware);
     }
