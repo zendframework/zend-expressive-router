@@ -28,8 +28,8 @@ use Interop\Http\Server\MiddlewareInterface;
  */
 class Route
 {
-    const HTTP_METHOD_ANY = 0xff;
-    const HTTP_METHOD_SEPARATOR = ':';
+    public const HTTP_METHOD_ANY = 0xff;
+    public const HTTP_METHOD_SEPARATOR = ':';
 
     /**
      * @var bool If HEAD was not provided to the Route instance, indicate
