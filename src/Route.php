@@ -35,18 +35,18 @@ class Route
      * @var bool If HEAD was not provided to the Route instance, indicate
      *     support for the method is implicit.
      */
-    private $implicitHead = true;
+    private $implicitHead;
 
     /**
      * @var bool If OPTIONS was not provided to the Route instance, indicate
      *     support for the method is implicit.
      */
-    private $implicitOptions = true;
+    private $implicitOptions;
 
     /**
      * @var int|string[] HTTP methods allowed with this route.
      */
-    private $methods = self::HTTP_METHOD_ANY;
+    private $methods;
 
     /**
      * @var callable|string Middleware or service name of middleware associated with route.
