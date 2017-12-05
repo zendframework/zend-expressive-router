@@ -46,7 +46,7 @@ class RouteResultTest extends TestCase
     public function testRouteFailureRetrieveHttpMethods()
     {
         $result = RouteResult::fromRouteFailure();
-        $this->assertSame(['*'], $result->getAllowedMethods());
+        $this->assertSame([], $result->getAllowedMethods());
     }
 
     public function testRouteMatchedParams()
