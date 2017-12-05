@@ -2,11 +2,12 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
-## 2.3.0 - TBD
+## 3.0.0 - TBD
 
 ### Added
 
-- Nothing.
+- [#39](https://github.com/zendframework/zend-expressive-router/pull/39) adds
+  PSR-15 `http-interop/http-server-middleware` support.
 
 ### Changed
 
@@ -18,7 +19,8 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Removed
 
-- Nothing.
+- [#39](https://github.com/zendframework/zend-expressive-router/pull/39) removes
+  PHP 5.6 and PHP 7.0 support.
 
 ### Fixed
 
