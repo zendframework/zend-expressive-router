@@ -227,7 +227,10 @@ class RouteTest extends TestCase
             'zero'                => [0],
             'int'                 => [1],
             'non-callable-object' => [(object) ['handler' => 'foo']],
-            'callback'            => [function () {}],
+            'callback'            => [
+                function () {
+                }
+            ],
             'array'               => [['Class', 'method']],
             'string'              => ['Application\Middleware\HelloWorld'],
         ];
