@@ -28,7 +28,7 @@ use Interop\Http\Server\MiddlewareInterface;
  */
 class Route
 {
-    public const HTTP_METHOD_ANY = 0xff;
+    public const HTTP_METHOD_ANY = null;
     public const HTTP_METHOD_SEPARATOR = ':';
 
     /**
@@ -71,21 +71,18 @@ class Route
     /**
      * @param string $path Path to match.
      * @param MiddlewareInterface $middleware Middleware to use when this route is matched.
-     * @param int|array $methods Allowed HTTP methods; defaults to HTTP_METHOD_ANY.
+     * @param null|string[] $methods Allowed HTTP methods; defaults to HTTP_METHOD_ANY.
      * @param null|string $name the route name
      * @throws Exception\InvalidArgumentException for invalid path type.
      * @throws Exception\InvalidArgumentException for invalid middleware type.
      * @throws Exception\InvalidArgumentException for any invalid HTTP method names.
      */
-    public function __construct(string $path, MiddlewareInterface $middleware, $methods = self::HTTP_METHOD_ANY, string $name = null)
-    {
-        if ($methods !== self::HTTP_METHOD_ANY && ! is_array($methods)) {
-            throw new Exception\InvalidArgumentException(sprintf(
-                'Invalid HTTP methods; must be an array or %s::HTTP_METHOD_ANY',
-                __CLASS__
-            ));
-        }
-
+    public function __construct(
+        string $path,
+        MiddlewareInterface $middleware,
+        array $methods = self::HTTP_METHOD_ANY,
+        string $name = null
+    ) {
         $this->path       = $path;
         $this->middleware = $middleware;
         $this->methods    = is_array($methods) ? $this->validateHttpMethods($methods) : $methods;
@@ -130,9 +127,9 @@ class Route
     }
 
     /**
-     * @return int|string[] Returns HTTP_METHOD_ANY or array of allowed methods.
+     * @return null|string[] Returns HTTP_METHOD_ANY or array of allowed methods.
      */
-    public function getAllowedMethods()
+    public function getAllowedMethods() : ?array
     {
         return $this->methods;
     }

@@ -82,9 +82,9 @@ class RouteResult
     /**
      * Create an instance representing a route failure.
      *
-     * @param null|int|array $methods HTTP methods allowed for the current URI, if any
+     * @param null|array $methods HTTP methods allowed for the current URI, if any
      */
-    public static function fromRouteFailure($methods = null) : self
+    public static function fromRouteFailure(array $methods = null) : self
     {
         $result = new self();
         $result->success = false;
