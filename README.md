@@ -1,7 +1,7 @@
 # zend-expressive-router
 
 [![Build Status](https://secure.travis-ci.org/zendframework/zend-expressive-router.svg?branch=master)](https://secure.travis-ci.org/zendframework/zend-expressive-router)
-[![Coverage Status](https://coveralls.io/repos/zendframework/zend-expressive-router/badge.svg?branch=master)](https://coveralls.io/r/zendframework/zend-expressive-router?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/zendframework/zend-expressive-router/badge.svg?branch=master)](https://coveralls.io/github/zendframework/zend-expressive-router?branch=master)
 
 Router subcomponent for [Expressive](https://github.com/zendframework/zend-expressive).
 
@@ -34,4 +34,4 @@ We currently support and provide the following routing integrations:
 
 ## Documentation
 
-Expressive provides [routing documentation](https://zendframework.github.io/zend-expressive/features/router/intro/).
+Expressive provides [routing documentation](https://docs.zendframework.com/zend-expressive/features/router/intro/).
