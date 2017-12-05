@@ -7,7 +7,7 @@
 
 namespace Zend\Expressive\Router;
 
-use Webimpress\HttpMiddlewareCompatibility\MiddlewareInterface;
+use Interop\Http\Server\MiddlewareInterface;
 
 /**
  * Value object representing the results of routing.
