@@ -103,7 +103,7 @@ class Route
         $this->methods    = is_array($methods) ? $this->validateHttpMethods($methods) : $methods;
 
         if (empty($name)) {
-            $name = ($this->methods === self::HTTP_METHOD_ANY)
+            $name = $this->methods === self::HTTP_METHOD_ANY
                 ? $path
                 : $path . '^' . implode(self::HTTP_METHOD_SEPARATOR, $this->methods);
         }
