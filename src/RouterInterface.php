@@ -54,8 +54,8 @@ interface RouterInterface
      * the URI, this should be performed afterwards; consider passing the URI
      * to league/uri to encode it.
      *
-     * @see https://github.com/auraphp/Aura.Router#generating-a-route-path
-     * @see http://framework.zend.com/manual/current/en/modules/zend.mvc.routing.html
+     * @see https://github.com/auraphp/Aura.Router/blob/3.x/docs/generating-paths.md
+     * @see https://docs.zendframework.com/zend-router/routing/
      * @throws Exception\RuntimeException if unable to generate the given URI.
      */
     public function generateUri(string $name, array $substitutions = [], array $options = []) : string;
