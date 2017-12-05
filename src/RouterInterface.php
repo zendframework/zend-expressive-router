@@ -29,11 +29,10 @@ interface RouterInterface
      * or `generateUri()` have already been called, to ensure integrity of the
      * router between invocations of either of those methods.
      *
-     * @param Route $route
      * @throws Exception\RuntimeException when called after match() or
      *     generateUri() have been called.
      */
-    public function addRoute(Route $route);
+    public function addRoute(Route $route) : void;
 
     /**
      * Match a request against the known routes.
@@ -42,11 +41,8 @@ interface RouterInterface
      * request instance, and pass them to the underlying router implementation;
      * when done, they will then marshal a `RouteResult` instance indicating
      * the results of the matching operation and return it to the caller.
-     *
-     * @param  Request $request
-     * @return RouteResult
      */
-    public function match(Request $request);
+    public function match(Request $request) : RouteResult;
 
     /**
      * Generate a URI from the named route.
@@ -60,11 +56,7 @@ interface RouterInterface
      *
      * @see https://github.com/auraphp/Aura.Router#generating-a-route-path
      * @see http://framework.zend.com/manual/current/en/modules/zend.mvc.routing.html
-     * @param string $name
-     * @param array $substitutions
-     * @param array $options
-     * @return string
      * @throws Exception\RuntimeException if unable to generate the given URI.
      */
-    public function generateUri($name, array $substitutions = [], array $options = []);
+    public function generateUri(string $name, array $substitutions = [], array $options = []) : string;
 }

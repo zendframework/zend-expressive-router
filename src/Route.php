@@ -72,17 +72,13 @@ class Route
      * @param string $path Path to match.
      * @param string|callable|MiddlewareInterface $middleware Middleware to use when this route is matched.
      * @param int|array $methods Allowed HTTP methods; defaults to HTTP_METHOD_ANY.
-     * @param string|null $name the route name
+     * @param null|string $name the route name
      * @throws Exception\InvalidArgumentException for invalid path type.
      * @throws Exception\InvalidArgumentException for invalid middleware type.
      * @throws Exception\InvalidArgumentException for any invalid HTTP method names.
      */
-    public function __construct($path, $middleware, $methods = self::HTTP_METHOD_ANY, $name = null)
+    public function __construct(string $path, $middleware, $methods = self::HTTP_METHOD_ANY, string $name = null)
     {
-        if (! is_string($path)) {
-            throw new Exception\InvalidArgumentException('Invalid path; must be a string');
-        }
-
         if (! is_callable($middleware)
             && ! $middleware instanceof MiddlewareInterface
             && ! is_string($middleware)
@@ -119,28 +115,20 @@ class Route
             && ! in_array(RequestMethod::METHOD_OPTIONS, $this->methods, true);
     }
 
-    /**
-     * @return string
-     */
-    public function getPath()
+    public function getPath() : string
     {
         return $this->path;
     }
 
     /**
      * Set the route name.
-     *
-     * @param string $name
      */
-    public function setName($name)
+    public function setName(string $name) : void
     {
-        $this->name = (string) $name;
+        $this->name = $name;
     }
 
-    /**
-     * @return string
-     */
-    public function getName()
+    public function getName() : string
     {
         return $this->name;
     }
@@ -165,9 +153,8 @@ class Route
      * Indicate whether the specified method is allowed by the route.
      *
      * @param string $method HTTP method to test.
-     * @return bool
      */
-    public function allowsMethod($method)
+    public function allowsMethod(string $method) : bool
     {
         $method = strtoupper($method);
         if (RequestMethod::METHOD_HEAD === $method
@@ -181,38 +168,28 @@ class Route
         return false;
     }
 
-    /**
-     * @param array $options
-     */
-    public function setOptions(array $options)
+    public function setOptions(array $options) : void
     {
         $this->options = $options;
     }
 
-    /**
-     * @return array
-     */
-    public function getOptions()
+    public function getOptions() : array
     {
         return $this->options;
     }
 
     /**
      * Whether or not HEAD support is implicit (i.e., not explicitly specified)
-     *
-     * @return bool
      */
-    public function implicitHead()
+    public function implicitHead() : bool
     {
         return $this->implicitHead;
     }
 
     /**
      * Whether or not OPTIONS support is implicit (i.e., not explicitly specified)
-     *
-     * @return bool
      */
-    public function implicitOptions()
+    public function implicitOptions() : bool
     {
         return $this->implicitOptions;
     }
@@ -226,7 +203,7 @@ class Route
      * @return string[]
      * @throws Exception\InvalidArgumentException for any invalid method names.
      */
-    private function validateHttpMethods(array $methods)
+    private function validateHttpMethods(array $methods) : array
     {
         if (false === array_reduce($methods, function ($valid, $method) {
             if (false === $valid) {

@@ -11,6 +11,7 @@ namespace ZendTest\Expressive\Router;
 use Fig\Http\Message\RequestMethodInterface as RequestMethod;
 use Interop\Http\Server\MiddlewareInterface;
 use PHPUnit\Framework\TestCase;
+use TypeError;
 use Zend\Expressive\Router\Exception\InvalidArgumentException;
 use Zend\Expressive\Router\Route;
 
@@ -123,8 +124,8 @@ class RouteTest extends TestCase
 
     public function testThrowsExceptionDuringConstructionIfPathIsNotString()
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid path; must be a string');
+        $this->expectException(TypeError::class);
+        $this->expectExceptionMessage('must be of the type string, integer given');
 
         new Route(12345, $this->noopMiddleware);
     }

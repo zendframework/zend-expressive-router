@@ -68,11 +68,9 @@ class RouteResult
     /**
      * Create an instance representing a route succes from the matching route.
      *
-     * @param Route $route
      * @param array $params Parameters associated with the matched route, if any.
-     * @return static
      */
-    public static function fromRoute(Route $route, array $params = [])
+    public static function fromRoute(Route $route, array $params = []) : self
     {
         $result                = new self();
         $result->success       = true;
@@ -85,9 +83,8 @@ class RouteResult
      * Create an instance representing a route failure.
      *
      * @param null|int|array $methods HTTP methods allowed for the current URI, if any
-     * @return static
      */
-    public static function fromRouteFailure($methods = null)
+    public static function fromRouteFailure($methods = null) : self
     {
         $result = new self();
         $result->success = false;
@@ -105,10 +102,8 @@ class RouteResult
 
     /**
      * Does the result represent successful routing?
-     *
-     * @return bool
      */
-    public function isSuccess()
+    public function isSuccess() : bool
     {
         return $this->success;
     }
@@ -130,7 +125,7 @@ class RouteResult
      * If this result represents a failure, return false; otherwise, return the
      * matched route name.
      *
-     * @return string
+     * @return false|string
      */
     public function getMatchedRouteName()
     {
@@ -170,30 +165,24 @@ class RouteResult
      * Returns the matched params.
      *
      * Guaranted to return an array, even if it is simply empty.
-     *
-     * @return array
      */
-    public function getMatchedParams()
+    public function getMatchedParams() : array
     {
         return $this->matchedParams;
     }
 
     /**
      * Is this a routing failure result?
-     *
-     * @return bool
      */
-    public function isFailure()
+    public function isFailure() : bool
     {
         return (! $this->success);
     }
 
     /**
      * Does the result represent failure to route due to HTTP method?
-     *
-     * @return bool
      */
-    public function isMethodFailure()
+    public function isMethodFailure() : bool
     {
         if ($this->isSuccess() || null === $this->allowedMethods) {
             return false;
@@ -207,7 +196,7 @@ class RouteResult
      *
      * @return string[] HTTP methods allowed
      */
-    public function getAllowedMethods()
+    public function getAllowedMethods() : array
     {
         if ($this->isSuccess()) {
             return $this->route
