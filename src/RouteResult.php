@@ -35,7 +35,7 @@ class RouteResult
     /**
      * @var null|array
      */
-    private $allowedMethods;
+    private $allowedMethods = [];
 
     /**
      * @var array
@@ -184,7 +184,7 @@ class RouteResult
      */
     public function isMethodFailure() : bool
     {
-        if ($this->isSuccess() || null === $this->allowedMethods) {
+        if ($this->isSuccess() || [] === $this->allowedMethods) {
             return false;
         }
 
@@ -202,10 +202,6 @@ class RouteResult
             return $this->route
                 ? $this->route->getAllowedMethods()
                 : [];
-        }
-
-        if (null === $this->allowedMethods) {
-            return [];
         }
 
         return $this->allowedMethods;
