@@ -50,8 +50,9 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "2.2-dev",
-            "dev-develop": "2.3-dev"
+            "dev-master": "2.2.x-dev",
+            "dev-develop": "2.3.x-dev",
+            "dev-release-3.0.0": "3.0.0-dev"
         }
     },
     "scripts": {
