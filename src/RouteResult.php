@@ -33,7 +33,7 @@ use Interop\Http\Server\MiddlewareInterface;
 class RouteResult
 {
     /**
-     * @var null|array
+     * @var array
      */
     private $allowedMethods = [];
 
@@ -48,7 +48,7 @@ class RouteResult
     private $matchedRouteName;
 
     /**
-     * @var callable|string|MiddlewareInterface|array
+     * @var MiddlewareInterface
      */
     private $matchedMiddleware;
 
@@ -143,10 +143,8 @@ class RouteResult
     /**
      * Retrieve the matched middleware, if possible.
      *
-     * @return false|callable|string|MiddlewareInterface|array Returns false if
-     *     the result represents a failure; otherwise, a callable, a string
-     *     service name, a MiddlewareInterface instance, or array of any of
-     *     these types.
+     * @return false|MiddlewareInterface Returns false if the result
+     *     represents a failure; otherwise, a MiddlewareInterface instance.
      */
     public function getMatchedMiddleware()
     {

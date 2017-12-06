@@ -44,12 +44,12 @@ class Route
     private $implicitOptions;
 
     /**
-     * @var int|string[] HTTP methods allowed with this route.
+     * @var null|string[] HTTP methods allowed with this route.
      */
     private $methods;
 
     /**
-     * @var callable|string Middleware or service name of middleware associated with route.
+     * @var MiddlewareInterface Middleware associated with route.
      */
     private $middleware;
 
@@ -73,9 +73,6 @@ class Route
      * @param MiddlewareInterface $middleware Middleware to use when this route is matched.
      * @param null|string[] $methods Allowed HTTP methods; defaults to HTTP_METHOD_ANY.
      * @param null|string $name the route name
-     * @throws Exception\InvalidArgumentException for invalid path type.
-     * @throws Exception\InvalidArgumentException for invalid middleware type.
-     * @throws Exception\InvalidArgumentException for any invalid HTTP method names.
      */
     public function __construct(
         string $path,
