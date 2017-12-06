@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace ZendTest\Expressive\Router;
 
+use Interop\Http\Server\MiddlewareInterface;
 use PHPUnit\Framework\TestCase;
 use Zend\Expressive\Router\Route;
 use Zend\Expressive\Router\RouteResult;
@@ -92,15 +93,16 @@ class RouteResultTest extends TestCase
      */
     public function testAllAccessorsShouldReturnExpectedDataWhenResultCreatedViaFromRoute(array $data)
     {
+        $middleware = $this->prophesize(MiddlewareInterface::class);
         $result = $data['result'];
         $route = $data['route'];
 
         $route->getName()->willReturn('route');
-        $route->getMiddleware()->willReturn(__METHOD__);
+        $route->getMiddleware()->will([$middleware, 'reveal']);
         $route->getAllowedMethods()->willReturn(['HEAD', 'OPTIONS', 'GET']);
 
         $this->assertEquals('route', $result->getMatchedRouteName());
-        $this->assertEquals(__METHOD__, $result->getMatchedMiddleware());
+        $this->assertEquals($middleware->reveal(), $result->getMatchedMiddleware());
         $this->assertEquals(['HEAD', 'OPTIONS', 'GET'], $result->getAllowedMethods());
     }
 }

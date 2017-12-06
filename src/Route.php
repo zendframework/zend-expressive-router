@@ -115,10 +115,7 @@ class Route
         return $this->name;
     }
 
-    /**
-     * @return string|callable|MiddlewareInterface
-     */
-    public function getMiddleware()
+    public function getMiddleware() : MiddlewareInterface
     {
         return $this->middleware;
     }
