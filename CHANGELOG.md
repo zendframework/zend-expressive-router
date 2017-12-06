@@ -11,7 +11,29 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Changed
 
-- Nothing.
+- [#41](https://github.com/zendframework/zend-expressive-router/pull/41) updates
+  the `Route` class to provide typehints for all arguments and return values.
+  Typehints were generally derived from the existing annotations, with the
+  following items of particular note:
+  - The constructor `$middleware` argument typehints on the PSR-15
+    `MiddlewareInterface`.
+  - The `getMiddleware()` method now explicitly returns a PSR-15
+    `MiddlewareInterface` instance.
+  - `getAllowedMethods()` now returns a nullable `array`.
+
+- [#41](https://github.com/zendframework/zend-expressive-router/pull/41) updates
+  the `RouteResult` class to add typehints for all arguments and return values,
+  where possible. Typehints were generally derived from the existing
+  annotations, with the following items of particular note:
+  - The `$methods` argument to `fromRouteFailure()` is now a nullable array,
+    defaulting to an empty array.
+
+- [#41](https://github.com/zendframework/zend-expressive-router/pull/41) updates
+  the `RouteInterface` to add typehints for all arguments and return values. In
+  particular, thse are now:
+  - `addRoute(Route $route) : void`
+  - `match(Psr\Http\Message\ServerRequestInterface $request) : RouteResult`
+  - `generateUri(string $name, array $substitutions = [], array $options = []) : string`
 
 ### Deprecated
 
@@ -19,7 +41,8 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Removed
 
-- [#39](https://github.com/zendframework/zend-expressive-router/pull/39) removes
+- [#39](https://github.com/zendframework/zend-expressive-router/pull/39) and
+  [#41](https://github.com/zendframework/zend-expressive-router/pull/41) remove
   PHP 5.6 and PHP 7.0 support.
 
 ### Fixed

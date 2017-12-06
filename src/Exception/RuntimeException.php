@@ -5,6 +5,8 @@
  * @license   https://github.com/zendframework/zend-expressive-router/blob/master/LICENSE.md New BSD License
  */
 
+declare(strict_types=1);
+
 namespace Zend\Expressive\Router\Exception;
 
 class RuntimeException extends \RuntimeException implements ExceptionInterface
