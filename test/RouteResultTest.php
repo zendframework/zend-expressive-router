@@ -106,4 +106,10 @@ class RouteResultTest extends TestCase
         $this->assertEquals($middleware->reveal(), $result->getMatchedMiddleware());
         $this->assertEquals(['HEAD', 'OPTIONS', 'GET'], $result->getAllowedMethods());
     }
+
+    public function testRouteFailureWithNoAllowedHttpMethodsShouldReportTrueForIsMethodFailure()
+    {
+        $result = RouteResult::fromRouteFailure([]);
+        $this->assertTrue($result->isMethodFailure());
+    }
 }
