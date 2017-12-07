@@ -29,13 +29,13 @@ class RouteResultTest extends TestCase
 
     public function testRouteMiddlewareIsNotRetrievable()
     {
-        $result = RouteResult::fromRouteFailure();
+        $result = RouteResult::fromRouteFailure([]);
         $this->assertFalse($result->getMatchedMiddleware());
     }
 
     public function testRouteNameIsNotRetrievable()
     {
-        $result = RouteResult::fromRouteFailure();
+        $result = RouteResult::fromRouteFailure([]);
         $this->assertFalse($result->getMatchedRouteName());
     }
 
@@ -47,7 +47,7 @@ class RouteResultTest extends TestCase
 
     public function testRouteFailureRetrieveHttpMethods()
     {
-        $result = RouteResult::fromRouteFailure();
+        $result = RouteResult::fromRouteFailure([]);
         $this->assertSame([], $result->getAllowedMethods());
     }
 
@@ -111,5 +111,22 @@ class RouteResultTest extends TestCase
     {
         $result = RouteResult::fromRouteFailure([]);
         $this->assertTrue($result->isMethodFailure());
+    }
+
+    public function testFailureResultDoesNotIndicateAMethodFailureIfAllMethodsAreAllowed()
+    {
+        $result = RouteResult::fromRouteFailure(Route::HTTP_METHOD_ANY);
+        $this->assertTrue($result->isFailure());
+        $this->assertFalse($result->isMethodFailure());
+        return $result;
+    }
+
+    /**
+     * @depends testFailureResultDoesNotIndicateAMethodFailureIfAllMethodsAreAllowed
+     */
+    public function testAllowedMethodsIncludesASingleWildcardEntryWhenAllMethodsAllowedForFailureResult(
+        RouteResult $result
+    ) {
+        $this->assertSame(['*'], $result->getAllowedMethods());
     }
 }
