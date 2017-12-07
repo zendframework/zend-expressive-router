@@ -21,12 +21,18 @@ All notable changes to this project will be documented in this file, in reverse 
     `MiddlewareInterface` instance.
   - `getAllowedMethods()` now returns a nullable `array`.
 
-- [#41](https://github.com/zendframework/zend-expressive-router/pull/41) updates
+- [#41](https://github.com/zendframework/zend-expressive-router/pull/41) and
+  [#43](https://github.com/zendframework/zend-expressive-router/pull/43) update
   the `RouteResult` class to add typehints for all arguments and return values,
   where possible. Typehints were generally derived from the existing
   annotations, with the following items of particular note:
-  - The `$methods` argument to `fromRouteFailure()` is now a nullable array,
-    defaulting to an empty array.
+  - The `$methods` argument to `fromRouteFailure()` is now a nullable array
+    (with `null` representing the fact that any method is allowed),
+    **without a default value**. You must provide a value when creating a route
+    failure.
+  - `getAllowedMethods()` will now return `['*']` when any HTTP method is
+    allowed; this will evaluate to a valid `Allows` header value, and is the
+    recommended value when any HTTP method is allowed.
 
 - [#41](https://github.com/zendframework/zend-expressive-router/pull/41) updates
   the `RouteInterface` to add typehints for all arguments and return values. In
