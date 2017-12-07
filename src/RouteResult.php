@@ -184,7 +184,7 @@ class RouteResult
      */
     public function isMethodFailure() : bool
     {
-        if ($this->isSuccess() || ['*'] === $this->allowedMethods) {
+        if ($this->isSuccess()) {
             return false;
         }
 
