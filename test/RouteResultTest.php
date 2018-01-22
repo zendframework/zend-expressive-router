@@ -9,8 +9,8 @@ declare(strict_types=1);
 
 namespace ZendTest\Expressive\Router;
 
-use Interop\Http\Server\MiddlewareInterface;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Server\MiddlewareInterface;
 use Zend\Expressive\Router\Route;
 use Zend\Expressive\Router\RouteResult;
 
