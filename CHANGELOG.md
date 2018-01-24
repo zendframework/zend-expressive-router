@@ -6,8 +6,9 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Added
 
-- [#39](https://github.com/zendframework/zend-expressive-router/pull/39) adds
-  PSR-15 `http-interop/http-server-middleware` support.
+- [#39](https://github.com/zendframework/zend-expressive-router/pull/39) and
+  [#45](https://github.com/zendframework/zend-expressive-router/pull/45) add
+  PSR-15 `psr/http-server-middleware` support.
 
 ### Changed
 
