@@ -6,6 +6,19 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Added
 
+- [#47](https://github.com/zendframework/zend-expressive-router/pull/47) adds
+  the middleware `Zend\Expressive\Router\PathBasedRoutingMiddleware`, which
+  extends the `RouteMiddleware` to add methods for defining and creating
+  path+method based routes. It exposes the following methods:
+
+  - `route(string $path, MiddlewareInterface $middleware, array $methods = null, string $name = null) : Route`
+  - `get(string $path, MiddlewareInterface $middleware, string $name = null) : Route`
+  - `post(string $path, MiddlewareInterface $middleware, string $name = null) : Route`
+  - `put(string $path, MiddlewareInterface $middleware, string $name = null) : Route`
+  - `patch(string $path, MiddlewareInterface $middleware, string $name = null) : Route`
+  - `delete(string $path, MiddlewareInterface $middleware, string $name = null) : Route`
+  - `any(string $path, MiddlewareInterface $middleware, string $name = null) : Route`
+
 - [#39](https://github.com/zendframework/zend-expressive-router/pull/39) and
   [#45](https://github.com/zendframework/zend-expressive-router/pull/45) add
   PSR-15 `psr/http-server-middleware` support.
@@ -41,6 +54,10 @@ All notable changes to this project will be documented in this file, in reverse 
   - `addRoute(Route $route) : void`
   - `match(Psr\Http\Message\ServerRequestInterface $request) : RouteResult`
   - `generateUri(string $name, array $substitutions = [], array $options = []) : string`
+
+- [#47](https://github.com/zendframework/zend-expressive-router/pull/47)
+  modifies the `RouteMiddleware::$router` property to make it `protected`
+  visibility, allowing extensions to work with it.
 
 ### Deprecated
 
