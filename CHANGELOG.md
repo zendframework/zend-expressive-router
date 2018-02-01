@@ -56,11 +56,28 @@ All notable changes to this project will be documented in this file, in reverse 
 
 - Nothing.
 
-## 2.2.1 - TBD
+## 2.3.0 - 2018-02-01
 
 ### Added
 
-- Nothing.
+- [#46](https://github.com/zendframework/zend-expressive-router/pull/46) adds
+  two new middleware, imported from zend-expressive and re-worked for general
+  purpose usage:
+
+  - `Zend\Expressive\Router\RouteMiddleware` composes a router and a response
+    prototype. When processed, if no match is found due to an un-matched HTTP
+    method, it uses the response prototype to create a 405 response with an
+    `Allow` header listing allowed methods; otherwise, it dispatches to the next
+    middleware via the provided handler. If a match is made, the route result is
+    stored as a request attribute using the `RouteResult` class name, and each
+    matched parameter is also added as a request attribute before delegating
+    request handling.
+
+  - `Zend\Expressive\Router\DispatchMiddleware` checks for a `RouteResult`
+    attribute in the request. If none is found, it delegates handling of the
+    request to the handler. If one is found, it pulls the matched middleware and
+    processes it. If the middleware is not http-interop middleware, it raises an
+    exception.
 
 ### Changed
 
