@@ -64,8 +64,10 @@ class PathBasedRoutingMiddlewareTest extends TestCase
                 $this->response = $response;
             }
 
-            public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
-            {
+            public function process(
+                ServerRequestInterface $request,
+                RequestHandlerInterface $handler
+            ) : ResponseInterface {
                 return $this->response;
             }
         };
