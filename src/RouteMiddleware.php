@@ -1,21 +1,19 @@
 <?php
 /**
  * @see       https://github.com/zendframework/zend-expressive-router for the canonical source repository
- * @copyright Copyright (c) 2018 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2018 Zend Technologies USA Inc. (https://www.zend.com)
  * @license   https://github.com/zendframework/zend-expressive-router/blob/master/LICENSE.md New BSD License
  */
+
+declare(strict_types=1);
 
 namespace Zend\Expressive\Router;
 
 use Fig\Http\Message\StatusCodeInterface as StatusCode;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Zend\Expressive\Router\RouteResult;
-use Zend\Expressive\Router\RouterInterface;
-use Webimpress\HttpMiddlewareCompatibility\HandlerInterface;
-use Webimpress\HttpMiddlewareCompatibility\MiddlewareInterface;
-
-use const Webimpress\HttpMiddlewareCompatibility\HANDLER_METHOD;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 /**
  * Default routing middleware.
@@ -42,24 +40,15 @@ class RouteMiddleware implements MiddlewareInterface
     /**
      * @var RouterInterface
      */
-    private $router;
+    protected $router;
 
-    /**
-     * @param RouterInterface $router
-     * @param ResponseInterface $responsePrototype
-     */
     public function __construct(RouterInterface $router, ResponseInterface $responsePrototype)
     {
         $this->router = $router;
         $this->responsePrototype = $responsePrototype;
     }
 
-    /**
-     * @param ServerRequestInterface $request
-     * @param HandlerInterface $handler
-     * @return ResponseInterface
-     */
-    public function process(ServerRequestInterface $request, HandlerInterface $handler)
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
     {
         $result = $this->router->match($request);
 
@@ -68,7 +57,7 @@ class RouteMiddleware implements MiddlewareInterface
                 return $this->responsePrototype->withStatus(StatusCode::STATUS_METHOD_NOT_ALLOWED)
                     ->withHeader('Allow', implode(',', $result->getAllowedMethods()));
             }
-            return $handler->{HANDLER_METHOD}($request);
+            return $handler->handle($request);
         }
 
         // Inject the actual route result, as well as individual matched parameters.
@@ -77,6 +66,6 @@ class RouteMiddleware implements MiddlewareInterface
             $request = $request->withAttribute($param, $value);
         }
 
-        return $handler->{HANDLER_METHOD}($request);
+        return $handler->handle($request);
     }
 }
