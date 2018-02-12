@@ -44,7 +44,7 @@ class MethodNotAllowedMiddlewareTest extends TestCase
 
     public function testDelegatesToHandlerIfNoRouteResultPresentInRequest()
     {
-        $this->request->getAttribute(RouteResult::class, false)->willReturn(false);
+        $this->request->getAttribute(RouteResult::class)->willReturn(null);
         $this->handler->handle(Argument::that([$this->request, 'reveal']))->will([$this->response, 'reveal']);
 
         $this->response->withStatus(Argument::any())->shouldNotBeCalled();
@@ -61,7 +61,7 @@ class MethodNotAllowedMiddlewareTest extends TestCase
         $result = $this->prophesize(RouteResult::class);
         $result->isMethodFailure()->willReturn(false);
 
-        $this->request->getAttribute(RouteResult::class, false)->will([$result, 'reveal']);
+        $this->request->getAttribute(RouteResult::class)->will([$result, 'reveal']);
         $this->handler->handle(Argument::that([$this->request, 'reveal']))->will([$this->response, 'reveal']);
 
         $this->response->withStatus(Argument::any())->shouldNotBeCalled();
@@ -79,7 +79,7 @@ class MethodNotAllowedMiddlewareTest extends TestCase
         $result->isMethodFailure()->willReturn(true);
         $result->getAllowedMethods()->willReturn(['GET', 'POST']);
 
-        $this->request->getAttribute(RouteResult::class, false)->will([$result, 'reveal']);
+        $this->request->getAttribute(RouteResult::class)->will([$result, 'reveal']);
         $this->handler->handle(Argument::that([$this->request, 'reveal']))->shouldNotBeCalled();
 
         $this->response->withStatus(StatusCode::STATUS_METHOD_NOT_ALLOWED)->will([$this->response, 'reveal']);

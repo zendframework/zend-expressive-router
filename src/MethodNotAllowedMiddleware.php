@@ -42,7 +42,7 @@ class MethodNotAllowedMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
     {
-        $routeResult = $request->getAttribute(RouteResult::class, false);
+        $routeResult = $request->getAttribute(RouteResult::class);
         if (! $routeResult || ! $routeResult->isMethodFailure()) {
             return $handler->handle($request);
         }
