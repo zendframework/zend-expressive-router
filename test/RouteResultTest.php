@@ -10,7 +10,10 @@ declare(strict_types=1);
 namespace ZendTest\Expressive\Router;
 
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Expressive\Router\Route;
 use Zend\Expressive\Router\RouteResult;
 
@@ -25,12 +28,6 @@ class RouteResultTest extends TestCase
     {
         $this->middleware = function ($req, $res, $next) {
         };
-    }
-
-    public function testRouteMiddlewareIsNotRetrievable()
-    {
-        $result = RouteResult::fromRouteFailure([]);
-        $this->assertFalse($result->getMatchedMiddleware());
     }
 
     public function testRouteNameIsNotRetrievable()
@@ -99,11 +96,9 @@ class RouteResultTest extends TestCase
         $route = $data['route'];
 
         $route->getName()->willReturn('route');
-        $route->getMiddleware()->will([$middleware, 'reveal']);
         $route->getAllowedMethods()->willReturn(['HEAD', 'OPTIONS', 'GET']);
 
         $this->assertEquals('route', $result->getMatchedRouteName());
-        $this->assertEquals($middleware->reveal(), $result->getMatchedMiddleware());
         $this->assertEquals(['HEAD', 'OPTIONS', 'GET'], $result->getAllowedMethods());
     }
 
@@ -128,5 +123,32 @@ class RouteResultTest extends TestCase
         RouteResult $result
     ) {
         $this->assertSame(['*'], $result->getAllowedMethods());
+    }
+
+    public function testFailureResultProcessedAsMiddlewareDelegatesToHandler()
+    {
+        $request = $this->prophesize(ServerRequestInterface::class)->reveal();
+        $response = $this->prophesize(ResponseInterface::class)->reveal();
+        $handler = $this->prophesize(RequestHandlerInterface::class);
+        $handler->handle($request)->willReturn($response);
+
+        $result = RouteResult::fromRouteFailure([]);
+
+        $this->assertSame($response, $result->process($request, $handler->reveal()));
+    }
+
+    public function testSuccessfulResultProcessedAsMiddlewareDelegatesToRoute()
+    {
+        $request = $this->prophesize(ServerRequestInterface::class)->reveal();
+        $response = $this->prophesize(ResponseInterface::class)->reveal();
+        $handler = $this->prophesize(RequestHandlerInterface::class);
+        $handler->handle($request)->shouldNotBeCalled();
+
+        $route = $this->prophesize(Route::class);
+        $route->process($request, $handler)->willReturn($response);
+
+        $result = RouteResult::fromRoute($route->reveal());
+
+        $this->assertSame($response, $result->process($request, $handler->reveal()));
     }
 }

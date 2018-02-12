@@ -11,7 +11,10 @@ namespace ZendTest\Expressive\Router;
 
 use Fig\Http\Message\RequestMethodInterface as RequestMethod;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use TypeError;
 use Zend\Expressive\Router\Exception\InvalidArgumentException;
 use Zend\Expressive\Router\Route;
@@ -248,5 +251,17 @@ class RouteTest extends TestCase
         ));
 
         new Route('/test', $middleware);
+    }
+
+    public function testRouteIsMiddlewareAndProxiesToComposedMiddleware()
+    {
+        $request = $this->prophesize(ServerRequestInterface::class)->reveal();
+        $handler = $this->prophesize(RequestHandlerInterface::class)->reveal();
+        $response = $this->prophesize(ResponseInterface::class)->reveal();
+        $middleware = $this->prophesize(MiddlewareInterface::class);
+        $middleware->process($request, $handler)->willReturn($response);
+
+        $route = new Route('/foo', $middleware->reveal());
+        $this->assertSame($response, $route->process($request, $handler));
     }
 }

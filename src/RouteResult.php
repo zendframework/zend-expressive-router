@@ -9,7 +9,10 @@ declare(strict_types=1);
 
 namespace Zend\Expressive\Router;
 
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 /**
  * Value object representing the results of routing.
@@ -31,7 +34,7 @@ use Psr\Http\Server\MiddlewareInterface;
  * RouteResult instances are consumed by the Application in the routing
  * middleware.
  */
-class RouteResult
+class RouteResult implements MiddlewareInterface
 {
     /**
      * @var array
@@ -103,6 +106,23 @@ class RouteResult
     }
 
     /**
+     * Process the result as middleware.
+     *
+     * If the result represents a failure, it passes handling to the handler.
+     *
+     * Otherwise, it processes the composed middleware using the provide request
+     * and handler.
+     */
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
+    {
+        if ($this->isFailure()) {
+            return $handler->handle($request);
+        }
+
+        return $this->getMatchedRoute()->process($request, $handler);
+    }
+
+    /**
      * Does the result represent successful routing?
      */
     public function isSuccess() : bool
@@ -140,25 +160,6 @@ class RouteResult
         }
 
         return $this->matchedRouteName;
-    }
-
-    /**
-     * Retrieve the matched middleware, if possible.
-     *
-     * @return false|MiddlewareInterface Returns false if the result
-     *     represents a failure; otherwise, a MiddlewareInterface instance.
-     */
-    public function getMatchedMiddleware()
-    {
-        if ($this->isFailure()) {
-            return false;
-        }
-
-        if (! $this->matchedMiddleware && $this->route) {
-            $this->matchedMiddleware = $this->route->getMiddleware();
-        }
-
-        return $this->matchedMiddleware;
     }
 
     /**
