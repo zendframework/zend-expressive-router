@@ -27,6 +27,22 @@ All notable changes to this project will be documented in this file, in reverse 
   in order to create a "405 Method Not Allowed" response, with an `Allow` header
   containing the list of allowed request methods.
 
+- [#49](https://github.com/zendframework/zend-expressive-router/pull/49) adds
+  the class `Zend\Expressive\Router\ImplicitHeadMiddleware`. This middleware
+  will answer a `HEAD` request for a given route. If no route was matched, or
+  the route allows `HEAD` requests, it delegates to the handler. If the route
+  does not allow a `GET` request, it returns an empty response, as composed in
+  the middleware. Otherwise, it issues a `GET` request to the handler,
+  indicating the method was forwarded for a `HEAD` request, and then returns the
+  response with an empty body.
+
+- [#49](https://github.com/zendframework/zend-expressive-router/pull/49) adds
+  the class `Zend\Expressive\Router\ImplicitOptionsMiddleware`. This middleware
+  handles `OPTIONS` requests when a route result is present and the route does
+  not explicitly support `OPTIONS` (and otherwise delegates to the handler). In
+  those conditions, it returns the response composed in the middleware, with an
+  `Allow` header indicating the allowed methods.
+
 - [#39](https://github.com/zendframework/zend-expressive-router/pull/39) and
   [#45](https://github.com/zendframework/zend-expressive-router/pull/45) add
   PSR-15 `psr/http-server-middleware` support.
