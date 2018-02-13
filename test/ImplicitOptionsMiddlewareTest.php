@@ -12,6 +12,7 @@ namespace ZendTest\Expressive\Router;
 use Fig\Http\Message\RequestMethodInterface as RequestMethod;
 use Fig\Http\Message\StatusCodeInterface as StatusCode;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Prophecy\ObjectProphecy;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -21,6 +22,12 @@ use Zend\Expressive\Router\RouteResult;
 
 class ImplicitOptionsMiddlewareTest extends TestCase
 {
+    /** @var ImplicitOptionsMiddleware */
+    private $middleware;
+
+    /** @var ResponseInterface|ObjectProphecy */
+    private $responsePrototype;
+
     public function setUp()
     {
         $this->responsePrototype = $this->prophesize(ResponseInterface::class);

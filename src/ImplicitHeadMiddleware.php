@@ -46,7 +46,7 @@ class ImplicitHeadMiddleware implements MiddlewareInterface
     public const FORWARDED_HTTP_METHOD_ATTRIBUTE = 'forwarded_http_method';
 
     /**
-     * @var null|ResponseInterface
+     * @var ResponseInterface
      */
     private $response;
 

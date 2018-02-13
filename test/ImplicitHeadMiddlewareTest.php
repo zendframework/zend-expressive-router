@@ -13,6 +13,7 @@ use Fig\Http\Message\RequestMethodInterface as RequestMethod;
 use Fig\Http\Message\StatusCodeInterface as StatusCode;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\Prophecy\ObjectProphecy;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
@@ -23,6 +24,15 @@ use Zend\Expressive\Router\RouteResult;
 
 class ImplicitHeadMiddlewareTest extends TestCase
 {
+    /** @var ImplicitHeadMiddleware */
+    private $middleware;
+
+    /** @var ResponseInterface|ObjectProphecy */
+    private $responsePrototype;
+
+    /** @var StreamInterface|ObjectProphecy */
+    private $stream;
+
     public function setUp()
     {
         $this->stream = $this->prophesize(StreamInterface::class);
