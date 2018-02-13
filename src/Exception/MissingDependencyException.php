@@ -9,9 +9,12 @@ declare(strict_types=1);
 
 namespace Zend\Expressive\Router\Exception;
 
+use Psr\Container\NotFoundExceptionInterface;
 use RuntimeException;
 
-class MissingDependencyException extends RuntimeException implements ExceptionInterface
+class MissingDependencyException extends RuntimeException implements
+    ExceptionInterface,
+    NotFoundExceptionInterface
 {
     public static function dependencyForService(string $dependency, string $service) : self
     {
