@@ -19,6 +19,14 @@ All notable changes to this project will be documented in this file, in reverse 
   - `delete(string $path, MiddlewareInterface $middleware, string $name = null) : Route`
   - `any(string $path, MiddlewareInterface $middleware, string $name = null) : Route`
 
+- [#48](https://github.com/zendframework/zend-expressive-router/pull/48) adds
+  `Zend\Expressive\Router\MethodNotAllowedMiddleware`. This middleware checks if
+  the request composes a `RouteResult`, and, if so, if it is due to a method
+  failure. If neither of those conditions is true, it delegates processing of
+  the request to the handler. Otherwise, it uses a composed response prototype
+  in order to create a "405 Method Not Allowed" response, with an `Allow` header
+  containing the list of allowed request methods.
+
 - [#39](https://github.com/zendframework/zend-expressive-router/pull/39) and
   [#45](https://github.com/zendframework/zend-expressive-router/pull/45) add
   PSR-15 `psr/http-server-middleware` support.
@@ -59,6 +67,21 @@ All notable changes to this project will be documented in this file, in reverse 
   modifies the `RouteMiddleware::$router` property to make it `protected`
   visibility, allowing extensions to work with it.
 
+- [#48](https://github.com/zendframework/zend-expressive-router/pull/48)
+  modifies `Zend\Expressive\Router\Route` to implement the PSR-15
+  `MiddlewareInterface`. The new `process()` method proxies to the composed
+  middleware.
+
+- [#48](https://github.com/zendframework/zend-expressive-router/pull/48)
+  modifies `Zend\Expressive\Router\RouteResult` to implement the PSR-15
+  `MiddlewareInterface`. The new `process()` method proxies to the composed
+  `Route` instance in the case of a success, and otherwise delegates to the
+  passed handler instance.
+
+- [#48](https://github.com/zendframework/zend-expressive-router/pull/48)
+  modifies `Zend\Expressive\Router\DispatchMiddleware` to process the
+  `RouteResult` directly, instead of pulling middleware from it.
+
 ### Deprecated
 
 - Nothing.
@@ -68,6 +91,11 @@ All notable changes to this project will be documented in this file, in reverse 
 - [#39](https://github.com/zendframework/zend-expressive-router/pull/39) and
   [#41](https://github.com/zendframework/zend-expressive-router/pull/41) remove
   PHP 5.6 and PHP 7.0 support.
+
+- [#48](https://github.com/zendframework/zend-expressive-router/pull/48)
+  removes the method `Zend\Expressive\Router\RouteResult::getMatchedMiddleware()`;
+  the method is no longer necessary, as the class now implements
+  `MiddlewareInterface` and proxies to the underlying route.
 
 ### Fixed
 
