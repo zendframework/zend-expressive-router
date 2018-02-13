@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace ZendTest\Expressive\Router;
+namespace ZendTest\Expressive\Router\Middleware;
 
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
@@ -15,7 +15,7 @@ use Prophecy\Prophecy\ObjectProphecy;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Zend\Expressive\Router\DispatchMiddleware;
+use Zend\Expressive\Router\Middleware\DispatchMiddleware;
 use Zend\Expressive\Router\RouteResult;
 
 class DispatchMiddlewareTest extends TestCase

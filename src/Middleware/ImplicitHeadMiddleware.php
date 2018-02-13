@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Zend\Expressive\Router;
+namespace Zend\Expressive\Router\Middleware;
 
 use Fig\Http\Message\RequestMethodInterface as RequestMethod;
 use Psr\Http\Message\ResponseInterface;
@@ -15,6 +15,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Zend\Expressive\Router\RouteResult;
 
 /**
  * Handle implicit HEAD requests.

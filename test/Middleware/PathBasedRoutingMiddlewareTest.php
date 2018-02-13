@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace ZendTest\Expressive\Router;
+namespace ZendTest\Expressive\Router\Middleware;
 
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
@@ -18,7 +18,7 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use TypeError;
 use Zend\Expressive\Router\Exception;
-use Zend\Expressive\Router\PathBasedRoutingMiddleware;
+use Zend\Expressive\Router\Middleware\PathBasedRoutingMiddleware;
 use Zend\Expressive\Router\Route;
 use Zend\Expressive\Router\RouteResult;
 use Zend\Expressive\Router\RouterInterface;

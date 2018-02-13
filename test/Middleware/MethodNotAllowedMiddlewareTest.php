@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace ZendTest\Expressive\Router;
+namespace ZendTest\Expressive\Router\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface as StatusCode;
 use PHPUnit\Framework\TestCase;
@@ -16,7 +16,7 @@ use Prophecy\Prophecy\ObjectProphecy;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Zend\Expressive\Router\MethodNotAllowedMiddleware;
+use Zend\Expressive\Router\Middleware\MethodNotAllowedMiddleware;
 use Zend\Expressive\Router\RouteResult;
 
 class MethodNotAllowedMiddlewareTest extends TestCase

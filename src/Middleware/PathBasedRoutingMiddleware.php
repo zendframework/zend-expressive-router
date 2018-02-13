@@ -7,9 +7,11 @@
 
 declare(strict_types=1);
 
-namespace Zend\Expressive\Router;
+namespace Zend\Expressive\Router\Middleware;
 
 use Psr\Http\Server\MiddlewareInterface;
+use Zend\Expressive\Router\Exception;
+use Zend\Expressive\Router\Route;
 
 /**
  * Routing middleware for path-based routes.
