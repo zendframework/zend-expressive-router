@@ -6,9 +6,21 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Added
 
-- [#47](https://github.com/zendframework/zend-expressive-router/pull/47) adds
-  the middleware `Zend\Expressive\Router\PathBasedRoutingMiddleware`, which
-  extends the `RouteMiddleware` to add methods for defining and creating
+- [#50](https://github.com/zendframework/zend-expressive-router/pull/50) adds
+  `Zend\Expressive\Router\ConfigProvider`, and registers it with the package.
+  The class defines and returns the initial dependencies for the package.
+
+- [#50](https://github.com/zendframework/zend-expressive-router/pull/50) adds
+  factory classes for all shipped middleware. In some cases
+  (`ImplicitHeadMiddleware`, `ImplicitOptionsMiddleware`, and
+  `MethodNotAllowedMiddleware`, these rely on virtual services that you will
+  need to configure within your application in order to work properly. See each
+  factory for details.
+
+- [#47](https://github.com/zendframework/zend-expressive-router/pull/47) and
+  [#50](https://github.com/zendframework/zend-expressive-router/pull/50) add
+  the middleware `Zend\Expressive\Router\Middleware\PathBasedRoutingMiddleware`,
+  which extends the `RouteMiddleware` to add methods for defining and creating
   path+method based routes. It exposes the following methods:
 
   - `route(string $path, MiddlewareInterface $middleware, array $methods = null, string $name = null) : Route`
@@ -19,29 +31,32 @@ All notable changes to this project will be documented in this file, in reverse 
   - `delete(string $path, MiddlewareInterface $middleware, string $name = null) : Route`
   - `any(string $path, MiddlewareInterface $middleware, string $name = null) : Route`
 
-- [#48](https://github.com/zendframework/zend-expressive-router/pull/48) adds
-  `Zend\Expressive\Router\MethodNotAllowedMiddleware`. This middleware checks if
+- [#48](https://github.com/zendframework/zend-expressive-router/pull/48) and
+  [#50](https://github.com/zendframework/zend-expressive-router/pull/50) adds
+  `Zend\Expressive\Router\Middleware\MethodNotAllowedMiddleware`. This middleware checks if
   the request composes a `RouteResult`, and, if so, if it is due to a method
   failure. If neither of those conditions is true, it delegates processing of
   the request to the handler. Otherwise, it uses a composed response prototype
   in order to create a "405 Method Not Allowed" response, with an `Allow` header
   containing the list of allowed request methods.
 
-- [#49](https://github.com/zendframework/zend-expressive-router/pull/49) adds
-  the class `Zend\Expressive\Router\ImplicitHeadMiddleware`. This middleware
-  will answer a `HEAD` request for a given route. If no route was matched, or
-  the route allows `HEAD` requests, it delegates to the handler. If the route
-  does not allow a `GET` request, it returns an empty response, as composed in
-  the middleware. Otherwise, it issues a `GET` request to the handler,
-  indicating the method was forwarded for a `HEAD` request, and then returns the
-  response with an empty body.
+- [#49](https://github.com/zendframework/zend-expressive-router/pull/49) and
+  [#50](https://github.com/zendframework/zend-expressive-router/pull/50) add
+  the class `Zend\Expressive\Router\Middleware\ImplicitHeadMiddleware`. This
+  middleware will answer a `HEAD` request for a given route. If no route was
+  matched, or the route allows `HEAD` requests, it delegates to the handler. If
+  the route does not allow a `GET` request, it returns an empty response, as
+  composed in the middleware. Otherwise, it issues a `GET` request to the
+  handler, indicating the method was forwarded for a `HEAD` request, and then
+  returns the response with an empty body.
 
-- [#49](https://github.com/zendframework/zend-expressive-router/pull/49) adds
-  the class `Zend\Expressive\Router\ImplicitOptionsMiddleware`. This middleware
-  handles `OPTIONS` requests when a route result is present and the route does
-  not explicitly support `OPTIONS` (and otherwise delegates to the handler). In
-  those conditions, it returns the response composed in the middleware, with an
-  `Allow` header indicating the allowed methods.
+- [#49](https://github.com/zendframework/zend-expressive-router/pull/49) and
+  [#50](https://github.com/zendframework/zend-expressive-router/pull/50) add
+  the class `Zend\Expressive\Router\Middleware\ImplicitOptionsMiddleware`. This
+  middleware handles `OPTIONS` requests when a route result is present and the
+  route does not explicitly support `OPTIONS` (and otherwise delegates to the
+  handler). In those conditions, it returns the response composed in the
+  middleware, with an `Allow` header indicating the allowed methods.
 
 - [#39](https://github.com/zendframework/zend-expressive-router/pull/39) and
   [#45](https://github.com/zendframework/zend-expressive-router/pull/45) add
@@ -97,6 +112,14 @@ All notable changes to this project will be documented in this file, in reverse 
 - [#48](https://github.com/zendframework/zend-expressive-router/pull/48)
   modifies `Zend\Expressive\Router\DispatchMiddleware` to process the
   `RouteResult` directly, instead of pulling middleware from it.
+
+- [#50](https://github.com/zendframework/zend-expressive-router/pull/50) renames
+  `Zend\Expressive\Router\RouteMiddleware` to
+  `Zend\Expressive\Router\Middleware\RouteMiddleware`.
+
+- [#50](https://github.com/zendframework/zend-expressive-router/pull/50) renames
+  `Zend\Expressive\Router\DispatchMiddleware` to
+  `Zend\Expressive\Router\Middleware\DispatchMiddleware`.
 
 ### Deprecated
 

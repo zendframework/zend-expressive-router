@@ -7,13 +7,14 @@
 
 declare(strict_types=1);
 
-namespace Zend\Expressive\Router;
+namespace Zend\Expressive\Router\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface as StatusCode;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Zend\Expressive\Router\RouteResult;
 
 /**
  * Emit a 405 Method Not Allowed response

@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace ZendTest\Expressive\Router;
+namespace ZendTest\Expressive\Router\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface as StatusCode;
 use PHPUnit\Framework\TestCase;
@@ -16,8 +16,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Zend\Expressive\Router\Middleware\RouteMiddleware;
 use Zend\Expressive\Router\Route;
-use Zend\Expressive\Router\RouteMiddleware;
 use Zend\Expressive\Router\RouteResult;
 use Zend\Expressive\Router\RouterInterface;
 
