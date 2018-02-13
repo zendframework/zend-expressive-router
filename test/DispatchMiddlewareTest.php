@@ -30,7 +30,7 @@ class DispatchMiddlewareTest extends TestCase
     private $request;
 
     /** @var ResponseInterface|ObjectProphecy */
-    private $responsePrototype;
+    private $response;
 
     public function setUp()
     {
