@@ -10,13 +10,12 @@ declare(strict_types=1);
 namespace ZendTest\Expressive\Router;
 
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Expressive\Router\DispatchMiddleware;
-use Zend\Expressive\Router\Route;
 use Zend\Expressive\Router\RouteResult;
 
 class DispatchMiddlewareTest extends TestCase
@@ -31,7 +30,7 @@ class DispatchMiddlewareTest extends TestCase
     private $request;
 
     /** @var ResponseInterface|ObjectProphecy */
-    private $responsePrototype;
+    private $response;
 
     public function setUp()
     {
@@ -51,18 +50,19 @@ class DispatchMiddlewareTest extends TestCase
         $this->assertSame($this->response, $response);
     }
 
-    public function testInvokesMatchedMiddlewareWhenRouteResult()
+    public function testInvokesRouteResultWhenPresent()
     {
-        $this->handler->handle()->shouldNotBeCalled();
+        $this->handler->handle(Argument::any())->shouldNotBeCalled();
 
-        $routedMiddleware = $this->prophesize(MiddlewareInterface::class);
-        $routedMiddleware
-            ->process($this->request->reveal(), $this->handler->reveal())
+        $routeResult = $this->prophesize(RouteResult::class);
+        $routeResult
+            ->process(
+                Argument::that([$this->request, 'reveal']),
+                Argument::that([$this->handler, 'reveal'])
+            )
             ->willReturn($this->response);
 
-        $routeResult = RouteResult::fromRoute(new Route('/', $routedMiddleware->reveal()));
-
-        $this->request->getAttribute(RouteResult::class, false)->willReturn($routeResult);
+        $this->request->getAttribute(RouteResult::class, false)->will([$routeResult, 'reveal']);
 
         $response = $this->middleware->process($this->request->reveal(), $this->handler->reveal());
 

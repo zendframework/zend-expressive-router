@@ -20,8 +20,7 @@ use Psr\Http\Server\RequestHandlerInterface;
  * Checks for a composed route result in the request. If none is provided,
  * delegates request processing to the handler.
  *
- * Otherwise, it pulls the middleware from the route result and processes it
- * with the provided request and handler.
+ * Otherwise, it delegates processing to the route result.
  */
 class DispatchMiddleware implements MiddlewareInterface
 {
@@ -32,7 +31,6 @@ class DispatchMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        $middleware = $routeResult->getMatchedMiddleware();
-        return $middleware->process($request, $handler);
+        return $routeResult->process($request, $handler);
     }
 }

@@ -44,10 +44,7 @@ class PathBasedRoutingMiddlewareTest extends TestCase
     {
         $this->router     = $this->prophesize(RouterInterface::class);
         $this->response   = $this->prophesize(ResponseInterface::class);
-        $this->middleware = new PathBasedRoutingMiddleware(
-            $this->router->reveal(),
-            $this->response->reveal()
-        );
+        $this->middleware = new PathBasedRoutingMiddleware($this->router->reveal());
 
         $this->request  = $this->prophesize(ServerRequestInterface::class);
         $this->handler = $this->prophesize(RequestHandlerInterface::class);

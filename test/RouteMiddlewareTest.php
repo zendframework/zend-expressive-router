@@ -41,47 +41,40 @@ class RouteMiddlewareTest extends TestCase
     public function setUp()
     {
         $this->router     = $this->prophesize(RouterInterface::class);
-        $this->response   = $this->prophesize(ResponseInterface::class);
-        $this->middleware = new RouteMiddleware(
-            $this->router->reveal(),
-            $this->response->reveal()
-        );
-
         $this->request = $this->prophesize(ServerRequestInterface::class);
+        $this->response   = $this->prophesize(ResponseInterface::class);
         $this->handler = $this->prophesize(RequestHandlerInterface::class);
+
+        $this->middleware = new RouteMiddleware($this->router->reveal());
     }
 
-    public function testRoutingFailureDueToHttpMethodCallsNextWithNotAllowedResponseAndError()
+    public function testRoutingFailureDueToHttpMethodCallsHandlerWithRequestComposingRouteResult()
     {
         $result = RouteResult::fromRouteFailure(['GET', 'POST']);
 
         $this->router->match($this->request->reveal())->willReturn($result);
-        $this->handler->handle()->shouldNotBeCalled();
-        $this->request->withAttribute()->shouldNotBeCalled();
-        $this->response->withStatus(StatusCode::STATUS_METHOD_NOT_ALLOWED)->will([$this->response, 'reveal']);
-        $this->response->withHeader('Allow', 'GET,POST')->will([$this->response, 'reveal']);
+        $this->handler->handle($this->request->reveal())->will([$this->response, 'reveal']);
+
+        $this->request->withAttribute(RouteResult::class, $result)->will([$this->request, 'reveal']);
 
         $response = $this->middleware->process($this->request->reveal(), $this->handler->reveal());
-        $this->assertSame($response, $this->response->reveal());
+        $this->assertSame($this->response->reveal(), $response);
     }
 
-    public function testGeneralRoutingFailureInvokesDelegateWithSameRequest()
+    public function testGeneralRoutingFailureInvokesHandlerWithRequestComposingRouteResult()
     {
         $result = RouteResult::fromRouteFailure(null);
 
         $this->router->match($this->request->reveal())->willReturn($result);
-        $this->response->withStatus()->shouldNotBeCalled();
-        $this->response->withHeader()->shouldNotBeCalled();
-        $this->request->withAttribute()->shouldNotBeCalled();
+        $this->handler->handle($this->request->reveal())->will([$this->response, 'reveal']);
 
-        $expected = $this->prophesize(ResponseInterface::class)->reveal();
-        $this->handler->handle($this->request->reveal())->willReturn($expected);
+        $this->request->withAttribute(RouteResult::class, $result)->will([$this->request, 'reveal']);
 
         $response = $this->middleware->process($this->request->reveal(), $this->handler->reveal());
-        $this->assertSame($expected, $response);
+        $this->assertSame($this->response->reveal(), $response);
     }
 
-    public function testRoutingSuccessDelegatesToNextAfterFirstInjectingRouteResultAndAttributesInRequest()
+    public function testRoutingSuccessInvokesHandlerWithRequestComposingRouteResultAndAttributes()
     {
         $middleware = $this->prophesize(MiddlewareInterface::class)->reveal();
         $parameters = ['foo' => 'bar', 'baz' => 'bat'];
@@ -96,18 +89,16 @@ class RouteMiddlewareTest extends TestCase
             ->withAttribute(RouteResult::class, $result)
             ->will([$this->request, 'reveal']);
         foreach ($parameters as $key => $value) {
-            $this->request->withAttribute($key, $value)->will([$this->request, 'reveal']);
+            $this->request
+                ->withAttribute($key, $value)
+                ->will([$this->request, 'reveal']);
         }
 
-        $this->response->withStatus()->shouldNotBeCalled();
-        $this->response->withHeader()->shouldNotBeCalled();
-
-        $expected = $this->prophesize(ResponseInterface::class)->reveal();
         $this->handler
             ->handle($this->request->reveal())
-            ->willReturn($expected);
+            ->will([$this->response, 'reveal']);
 
         $response = $this->middleware->process($this->request->reveal(), $this->handler->reveal());
-        $this->assertSame($expected, $response);
+        $this->assertSame($this->response->reveal(), $response);
     }
 }

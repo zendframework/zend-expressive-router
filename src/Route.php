@@ -10,7 +10,10 @@ declare(strict_types=1);
 namespace Zend\Expressive\Router;
 
 use Fig\Http\Message\RequestMethodInterface as RequestMethod;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 /**
  * Value object representing a single route.
@@ -27,7 +30,7 @@ use Psr\Http\Server\MiddlewareInterface;
  * be provided after instantiation via the "options" property and related
  * setOptions() method.
  */
-class Route
+class Route implements MiddlewareInterface
 {
     public const HTTP_METHOD_ANY = null;
     public const HTTP_METHOD_SEPARATOR = ':';
@@ -96,6 +99,14 @@ class Route
             && ! in_array(RequestMethod::METHOD_HEAD, $this->methods, true);
         $this->implicitOptions = is_array($this->methods)
             && ! in_array(RequestMethod::METHOD_OPTIONS, $this->methods, true);
+    }
+
+    /**
+     * Proxies to the middleware composed during instantiation.
+     */
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
+    {
+        return $this->middleware->process($request, $handler);
     }
 
     public function getPath() : string
