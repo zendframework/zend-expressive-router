@@ -16,7 +16,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Expressive\Router\DispatchMiddleware;
-use Zend\Expressive\Router\Route;
 use Zend\Expressive\Router\RouteResult;
 
 class DispatchMiddlewareTest extends TestCase
