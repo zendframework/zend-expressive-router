@@ -17,8 +17,6 @@ use Zend\Expressive\Router\Exception\MissingDependencyException;
 use Zend\Expressive\Router\Middleware\MethodNotAllowedMiddleware;
 use Zend\Expressive\Router\Middleware\MethodNotAllowedMiddlewareFactory;
 
-use const Zend\Expressive\Router\METHOD_NOT_ALLOWED_MIDDLEWARE_RESPONSE;
-
 class MethodNotAllowedMiddlewareFactoryTest extends TestCase
 {
     /** @var ContainerInterface|ObjectProphecy */
@@ -33,9 +31,9 @@ class MethodNotAllowedMiddlewareFactoryTest extends TestCase
         $this->factory = new MethodNotAllowedMiddlewareFactory();
     }
 
-    public function testFactoryRaisesExceptionIfResponseServiceIsMissing()
+    public function testFactoryRaisesExceptionIfResponseFactoryServiceIsMissing()
     {
-        $this->container->has(METHOD_NOT_ALLOWED_MIDDLEWARE_RESPONSE)->willReturn(false);
+        $this->container->has(ResponseInterface::class)->willReturn(false);
 
         $this->expectException(MissingDependencyException::class);
         ($this->factory)($this->container->reveal());
@@ -43,12 +41,15 @@ class MethodNotAllowedMiddlewareFactoryTest extends TestCase
 
     public function testFactoryProducesMethodNotAllowedMiddlewareWhenAllDependenciesPresent()
     {
-        $response = $this->prophesize(ResponseInterface::class)->reveal();
-        $this->container->has(METHOD_NOT_ALLOWED_MIDDLEWARE_RESPONSE)->willReturn(true);
-        $this->container->get(METHOD_NOT_ALLOWED_MIDDLEWARE_RESPONSE)->willReturn($response);
+        $factory = function () {
+        };
+
+        $this->container->has(ResponseInterface::class)->willReturn(true);
+        $this->container->get(ResponseInterface::class)->willReturn($factory);
 
         $middleware = ($this->factory)($this->container->reveal());
 
         $this->assertInstanceOf(MethodNotAllowedMiddleware::class, $middleware);
+        $this->assertAttributeSame($factory, 'responseFactory', $middleware);
     }
 }

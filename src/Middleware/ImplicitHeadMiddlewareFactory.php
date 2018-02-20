@@ -10,47 +10,45 @@ declare(strict_types=1);
 namespace Zend\Expressive\Router\Middleware;
 
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
 use Zend\Expressive\Router\Exception\MissingDependencyException;
-
-use const Zend\Expressive\Router\IMPLICIT_HEAD_MIDDLEWARE_RESPONSE;
-use const Zend\Expressive\Router\IMPLICIT_HEAD_MIDDLEWARE_STREAM_FACTORY;
 
 /**
  * Create and return an ImplicitHeadMiddleware instance.
  *
  * This factory depends on two other services:
  *
- * - IMPLICIT_HEAD_MIDDLEWARE_RESPONSE, which should resolve to a
- *   Psr\Http\Message\ResponseInterface instance.
- * - IMPLICIT_HEAD_MIDDLEWARE_STREAM_FACTORY, which should resolve to a
- *   callable that will produce an empty Psr\Http\Message\StreamInterface
- *   instance.
+ * - Psr\Http\Message\ResponseInterface, which should resolve to a callable
+ *   that will produce an empty Psr\Http\Message\ResponseInterface instance.
+ * - Psr\Http\Message\StreamInterface, which should resolve to a callable
+ *   that will produce an empty Psr\Http\Message\StreamInterface instance.
  */
 class ImplicitHeadMiddlewareFactory
 {
     /**
-     * @throws MissingDependencyException if either the IMPLICIT_HEAD_MIDDLEWARE_RESPONSE
-     *     or IMPLICIT_HEAD_MIDDLEWARE_STREAM_FACTORY services are missing.
+     * @throws MissingDependencyException if either the Psr\Http\Message\ResponseInterface
+     *     or Psr\Http\Message\StreamInterface services are missing.
      */
     public function __invoke(ContainerInterface $container) : ImplicitHeadMiddleware
     {
-        if (! $container->has(IMPLICIT_HEAD_MIDDLEWARE_RESPONSE)) {
+        if (! $container->has(ResponseInterface::class)) {
             throw MissingDependencyException::dependencyForService(
-                IMPLICIT_HEAD_MIDDLEWARE_RESPONSE,
+                ResponseInterface::class,
                 ImplicitHeadMiddleware::class
             );
         }
 
-        if (! $container->has(IMPLICIT_HEAD_MIDDLEWARE_STREAM_FACTORY)) {
+        if (! $container->has(StreamInterface::class)) {
             throw MissingDependencyException::dependencyForService(
-                IMPLICIT_HEAD_MIDDLEWARE_STREAM_FACTORY,
+                StreamInterface::class,
                 ImplicitHeadMiddleware::class
             );
         }
 
         return new ImplicitHeadMiddleware(
-            $container->get(IMPLICIT_HEAD_MIDDLEWARE_RESPONSE),
-            $container->get(IMPLICIT_HEAD_MIDDLEWARE_STREAM_FACTORY)
+            $container->get(ResponseInterface::class),
+            $container->get(StreamInterface::class)
         );
     }
 }

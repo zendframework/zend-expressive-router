@@ -17,8 +17,6 @@ use Zend\Expressive\Router\Exception\MissingDependencyException;
 use Zend\Expressive\Router\Middleware\ImplicitOptionsMiddleware;
 use Zend\Expressive\Router\Middleware\ImplicitOptionsMiddlewareFactory;
 
-use const Zend\Expressive\Router\IMPLICIT_OPTIONS_MIDDLEWARE_RESPONSE;
-
 class ImplicitOptionsMiddlewareFactoryTest extends TestCase
 {
     /** @var ContainerInterface|ObjectProphecy */
@@ -33,9 +31,9 @@ class ImplicitOptionsMiddlewareFactoryTest extends TestCase
         $this->factory = new ImplicitOptionsMiddlewareFactory();
     }
 
-    public function testFactoryRaisesExceptionIfResponseServiceIsMissing()
+    public function testFactoryRaisesExceptionIfResponseFactoryServiceIsMissing()
     {
-        $this->container->has(IMPLICIT_OPTIONS_MIDDLEWARE_RESPONSE)->willReturn(false);
+        $this->container->has(ResponseInterface::class)->willReturn(false);
 
         $this->expectException(MissingDependencyException::class);
         ($this->factory)($this->container->reveal());
@@ -43,12 +41,15 @@ class ImplicitOptionsMiddlewareFactoryTest extends TestCase
 
     public function testFactoryProducesImplicitOptionsMiddlewareWhenAllDependenciesPresent()
     {
-        $response = $this->prophesize(ResponseInterface::class)->reveal();
-        $this->container->has(IMPLICIT_OPTIONS_MIDDLEWARE_RESPONSE)->willReturn(true);
-        $this->container->get(IMPLICIT_OPTIONS_MIDDLEWARE_RESPONSE)->willReturn($response);
+        $factory = function () {
+        };
+
+        $this->container->has(ResponseInterface::class)->willReturn(true);
+        $this->container->get(ResponseInterface::class)->willReturn($factory);
 
         $middleware = ($this->factory)($this->container->reveal());
 
         $this->assertInstanceOf(ImplicitOptionsMiddleware::class, $middleware);
+        $this->assertAttributeSame($factory, 'responseFactory', $middleware);
     }
 }

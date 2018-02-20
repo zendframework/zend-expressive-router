@@ -9,11 +9,8 @@ declare(strict_types=1);
 
 namespace Zend\Expressive\Router;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\StreamInterface;
-
 /**
- * Service name that will produce a ResponseInterface instance for use with
+ * Service name passed to ResponseInterface factory for use with
  * Middleware\ImplicitHeadMiddleware.
  *
  * @var string
@@ -21,15 +18,15 @@ use Psr\Http\Message\StreamInterface;
 const IMPLICIT_HEAD_MIDDLEWARE_RESPONSE = 'IMPLICIT_HEAD_MIDDLEWARE_RESPONSE';
 
 /**
- * Service name that will produce a factory capable of producing a
- * StreamInterface instance for use with Middleware\ImplicitHeadMiddleware.
+ * Service name passed to StreamInterface factory for use with
+ * Middleware\ImplicitHeadMiddleware.
  *
  * @var string
  */
-const IMPLICIT_HEAD_MIDDLEWARE_STREAM_FACTORY = 'IMPLICIT_HEAD_MIDDLEWARE_STREAM_FACTORY';
+const IMPLICIT_HEAD_MIDDLEWARE_STREAM = 'IMPLICIT_HEAD_MIDDLEWARE_STREAM';
 
 /**
- * Service name that will produce a ResponseInterface instance for use with
+ * Service name passed to ResponseInterface factory for use with
  * Middleware\ImplicitOptionsMiddleware.
  *
  * @var string
@@ -37,7 +34,7 @@ const IMPLICIT_HEAD_MIDDLEWARE_STREAM_FACTORY = 'IMPLICIT_HEAD_MIDDLEWARE_STREAM
 const IMPLICIT_OPTIONS_MIDDLEWARE_RESPONSE = 'IMPLICIT_OPTIONS_MIDDLEWARE_RESPONSE';
 
 /**
- * Service name that will produce a ResponseInterface instance for use with
+ * Service name passed to ResponseInterface factory for use with
  * Middleware\MethodNotAllowedMiddleware.
  *
  * @var string

@@ -16,6 +16,8 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Expressive\Router\RouteResult;
 
+use const Zend\Expressive\Router\METHOD_NOT_ALLOWED_MIDDLEWARE_RESPONSE;
+
 /**
  * Emit a 405 Method Not Allowed response
  *
@@ -30,15 +32,13 @@ use Zend\Expressive\Router\RouteResult;
 class MethodNotAllowedMiddleware implements MiddlewareInterface
 {
     /**
-     * Response prototype for 405 responses.
-     *
-     * @var ResponseInterface
+     * @var callable
      */
-    private $responsePrototype;
+    private $responseFactory;
 
-    public function __construct(ResponseInterface $responsePrototype)
+    public function __construct(callable $responseFactory)
     {
-        $this->responsePrototype = $responsePrototype;
+        $this->responseFactory = $responseFactory;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
@@ -48,7 +48,7 @@ class MethodNotAllowedMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        return $this->responsePrototype
+        return ($this->responseFactory)(METHOD_NOT_ALLOWED_MIDDLEWARE_RESPONSE)
             ->withStatus(StatusCode::STATUS_METHOD_NOT_ALLOWED)
             ->withHeader('Allow', implode(',', $routeResult->getAllowedMethods()));
     }

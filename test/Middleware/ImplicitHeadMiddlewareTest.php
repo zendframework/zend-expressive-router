@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace ZendTest\Expressive\Router\Middleware;
 
 use Fig\Http\Message\RequestMethodInterface as RequestMethod;
-use Fig\Http\Message\StatusCodeInterface as StatusCode;
+use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
@@ -22,29 +22,34 @@ use Zend\Expressive\Router\Middleware\ImplicitHeadMiddleware;
 use Zend\Expressive\Router\Route;
 use Zend\Expressive\Router\RouteResult;
 
+use const Zend\Expressive\Router\IMPLICIT_HEAD_MIDDLEWARE_RESPONSE;
+use const Zend\Expressive\Router\IMPLICIT_HEAD_MIDDLEWARE_STREAM;
+
 class ImplicitHeadMiddlewareTest extends TestCase
 {
     /** @var ImplicitHeadMiddleware */
     private $middleware;
 
     /** @var ResponseInterface|ObjectProphecy */
-    private $responsePrototype;
+    private $response;
 
     /** @var StreamInterface|ObjectProphecy */
     private $stream;
 
     public function setUp()
     {
+        $this->response = $this->prophesize(ResponseInterface::class);
         $this->stream = $this->prophesize(StreamInterface::class);
-        $streamFactory = function () {
+        $responseFactory = function ($string) {
+            Assert::assertSame(IMPLICIT_HEAD_MIDDLEWARE_RESPONSE, $string);
+            return $this->response->reveal();
+        };
+        $streamFactory = function ($string) {
+            Assert::assertSame(IMPLICIT_HEAD_MIDDLEWARE_STREAM, $string);
             return $this->stream->reveal();
         };
-        $this->responsePrototype = $this->prophesize(ResponseInterface::class);
 
-        $this->middleware = new ImplicitHeadMiddleware(
-            $this->responsePrototype->reveal(),
-            $streamFactory
-        );
+        $this->middleware = new ImplicitHeadMiddleware($responseFactory, $streamFactory);
     }
 
     public function testReturnsResultOfHandlerOnNonHeadRequests()
@@ -141,7 +146,7 @@ class ImplicitHeadMiddlewareTest extends TestCase
 
         $result = $this->middleware->process($request->reveal(), $handler->reveal());
 
-        $this->assertSame($this->responsePrototype->reveal(), $result);
+        $this->assertSame($this->response->reveal(), $result);
     }
 
     public function testInvokesHandlerWhenRouteImplicitlySupportsHeadAndSupportsGet()
@@ -167,7 +172,7 @@ class ImplicitHeadMiddlewareTest extends TestCase
         $response = $this->prophesize(ResponseInterface::class);
         $response->withBody($this->stream->reveal())->will([$response, 'reveal']);
 
-        $this->responsePrototype->withBody($this->stream->reveal())->shouldNotBeCalled();
+        $this->response->withBody($this->stream->reveal())->shouldNotBeCalled();
 
         $handler = $this->prophesize(RequestHandlerInterface::class);
         $handler

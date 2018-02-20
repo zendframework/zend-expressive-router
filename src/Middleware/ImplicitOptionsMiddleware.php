@@ -10,12 +10,13 @@ declare(strict_types=1);
 namespace Zend\Expressive\Router\Middleware;
 
 use Fig\Http\Message\RequestMethodInterface as RequestMethod;
-use Fig\Http\Message\StatusCodeInterface as StatusCode;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Expressive\Router\RouteResult;
+
+use const Zend\Expressive\Router\IMPLICIT_OPTIONS_MIDDLEWARE_RESPONSE;
 
 /**
  * Handle implicit OPTIONS requests.
@@ -43,17 +44,18 @@ use Zend\Expressive\Router\RouteResult;
 class ImplicitOptionsMiddleware implements MiddlewareInterface
 {
     /**
-     * @var ResponseInterface
+     * @var callable
      */
-    private $response;
+    private $responseFactory;
 
     /**
-     * @param null|ResponseInterface $response Response prototype to use for
+     * @param callable $responseFactory A factory capable of returning an
+     *     empty ResponseInterface instance to return to return for
      *     implicit OPTIONS requests.
      */
-    public function __construct(ResponseInterface $response)
+    public function __construct(callable $responseFactory)
     {
-        $this->response = $response;
+        $this->responseFactory = $responseFactory;
     }
 
     /**
@@ -75,6 +77,7 @@ class ImplicitOptionsMiddleware implements MiddlewareInterface
         }
 
         $methods = implode(',', $route->getAllowedMethods());
-        return $this->response->withHeader('Allow', $methods);
+
+        return ($this->responseFactory)(IMPLICIT_OPTIONS_MIDDLEWARE_RESPONSE)->withHeader('Allow', $methods);
     }
 }

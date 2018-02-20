@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace ZendTest\Expressive\Router\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface as StatusCode;
+use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
@@ -18,6 +19,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Expressive\Router\Middleware\MethodNotAllowedMiddleware;
 use Zend\Expressive\Router\RouteResult;
+
+use const Zend\Expressive\Router\METHOD_NOT_ALLOWED_MIDDLEWARE_RESPONSE;
 
 class MethodNotAllowedMiddlewareTest extends TestCase
 {
@@ -38,7 +41,12 @@ class MethodNotAllowedMiddlewareTest extends TestCase
         $this->handler = $this->prophesize(RequestHandlerInterface::class);
         $this->request = $this->prophesize(ServerRequestInterface::class);
         $this->response = $this->prophesize(ResponseInterface::class);
-        $this->middleware = new MethodNotAllowedMiddleware($this->response->reveal());
+        $responseFactory = function ($string) {
+            Assert::assertSame(METHOD_NOT_ALLOWED_MIDDLEWARE_RESPONSE, $string);
+            return $this->response->reveal();
+        };
+
+        $this->middleware = new MethodNotAllowedMiddleware($responseFactory);
     }
 
     public function testDelegatesToHandlerIfNoRouteResultPresentInRequest()

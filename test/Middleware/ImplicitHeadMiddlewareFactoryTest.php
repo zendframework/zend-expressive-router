@@ -13,12 +13,10 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Prophecy\ObjectProphecy;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
 use Zend\Expressive\Router\Exception\MissingDependencyException;
 use Zend\Expressive\Router\Middleware\ImplicitHeadMiddleware;
 use Zend\Expressive\Router\Middleware\ImplicitHeadMiddlewareFactory;
-
-use const Zend\Expressive\Router\IMPLICIT_HEAD_MIDDLEWARE_RESPONSE;
-use const Zend\Expressive\Router\IMPLICIT_HEAD_MIDDLEWARE_STREAM_FACTORY;
 
 class ImplicitHeadMiddlewareFactoryTest extends TestCase
 {
@@ -34,10 +32,10 @@ class ImplicitHeadMiddlewareFactoryTest extends TestCase
         $this->factory = new ImplicitHeadMiddlewareFactory();
     }
 
-    public function testFactoryRaisesExceptionIfResponseServiceIsMissing()
+    public function testFactoryRaisesExceptionIfResponseFactoryServiceIsMissing()
     {
-        $this->container->has(IMPLICIT_HEAD_MIDDLEWARE_RESPONSE)->willReturn(false);
-        $this->container->has(IMPLICIT_HEAD_MIDDLEWARE_STREAM_FACTORY)->shouldNotBeCalled();
+        $this->container->has(ResponseInterface::class)->willReturn(false);
+        $this->container->has(StreamInterface::class)->shouldNotBeCalled();
 
         $this->expectException(MissingDependencyException::class);
         ($this->factory)($this->container->reveal());
@@ -45,8 +43,8 @@ class ImplicitHeadMiddlewareFactoryTest extends TestCase
 
     public function testFactoryRaisesExceptionIfStreamFactoryServiceIsMissing()
     {
-        $this->container->has(IMPLICIT_HEAD_MIDDLEWARE_RESPONSE)->willReturn(true);
-        $this->container->has(IMPLICIT_HEAD_MIDDLEWARE_STREAM_FACTORY)->willReturn(false);
+        $this->container->has(ResponseInterface::class)->willReturn(true);
+        $this->container->has(StreamInterface::class)->willReturn(false);
 
         $this->expectException(MissingDependencyException::class);
         ($this->factory)($this->container->reveal());
@@ -54,18 +52,21 @@ class ImplicitHeadMiddlewareFactoryTest extends TestCase
 
     public function testFactoryProducesImplicitHeadMiddlewareWhenAllDependenciesPresent()
     {
-        $response = $this->prophesize(ResponseInterface::class)->reveal();
-        $factory = function () {
+        $responseFactory = function () {
+        };
+        $streamFactory = function () {
         };
 
-        $this->container->has(IMPLICIT_HEAD_MIDDLEWARE_RESPONSE)->willReturn(true);
-        $this->container->has(IMPLICIT_HEAD_MIDDLEWARE_STREAM_FACTORY)->willReturn(true);
+        $this->container->has(ResponseInterface::class)->willReturn(true);
+        $this->container->has(StreamInterface::class)->willReturn(true);
 
-        $this->container->get(IMPLICIT_HEAD_MIDDLEWARE_RESPONSE)->willReturn($response);
-        $this->container->get(IMPLICIT_HEAD_MIDDLEWARE_STREAM_FACTORY)->willReturn($factory);
+        $this->container->get(ResponseInterface::class)->willReturn($responseFactory);
+        $this->container->get(StreamInterface::class)->willReturn($streamFactory);
 
         $middleware = ($this->factory)($this->container->reveal());
 
         $this->assertInstanceOf(ImplicitHeadMiddleware::class, $middleware);
+        $this->assertAttributeSame($responseFactory, 'responseFactory', $middleware);
+        $this->assertAttributeSame($streamFactory, 'streamFactory', $middleware);
     }
 }

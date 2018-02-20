@@ -17,6 +17,9 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Expressive\Router\RouteResult;
 
+use const Zend\Expressive\Router\IMPLICIT_HEAD_MIDDLEWARE_RESPONSE;
+use const Zend\Expressive\Router\IMPLICIT_HEAD_MIDDLEWARE_STREAM;
+
 /**
  * Handle implicit HEAD requests.
  *
@@ -47,9 +50,9 @@ class ImplicitHeadMiddleware implements MiddlewareInterface
     public const FORWARDED_HTTP_METHOD_ATTRIBUTE = 'forwarded_http_method';
 
     /**
-     * @var ResponseInterface
+     * @var callable
      */
-    private $response;
+    private $responseFactory;
 
     /**
      * @var callable
@@ -57,14 +60,15 @@ class ImplicitHeadMiddleware implements MiddlewareInterface
     private $streamFactory;
 
     /**
-     * @param ResponseInterface $response Response prototype to return for
+     * @param callable $responseFactory A factory capable of returning an
+     *     empty ResponseInterface instance to return to return for
      *     implicit HEAD requests.
      * @param callable $streamFactory A factory capable of returning an empty
      *     StreamInterface instance to inject in a response.
      */
-    public function __construct(ResponseInterface $response, callable $streamFactory)
+    public function __construct(callable $responseFactory, callable $streamFactory)
     {
-        $this->response = $response;
+        $this->responseFactory = $responseFactory;
         $this->streamFactory = $streamFactory;
     }
 
@@ -92,7 +96,7 @@ class ImplicitHeadMiddleware implements MiddlewareInterface
         }
 
         if (! $route->allowsMethod(RequestMethod::METHOD_GET)) {
-            return $this->response;
+            return ($this->responseFactory)(IMPLICIT_HEAD_MIDDLEWARE_RESPONSE);
         }
 
         $response = $handler->handle(
@@ -102,7 +106,7 @@ class ImplicitHeadMiddleware implements MiddlewareInterface
         );
 
         /** @var StreamInterface $body */
-        $body = ($this->streamFactory)();
+        $body = ($this->streamFactory)(IMPLICIT_HEAD_MIDDLEWARE_STREAM);
         return $response->withBody($body);
     }
 }
