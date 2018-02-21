@@ -58,8 +58,8 @@ class ImplicitHeadMiddleware implements MiddlewareInterface
 
     /**
      * @param callable $responseFactory A factory capable of returning an
-     *     empty ResponseInterface instance to return to return for
-     *     implicit HEAD requests.
+     *     empty ResponseInterface instance to return for implicit HEAD
+     *     requests.
      * @param callable $streamFactory A factory capable of returning an empty
      *     StreamInterface instance to inject in a response.
      */

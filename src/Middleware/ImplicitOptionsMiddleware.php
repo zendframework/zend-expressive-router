@@ -48,8 +48,8 @@ class ImplicitOptionsMiddleware implements MiddlewareInterface
 
     /**
      * @param callable $responseFactory A factory capable of returning an
-     *     empty ResponseInterface instance to return to return for
-     *     implicit OPTIONS requests.
+     *     empty ResponseInterface instance to return for implicit OPTIONS
+     *     requests.
      */
     public function __construct(callable $responseFactory)
     {
