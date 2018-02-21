@@ -65,6 +65,7 @@ class ImplicitHeadMiddleware implements MiddlewareInterface
      */
     public function __construct(callable $responseFactory, callable $streamFactory)
     {
+        // Factories are wrapped in closures in order to enforce return type safety.
         $this->responseFactory = function () use ($responseFactory) : ResponseInterface {
             return $responseFactory();
         };

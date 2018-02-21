@@ -36,6 +36,7 @@ class MethodNotAllowedMiddleware implements MiddlewareInterface
 
     public function __construct(callable $responseFactory)
     {
+        // Factories is wrapped in a closure in order to enforce return type safety.
         $this->responseFactory = function () use ($responseFactory) : ResponseInterface {
             return $responseFactory();
         };
