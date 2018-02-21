@@ -50,6 +50,5 @@ class MethodNotAllowedMiddlewareFactoryTest extends TestCase
         $middleware = ($this->factory)($this->container->reveal());
 
         $this->assertInstanceOf(MethodNotAllowedMiddleware::class, $middleware);
-        $this->assertAttributeSame($factory, 'responseFactory', $middleware);
     }
 }

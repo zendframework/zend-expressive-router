@@ -53,7 +53,9 @@ class ImplicitOptionsMiddleware implements MiddlewareInterface
      */
     public function __construct(callable $responseFactory)
     {
-        $this->responseFactory = $responseFactory;
+        $this->responseFactory = function () use ($responseFactory) : ResponseInterface {
+            return $responseFactory();
+        };
     }
 
     /**

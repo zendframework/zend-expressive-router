@@ -65,8 +65,12 @@ class ImplicitHeadMiddleware implements MiddlewareInterface
      */
     public function __construct(callable $responseFactory, callable $streamFactory)
     {
-        $this->responseFactory = $responseFactory;
-        $this->streamFactory = $streamFactory;
+        $this->responseFactory = function () use ($responseFactory) : ResponseInterface {
+            return $responseFactory();
+        };
+        $this->streamFactory = function () use ($streamFactory) : StreamInterface {
+            return $streamFactory();
+        };
     }
 
     /**

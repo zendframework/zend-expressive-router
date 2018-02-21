@@ -36,7 +36,9 @@ class MethodNotAllowedMiddleware implements MiddlewareInterface
 
     public function __construct(callable $responseFactory)
     {
-        $this->responseFactory = $responseFactory;
+        $this->responseFactory = function () use ($responseFactory) : ResponseInterface {
+            return $responseFactory();
+        };
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface

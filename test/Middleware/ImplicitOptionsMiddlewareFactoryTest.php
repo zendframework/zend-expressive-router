@@ -50,6 +50,5 @@ class ImplicitOptionsMiddlewareFactoryTest extends TestCase
         $middleware = ($this->factory)($this->container->reveal());
 
         $this->assertInstanceOf(ImplicitOptionsMiddleware::class, $middleware);
-        $this->assertAttributeSame($factory, 'responseFactory', $middleware);
     }
 }

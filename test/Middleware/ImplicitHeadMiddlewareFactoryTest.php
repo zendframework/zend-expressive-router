@@ -66,7 +66,5 @@ class ImplicitHeadMiddlewareFactoryTest extends TestCase
         $middleware = ($this->factory)($this->container->reveal());
 
         $this->assertInstanceOf(ImplicitHeadMiddleware::class, $middleware);
-        $this->assertAttributeSame($responseFactory, 'responseFactory', $middleware);
-        $this->assertAttributeSame($streamFactory, 'streamFactory', $middleware);
     }
 }
