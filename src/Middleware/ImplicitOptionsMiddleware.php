@@ -16,8 +16,6 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Expressive\Router\RouteResult;
 
-use const Zend\Expressive\Router\IMPLICIT_OPTIONS_MIDDLEWARE_RESPONSE;
-
 /**
  * Handle implicit OPTIONS requests.
  *
@@ -78,6 +76,6 @@ class ImplicitOptionsMiddleware implements MiddlewareInterface
 
         $methods = implode(',', $route->getAllowedMethods());
 
-        return ($this->responseFactory)(IMPLICIT_OPTIONS_MIDDLEWARE_RESPONSE)->withHeader('Allow', $methods);
+        return ($this->responseFactory)()->withHeader('Allow', $methods);
     }
 }

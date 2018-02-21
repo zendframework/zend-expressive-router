@@ -22,9 +22,6 @@ use Zend\Expressive\Router\Middleware\ImplicitHeadMiddleware;
 use Zend\Expressive\Router\Route;
 use Zend\Expressive\Router\RouteResult;
 
-use const Zend\Expressive\Router\IMPLICIT_HEAD_MIDDLEWARE_RESPONSE;
-use const Zend\Expressive\Router\IMPLICIT_HEAD_MIDDLEWARE_STREAM;
-
 class ImplicitHeadMiddlewareTest extends TestCase
 {
     /** @var ImplicitHeadMiddleware */
@@ -40,12 +37,10 @@ class ImplicitHeadMiddlewareTest extends TestCase
     {
         $this->response = $this->prophesize(ResponseInterface::class);
         $this->stream = $this->prophesize(StreamInterface::class);
-        $responseFactory = function ($string) {
-            Assert::assertSame(IMPLICIT_HEAD_MIDDLEWARE_RESPONSE, $string);
+        $responseFactory = function () {
             return $this->response->reveal();
         };
-        $streamFactory = function ($string) {
-            Assert::assertSame(IMPLICIT_HEAD_MIDDLEWARE_STREAM, $string);
+        $streamFactory = function () {
             return $this->stream->reveal();
         };
 

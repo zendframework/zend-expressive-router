@@ -20,8 +20,6 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Expressive\Router\Middleware\MethodNotAllowedMiddleware;
 use Zend\Expressive\Router\RouteResult;
 
-use const Zend\Expressive\Router\METHOD_NOT_ALLOWED_MIDDLEWARE_RESPONSE;
-
 class MethodNotAllowedMiddlewareTest extends TestCase
 {
     /** @var RequestHandlerInterface|ObjectProphecy */
@@ -41,8 +39,7 @@ class MethodNotAllowedMiddlewareTest extends TestCase
         $this->handler = $this->prophesize(RequestHandlerInterface::class);
         $this->request = $this->prophesize(ServerRequestInterface::class);
         $this->response = $this->prophesize(ResponseInterface::class);
-        $responseFactory = function ($string) {
-            Assert::assertSame(METHOD_NOT_ALLOWED_MIDDLEWARE_RESPONSE, $string);
+        $responseFactory = function () {
             return $this->response->reveal();
         };
 

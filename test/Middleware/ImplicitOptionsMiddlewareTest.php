@@ -20,8 +20,6 @@ use Zend\Expressive\Router\Middleware\ImplicitOptionsMiddleware;
 use Zend\Expressive\Router\Route;
 use Zend\Expressive\Router\RouteResult;
 
-use const Zend\Expressive\Router\IMPLICIT_OPTIONS_MIDDLEWARE_RESPONSE;
-
 class ImplicitOptionsMiddlewareTest extends TestCase
 {
     /** @var ImplicitOptionsMiddleware */
@@ -33,8 +31,7 @@ class ImplicitOptionsMiddlewareTest extends TestCase
     public function setUp()
     {
         $this->response = $this->prophesize(ResponseInterface::class);
-        $responseFactory = function ($string) {
-            Assert::assertSame(IMPLICIT_OPTIONS_MIDDLEWARE_RESPONSE, $string);
+        $responseFactory = function () {
             return $this->response->reveal();
         };
 

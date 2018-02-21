@@ -17,9 +17,6 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Expressive\Router\RouteResult;
 
-use const Zend\Expressive\Router\IMPLICIT_HEAD_MIDDLEWARE_RESPONSE;
-use const Zend\Expressive\Router\IMPLICIT_HEAD_MIDDLEWARE_STREAM;
-
 /**
  * Handle implicit HEAD requests.
  *
@@ -96,7 +93,7 @@ class ImplicitHeadMiddleware implements MiddlewareInterface
         }
 
         if (! $route->allowsMethod(RequestMethod::METHOD_GET)) {
-            return ($this->responseFactory)(IMPLICIT_HEAD_MIDDLEWARE_RESPONSE);
+            return ($this->responseFactory)();
         }
 
         $response = $handler->handle(
@@ -106,7 +103,7 @@ class ImplicitHeadMiddleware implements MiddlewareInterface
         );
 
         /** @var StreamInterface $body */
-        $body = ($this->streamFactory)(IMPLICIT_HEAD_MIDDLEWARE_STREAM);
+        $body = ($this->streamFactory)();
         return $response->withBody($body);
     }
 }

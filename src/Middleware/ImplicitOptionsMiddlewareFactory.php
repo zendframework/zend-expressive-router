@@ -13,8 +13,6 @@ use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Zend\Expressive\Router\Exception\MissingDependencyException;
 
-use const Zend\Expressive\Router\IMPLICIT_OPTIONS_MIDDLEWARE_RESPONSE;
-
 /**
  * Create and return an ImplicitOptionsMiddleware instance.
  *
