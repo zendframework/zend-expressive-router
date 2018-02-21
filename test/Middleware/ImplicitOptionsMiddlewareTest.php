@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace ZendTest\Expressive\Router\Middleware;
 
 use Fig\Http\Message\RequestMethodInterface as RequestMethod;
-use Fig\Http\Message\StatusCodeInterface as StatusCode;
+use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Prophecy\ObjectProphecy;
 use Psr\Http\Message\ResponseInterface;
@@ -26,12 +26,16 @@ class ImplicitOptionsMiddlewareTest extends TestCase
     private $middleware;
 
     /** @var ResponseInterface|ObjectProphecy */
-    private $responsePrototype;
+    private $response;
 
     public function setUp()
     {
-        $this->responsePrototype = $this->prophesize(ResponseInterface::class);
-        $this->middleware = new ImplicitOptionsMiddleware($this->responsePrototype->reveal());
+        $this->response = $this->prophesize(ResponseInterface::class);
+        $responseFactory = function () {
+            return $this->response->reveal();
+        };
+
+        $this->middleware = new ImplicitOptionsMiddleware($responseFactory);
     }
 
     public function testNonOptionsRequestInvokesHandler()
@@ -121,11 +125,11 @@ class ImplicitOptionsMiddlewareTest extends TestCase
         $handler = $this->prophesize(RequestHandlerInterface::class);
         $handler->handle($request->reveal())->shouldNotBeCalled();
 
-        $this->responsePrototype
+        $this->response
             ->withHeader('Allow', implode(',', $allowedMethods))
-            ->will([$this->responsePrototype, 'reveal']);
+            ->will([$this->response, 'reveal']);
 
         $result = $this->middleware->process($request->reveal(), $handler->reveal());
-        $this->assertSame($this->responsePrototype->reveal(), $result);
+        $this->assertSame($this->response->reveal(), $result);
     }
 }

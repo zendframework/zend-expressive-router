@@ -47,9 +47,9 @@ class ImplicitHeadMiddleware implements MiddlewareInterface
     public const FORWARDED_HTTP_METHOD_ATTRIBUTE = 'forwarded_http_method';
 
     /**
-     * @var ResponseInterface
+     * @var callable
      */
-    private $response;
+    private $responseFactory;
 
     /**
      * @var callable
@@ -57,15 +57,21 @@ class ImplicitHeadMiddleware implements MiddlewareInterface
     private $streamFactory;
 
     /**
-     * @param ResponseInterface $response Response prototype to return for
-     *     implicit HEAD requests.
+     * @param callable $responseFactory A factory capable of returning an
+     *     empty ResponseInterface instance to return for implicit HEAD
+     *     requests.
      * @param callable $streamFactory A factory capable of returning an empty
      *     StreamInterface instance to inject in a response.
      */
-    public function __construct(ResponseInterface $response, callable $streamFactory)
+    public function __construct(callable $responseFactory, callable $streamFactory)
     {
-        $this->response = $response;
-        $this->streamFactory = $streamFactory;
+        // Factories are wrapped in closures in order to enforce return type safety.
+        $this->responseFactory = function () use ($responseFactory) : ResponseInterface {
+            return $responseFactory();
+        };
+        $this->streamFactory = function () use ($streamFactory) : StreamInterface {
+            return $streamFactory();
+        };
     }
 
     /**
@@ -92,7 +98,7 @@ class ImplicitHeadMiddleware implements MiddlewareInterface
         }
 
         if (! $route->allowsMethod(RequestMethod::METHOD_GET)) {
-            return $this->response;
+            return ($this->responseFactory)();
         }
 
         $response = $handler->handle(

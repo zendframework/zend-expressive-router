@@ -37,9 +37,6 @@
         "zendframework/zend-expressive-zendrouter": "^3.0 to use the zend-router routing adapter"
     },
     "autoload": {
-        "files": [
-            "src/constants.php"
-        ],
         "psr-4": {
             "Zend\\Expressive\\Router\\": "src/"
         }

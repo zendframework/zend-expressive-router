@@ -13,7 +13,7 @@ All notable changes to this project will be documented in this file, in reverse 
 - [#50](https://github.com/zendframework/zend-expressive-router/pull/50) adds
   factory classes for all shipped middleware. In some cases
   (`ImplicitHeadMiddleware`, `ImplicitOptionsMiddleware`, and
-  `MethodNotAllowedMiddleware`, these rely on virtual services that you will
+  `MethodNotAllowedMiddleware`), these rely on additional services that you will
   need to configure within your application in order to work properly. See each
   factory for details.
 

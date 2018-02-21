@@ -30,15 +30,16 @@ use Zend\Expressive\Router\RouteResult;
 class MethodNotAllowedMiddleware implements MiddlewareInterface
 {
     /**
-     * Response prototype for 405 responses.
-     *
-     * @var ResponseInterface
+     * @var callable
      */
-    private $responsePrototype;
+    private $responseFactory;
 
-    public function __construct(ResponseInterface $responsePrototype)
+    public function __construct(callable $responseFactory)
     {
-        $this->responsePrototype = $responsePrototype;
+        // Factories is wrapped in a closure in order to enforce return type safety.
+        $this->responseFactory = function () use ($responseFactory) : ResponseInterface {
+            return $responseFactory();
+        };
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
@@ -48,7 +49,7 @@ class MethodNotAllowedMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        return $this->responsePrototype
+        return ($this->responseFactory)()
             ->withStatus(StatusCode::STATUS_METHOD_NOT_ALLOWED)
             ->withHeader('Allow', implode(',', $routeResult->getAllowedMethods()));
     }
