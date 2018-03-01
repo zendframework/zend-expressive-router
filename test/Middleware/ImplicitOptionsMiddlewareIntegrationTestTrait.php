@@ -60,6 +60,6 @@ trait ImplicitOptionsMiddlewareIntegrationTestTrait
         $response = $routeMiddleware->process($request, $handler);
 
         $this->assertTrue($response->hasHeader('Allow'));
-        $this->assertSame('GET, POST', $response->getHeaderLine('Allow'));
+        $this->assertSame('GET,POST', $response->getHeaderLine('Allow'));
     }
 }
