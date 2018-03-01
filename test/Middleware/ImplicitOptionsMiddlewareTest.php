@@ -14,17 +14,10 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Prophecy\ObjectProphecy;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Zend\Diactoros\Response;
-use Zend\Diactoros\ServerRequest;
-use Zend\Expressive\Router\AuraRouter;
-use Zend\Expressive\Router\FastRouteRouter;
 use Zend\Expressive\Router\Middleware\ImplicitOptionsMiddleware;
-use Zend\Expressive\Router\Middleware\PathBasedRoutingMiddleware;
 use Zend\Expressive\Router\Route;
 use Zend\Expressive\Router\RouteResult;
-use Zend\Expressive\Router\ZendRouter;
 
 class ImplicitOptionsMiddlewareTest extends TestCase
 {
@@ -137,54 +130,5 @@ class ImplicitOptionsMiddlewareTest extends TestCase
 
         $result = $this->middleware->process($request->reveal(), $handler->reveal());
         $this->assertSame($this->response->reveal(), $result);
-    }
-
-    public function router()
-    {
-        yield 'zend-router' => [ZendRouter::class];
-        yield 'aura-router' => [AuraRouter::class];
-        yield 'fastroute' => [FastRouteRouter::class];
-    }
-
-    /**
-     * @dataProvider router
-     */
-    public function testIntergration(string $routerName)
-    {
-        $middleware1 = $this->prophesize(MiddlewareInterface::class)->reveal();
-        $middleware2 = $this->prophesize(MiddlewareInterface::class)->reveal();
-        $route1 = new Route('/api/v1/me', $middleware1, ['GET']);
-        $route2 = new Route('/api/v1/me', $middleware2, ['POST']);
-
-        $router = new $routerName();
-        $router->addRoute($route1);
-        $router->addRoute($route2);
-
-        $finalHandler = $this->prophesize(RequestHandlerInterface::class)->reveal();
-
-        $routeMiddleware = new PathBasedRoutingMiddleware($router);
-        $handler = new class ($finalHandler) implements RequestHandlerInterface
-        {
-            private $handler;
-
-            public function __construct($handler)
-            {
-                $this->handler = $handler;
-            }
-
-            public function handle(ServerRequestInterface $request) : ResponseInterface
-            {
-                return (new ImplicitOptionsMiddleware(function () {
-                    return new Response();
-                }))->process($request, $this->handler);
-            }
-        };
-
-        $request = new ServerRequest([], [],'/api/v1/me', 'OPTIONS');
-
-        $response = $routeMiddleware->process($request, $handler);
-
-        $this->assertTrue($response->hasHeader('Allow'));
-        $this->assertSame('GET, POST', $response->getHeaderLine('Allow'));
     }
 }
