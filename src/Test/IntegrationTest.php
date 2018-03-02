@@ -25,6 +25,7 @@ use Zend\Expressive\Router\Middleware\ImplicitHeadMiddleware;
 use Zend\Expressive\Router\Middleware\ImplicitOptionsMiddleware;
 use Zend\Expressive\Router\Middleware\PathBasedRoutingMiddleware;
 use Zend\Expressive\Router\Route;
+use Zend\Expressive\Router\RouteResult;
 use Zend\Expressive\Router\RouterInterface;
 
 abstract class IntegrationTest extends TestCase
@@ -73,12 +74,30 @@ abstract class IntegrationTest extends TestCase
 
         $finalHandler = $this->prophesize(RequestHandlerInterface::class);
         $finalHandler
-            ->handle(Argument::that(function (ServerRequestInterface $request) use ($method) {
+            ->handle(Argument::that(function (ServerRequestInterface $request) use ($method, $route1) {
                 if ($request->getMethod() !== $method) {
                     return false;
                 }
 
                 if ($request->getAttribute(ImplicitHeadMiddleware::FORWARDED_HTTP_METHOD_ATTRIBUTE) !== null) {
+                    return false;
+                }
+
+                $routeResult = $request->getAttribute(RouteResult::class);
+                if (! $routeResult) {
+                    return false;
+                }
+
+                if (! $routeResult->isSuccess()) {
+                    return false;
+                }
+
+                $matchedRoute = $routeResult->getMatchedRoute();
+                if (! $matchedRoute) {
+                    return false;
+                }
+
+                if ($matchedRoute !== $route1) {
                     return false;
                 }
 
@@ -134,7 +153,7 @@ abstract class IntegrationTest extends TestCase
 
         $finalHandler = $this->prophesize(RequestHandlerInterface::class);
         $finalHandler
-            ->handle(Argument::that(function (ServerRequestInterface $request) {
+            ->handle(Argument::that(function (ServerRequestInterface $request) use ($route1) {
                 if ($request->getMethod() !== RequestMethod::METHOD_GET) {
                     return false;
                 }
@@ -142,6 +161,24 @@ abstract class IntegrationTest extends TestCase
                 if ($request->getAttribute(ImplicitHeadMiddleware::FORWARDED_HTTP_METHOD_ATTRIBUTE)
                     !== RequestMethod::METHOD_HEAD
                 ) {
+                    return false;
+                }
+
+                $routeResult = $request->getAttribute(RouteResult::class);
+                if (! $routeResult) {
+                    return false;
+                }
+
+                if (! $routeResult->isSuccess()) {
+                    return false;
+                }
+
+                $matchedRoute = $routeResult->getMatchedRoute();
+                if (! $matchedRoute) {
+                    return false;
+                }
+
+                if ($matchedRoute !== $route1) {
                     return false;
                 }
 
@@ -200,21 +237,28 @@ abstract class IntegrationTest extends TestCase
         $finalHandler = $this->prophesize(RequestHandlerInterface::class);
         $finalHandler->handle()->shouldNotBeCalled();
 
+        $finalResponse = (new Response())->withHeader('foo-bar', 'baz');
+        $finalResponse->getBody()->write('response body bar');
+
         $routeMiddleware = new PathBasedRoutingMiddleware($router);
-        $handler = new class ($finalHandler->reveal()) implements RequestHandlerInterface
+        $handler = new class ($finalHandler->reveal(), $finalResponse) implements RequestHandlerInterface
         {
             /** @var RequestHandlerInterface */
             private $handler;
 
-            public function __construct(RequestHandlerInterface $handler)
+            /** @var ResponseInterface */
+            private $response;
+
+            public function __construct(RequestHandlerInterface $handler, ResponseInterface $response)
             {
                 $this->handler = $handler;
+                $this->response = $response;
             }
 
             public function handle(ServerRequestInterface $request) : ResponseInterface
             {
                 return (new ImplicitOptionsMiddleware(function () {
-                    return new Response();
+                    return $this->response;
                 }))->process($request, $this->handler);
             }
         };
@@ -226,5 +270,8 @@ abstract class IntegrationTest extends TestCase
         $this->assertSame(StatusCode::STATUS_OK, $response->getStatusCode());
         $this->assertTrue($response->hasHeader('Allow'));
         $this->assertSame('GET,POST', $response->getHeaderLine('Allow'));
+        $this->assertTrue($response->hasHeader('foo-bar'));
+        $this->assertSame('baz', $response->getHeaderLine('foo-bar'));
+        $this->assertSame('response body bar', (string) $response->getBody());
     }
 }
