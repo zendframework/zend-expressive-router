@@ -37,7 +37,7 @@ use Zend\Expressive\Router\RouterInterface;
  * This test class tests that the router correctly marshals the allowed methods
  * for a match that matches the path, but not the request method.
  */
-abstract class IntegrationTest extends TestCase
+abstract class ImplicitMethodsIntegrationTest extends TestCase
 {
     abstract public function getRouter() : RouterInterface;
 
