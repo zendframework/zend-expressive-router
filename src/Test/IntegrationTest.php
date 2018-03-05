@@ -28,6 +28,15 @@ use Zend\Expressive\Router\Route;
 use Zend\Expressive\Router\RouteResult;
 use Zend\Expressive\Router\RouterInterface;
 
+/**
+ * Base class for testing adapter integrations.
+ *
+ * Implementers of adapters should extend this class in their test suite,
+ * implementing the `getRouter()` method.
+ *
+ * This test class tests that the router correctly marshals the allowed methods
+ * for a match that matches the path, but not the request method.
+ */
 abstract class IntegrationTest extends TestCase
 {
     abstract public function getRouter() : RouterInterface;
@@ -58,7 +67,7 @@ abstract class IntegrationTest extends TestCase
     /**
      * @dataProvider method
      */
-    public function testExcplicitRequest(string $method, MiddlewareInterface $middleware)
+    public function testExplicitRequest(string $method, MiddlewareInterface $middleware)
     {
         $middleware1 = $this->prophesize(MiddlewareInterface::class)->reveal();
         $middleware2 = $this->prophesize(MiddlewareInterface::class)->reveal();
