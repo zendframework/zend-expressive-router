@@ -52,11 +52,6 @@ class RouteResult implements MiddlewareInterface
     private $matchedRouteName;
 
     /**
-     * @var MiddlewareInterface
-     */
-    private $matchedMiddleware;
-
-    /**
      * Route matched during routing
      *
      * @since 1.3.0

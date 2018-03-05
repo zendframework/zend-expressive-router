@@ -62,6 +62,12 @@ All notable changes to this project will be documented in this file, in reverse 
   [#45](https://github.com/zendframework/zend-expressive-router/pull/45) add
   PSR-15 `psr/http-server-middleware` support.
 
+- [#53](https://github.com/zendframework/zend-expressive-router/pull/53) adds an
+  abstract test case, `Zend\Expressive\Router\Test\ImplicitMethodsIntegrationTest`.
+  Implementors of `RouterInterface` should extend this class in their own test
+  suite to ensure that they marshal the set of allowed methods for a given
+  path-based match correctly.
+
 ### Changed
 
 - [#41](https://github.com/zendframework/zend-expressive-router/pull/41) updates
@@ -138,7 +144,10 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Fixed
 
-- Nothing.
+- [#53](https://github.com/zendframework/zend-expressive-router/pull/53) fixes
+  logic in the `ImplicitHeadMiddleware` and `ImplicitOptionsMiddleware` classes
+  with regards to how they determine that an implicit `HEAD` or `OPTIONS`
+  request (respectively) has occurred.
 
 ## 2.3.0 - 2018-02-01
 
