@@ -12,7 +12,6 @@ namespace ZendTest\Expressive\Router\Middleware;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Prophecy\ObjectProphecy;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Zend\Expressive\Router\Exception\MissingDependencyException;
 use Zend\Expressive\Router\Middleware\ImplicitHeadMiddleware;

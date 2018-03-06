@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Zend\Expressive\Router;
 
-use Fig\Http\Message\RequestMethodInterface as RequestMethod;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
