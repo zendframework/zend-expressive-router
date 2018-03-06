@@ -177,14 +177,16 @@ abstract class ImplicitMethodsIntegrationTest extends TestCase
 
     public function withoutImplicitMiddleware()
     {
+        // @codingStandardsIgnoreStart
         // request method, array of allowed methods for a route.
-        yield 'HEAD: get' => [RequestMethod::METHOD_HEAD, [RequestMethod::METHOD_GET]];
-        yield 'HEAD: post' => [RequestMethod::METHOD_HEAD, [RequestMethod::METHOD_POST]];
-        yield 'HEAD: get, post' => [RequestMethod::METHOD_HEAD, [RequestMethod::METHOD_GET, RequestMethod::METHOD_POST]];
+        yield 'HEAD: get'          => [RequestMethod::METHOD_HEAD, [RequestMethod::METHOD_GET]];
+        yield 'HEAD: post'         => [RequestMethod::METHOD_HEAD, [RequestMethod::METHOD_POST]];
+        yield 'HEAD: get, post'    => [RequestMethod::METHOD_HEAD, [RequestMethod::METHOD_GET, RequestMethod::METHOD_POST]];
 
-        yield 'OPTIONS: get' => [RequestMethod::METHOD_OPTIONS, [RequestMethod::METHOD_GET]];
-        yield 'OPTIONS: post' => [RequestMethod::METHOD_OPTIONS, [RequestMethod::METHOD_POST]];
+        yield 'OPTIONS: get'       => [RequestMethod::METHOD_OPTIONS, [RequestMethod::METHOD_GET]];
+        yield 'OPTIONS: post'      => [RequestMethod::METHOD_OPTIONS, [RequestMethod::METHOD_POST]];
         yield 'OPTIONS: get, post' => [RequestMethod::METHOD_OPTIONS, [RequestMethod::METHOD_GET, RequestMethod::METHOD_POST]];
+        // @codingStandardsIgnoreEnd
     }
 
     /**
@@ -254,7 +256,8 @@ abstract class ImplicitMethodsIntegrationTest extends TestCase
 
                     return true;
                 }),
-                Argument::type(RequestHandlerInterface::class))
+                Argument::type(RequestHandlerInterface::class)
+            )
             ->willReturn($finalResponse);
 
         $route2 = new Route('/api/v1/me', $middleware2->reveal(), [RequestMethod::METHOD_POST]);
