@@ -89,10 +89,8 @@ class ImplicitHeadMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        $allowedMethods = $result->getAllowedMethods();
-
         $route = $result->getMatchedRoute();
-        if (! $allowedMethods || ($route && ! $route->implicitHead())) {
+        if ($route && ! $route->implicitHead()) {
             return $handler->handle($request);
         }
 
