@@ -177,40 +177,6 @@ class RouteTest extends TestCase
         new Route('/test', $this->noopMiddleware, $invalidHttpMethods);
     }
 
-    public function testProvidingArrayOfMethodsWithoutHeadOrOptionsImpliesBoth()
-    {
-        $route = new Route('/test', $this->noopMiddleware, [RequestMethod::METHOD_GET, RequestMethod::METHOD_POST]);
-        $this->assertTrue($route->implicitHead());
-        $this->assertTrue($route->implicitOptions());
-    }
-
-    public function headAndOptions()
-    {
-        return [
-            'head'    => [RequestMethod::METHOD_HEAD, 'implicitHead'],
-            'options' => [RequestMethod::METHOD_OPTIONS, 'implicitOptions'],
-        ];
-    }
-
-    /**
-     * @dataProvider headAndOptions
-     *
-     * @param string $httpMethod
-     * @param string $implicitMethod
-     */
-    public function testPassingHeadOrOptionsInMethodArrayDoesNotMarkAsImplicit($httpMethod, $implicitMethod)
-    {
-        $route = new Route('/test', $this->noopMiddleware, [$httpMethod]);
-        $this->assertFalse($route->{$implicitMethod}());
-    }
-
-    public function testPassingWildcardMethodDoesNotMarkAsImplicit()
-    {
-        $route = new Route('/test', $this->noopMiddleware, Route::HTTP_METHOD_ANY);
-        $this->assertFalse($route->implicitHead());
-        $this->assertFalse($route->implicitOptions());
-    }
-
     public function testAllowsHttpInteropMiddleware()
     {
         $middleware = $this->prophesize(MiddlewareInterface::class)->reveal();

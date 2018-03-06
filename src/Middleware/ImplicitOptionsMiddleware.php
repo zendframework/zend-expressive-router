@@ -68,17 +68,16 @@ class ImplicitOptionsMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        /** @var RouteResult $result */
-        if (false === ($result = $request->getAttribute(RouteResult::class, false))) {
+        $result = $request->getAttribute(RouteResult::class);
+        if (! $result) {
+            return $handler->handle($request);
+        }
+
+        if ($result->getMatchedRoute()) {
             return $handler->handle($request);
         }
 
         $allowedMethods = $result->getAllowedMethods();
-
-        $route = $result->getMatchedRoute();
-        if (! $allowedMethods || ($route && ! $route->implicitOptions())) {
-            return $handler->handle($request);
-        }
 
         return ($this->responseFactory)()->withHeader('Allow', implode(',', $allowedMethods));
     }

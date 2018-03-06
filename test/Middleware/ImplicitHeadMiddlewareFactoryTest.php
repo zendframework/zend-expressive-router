@@ -33,8 +33,17 @@ class ImplicitHeadMiddlewareFactoryTest extends TestCase
         $this->factory = new ImplicitHeadMiddlewareFactory();
     }
 
+    public function testFactoryRaisesExceptionIfRouterInterfaceServiceIsMissing()
+    {
+        $this->container->has(RouterInterface::class)->willReturn(false);
+
+        $this->expectException(MissingDependencyException::class);
+        ($this->factory)($this->container->reveal());
+    }
+
     public function testFactoryRaisesExceptionIfStreamFactoryServiceIsMissing()
     {
+        $this->container->has(RouterInterface::class)->willReturn(true);
         $this->container->has(StreamInterface::class)->willReturn(false);
 
         $this->expectException(MissingDependencyException::class);
@@ -47,9 +56,10 @@ class ImplicitHeadMiddlewareFactoryTest extends TestCase
         $streamFactory = function () {
         };
 
+        $this->container->has(RouterInterface::class)->willReturn(true);
         $this->container->has(StreamInterface::class)->willReturn(true);
-        $this->container->get(StreamInterface::class)->willReturn($streamFactory);
         $this->container->get(RouterInterface::class)->will([$router, 'reveal']);
+        $this->container->get(StreamInterface::class)->willReturn($streamFactory);
 
         $middleware = ($this->factory)($this->container->reveal());
 

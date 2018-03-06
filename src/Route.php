@@ -36,18 +36,6 @@ class Route implements MiddlewareInterface
     public const HTTP_METHOD_SEPARATOR = ':';
 
     /**
-     * @var bool If HEAD was not provided to the Route instance, indicate
-     *     support for the method is implicit.
-     */
-    private $implicitHead;
-
-    /**
-     * @var bool If OPTIONS was not provided to the Route instance, indicate
-     *     support for the method is implicit.
-     */
-    private $implicitOptions;
-
-    /**
      * @var null|string[] HTTP methods allowed with this route.
      */
     private $methods;
@@ -94,11 +82,6 @@ class Route implements MiddlewareInterface
                 : $path . '^' . implode(self::HTTP_METHOD_SEPARATOR, $this->methods);
         }
         $this->name = $name;
-
-        $this->implicitHead = is_array($this->methods)
-            && ! in_array(RequestMethod::METHOD_HEAD, $this->methods, true);
-        $this->implicitOptions = is_array($this->methods)
-            && ! in_array(RequestMethod::METHOD_OPTIONS, $this->methods, true);
     }
 
     /**
@@ -165,22 +148,6 @@ class Route implements MiddlewareInterface
     public function getOptions() : array
     {
         return $this->options;
-    }
-
-    /**
-     * Whether or not HEAD support is implicit (i.e., not explicitly specified)
-     */
-    public function implicitHead() : bool
-    {
-        return $this->implicitHead;
-    }
-
-    /**
-     * Whether or not OPTIONS support is implicit (i.e., not explicitly specified)
-     */
-    public function implicitOptions() : bool
-    {
-        return $this->implicitOptions;
     }
 
     /**
