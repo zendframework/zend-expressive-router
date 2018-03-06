@@ -9,6 +9,7 @@ namespace ZendTest\Expressive\Router;
 
 use Fig\Http\Message\RequestMethodInterface as RequestMethod;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Prophecy\ObjectProphecy;
 use Webimpress\HttpMiddlewareCompatibility\MiddlewareInterface;
 use Zend\Expressive\Router\Exception\InvalidArgumentException;
 use Zend\Expressive\Router\Route;
@@ -18,15 +19,32 @@ use Zend\Expressive\Router\Route;
  */
 class RouteTest extends TestCase
 {
+    /** @var null|callable */
+    private $errorHandler;
+
     /**
-     * @var callable
+     * @var MiddlewareInterface|ObjectProphecy
      */
     private $noopMiddleware;
 
     public function setUp()
     {
-        $this->noopMiddleware = function ($req, $res, $next) {
-        };
+        $this->noopMiddleware = $this->prophesize(MiddlewareInterface::class)->reveal();
+    }
+
+    public function tearDown()
+    {
+        if ($this->errorHandler) {
+            restore_error_handler();
+            $this->errorHandler = null;
+        }
+    }
+
+    public function registerDeprecationErrorHandler()
+    {
+        $this->errorHandler = set_error_handler(function ($errno, $errstr) {
+            return true;
+        }, E_USER_DEPRECATED);
     }
 
     public function testRoutePathIsRetrievable()
@@ -43,6 +61,7 @@ class RouteTest extends TestCase
 
     public function testRouteMiddlewareMayBeANonCallableString()
     {
+        $this->registerDeprecationErrorHandler();
         $route = new Route('/foo', 'Application\Middleware\HelloWorld');
         $this->assertSame('Application\Middleware\HelloWorld', $route->getMiddleware());
     }
@@ -130,6 +149,7 @@ class RouteTest extends TestCase
 
     public function testThrowsExceptionDuringConstructionOnInvalidMiddleware()
     {
+        $this->registerDeprecationErrorHandler();
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid middleware');
 
@@ -226,6 +246,7 @@ class RouteTest extends TestCase
      */
     public function testAllowsNonCallableArraysAsMiddleware()
     {
+        $this->registerDeprecationErrorHandler();
         $middleware = ['Non', 'Callable', 'Middleware'];
         $route = new Route('/test', $middleware, Route::HTTP_METHOD_ANY);
         $this->assertSame($middleware, $route->getMiddleware());
@@ -251,9 +272,34 @@ class RouteTest extends TestCase
      */
     public function testConstructorRaisesExceptionForInvalidMiddleware($middleware)
     {
+        $this->registerDeprecationErrorHandler();
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid middleware');
 
         new Route('/test', $middleware);
+    }
+
+    public function validNonInteropMiddleware()
+    {
+        yield 'string-callable' => ['sprintf'];
+        yield 'array' => [['sprintf']];
+        yield 'array-callable' => [[$this, 'setUp']];
+    }
+
+    /**
+     * @dataProvider validNonInteropMiddleware
+     * @param mixed $middleware
+     */
+    public function testPassingNonInteropMiddlewareToConstructorTriggersDeprecationNotice($middleware)
+    {
+        $spy = (object) ['found' => false];
+        $this->errorHandler = set_error_handler(function ($errno, $errstr) use ($spy) {
+            $spy->found = true;
+            return true;
+        }, E_USER_DEPRECATED);
+
+        new Route('/test', $middleware);
+
+        $this->assertTrue($spy->found);
     }
 }

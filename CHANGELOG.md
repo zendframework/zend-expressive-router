@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
+## 2.4.0 - TBD
+
+### Added
+
+- Nothing.
+
+### Changed
+
+- Nothing.
+
+### Deprecated
+
+- [#56](https://github.com/zendframework/zend-expressive-router/pull/56)
+  deprecates the method `Zend\Expressive\RouteResult::getMatchedMiddleware()`,
+  as it will be removed in version 3. If you need access to the middleware,
+  use `getMatchedRoute()->getMiddleware()`. (In version 3, the `RouteResult`
+  _is_ middleware, and will proxy to it.)
+
+- [#56](https://github.com/zendframework/zend-expressive-router/pull/56)
+  deprecates passing non-MiddlewareInterface instances to the constructor of
+  `Zend\Expressive\Route`. The class now triggers a deprecation notice when this
+  occurs, indicating the changes the developer needs to make.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- Nothing.
+
 ## 2.3.0 - 2018-02-01
 
 ### Added

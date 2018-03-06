@@ -82,6 +82,15 @@ class Route
             throw new Exception\InvalidArgumentException('Invalid path; must be a string');
         }
 
+        if (! $middleware instanceof MiddlewareInterface) {
+            trigger_error(sprintf(
+                '%1$s will not accept anything other than objects implementing the MiddlewareInterface'
+                . ' starting in version 3.0.0. Please update your code to create %1$s instances'
+                . ' using MiddlewareInterface instances.',
+                __CLASS__
+            ), E_USER_DEPRECATED);
+        }
+
         if (! is_callable($middleware)
             && ! $middleware instanceof MiddlewareInterface
             && ! is_string($middleware)
