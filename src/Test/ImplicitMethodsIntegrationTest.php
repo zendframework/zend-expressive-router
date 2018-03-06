@@ -227,8 +227,28 @@ abstract class ImplicitMethodsIntegrationTest extends TestCase
         $this->assertSame($finalResponse->reveal(), $response);
     }
 
-    public function testImplicitHeadRequest()
-    {
+    /**
+     * Provider for the testImplicitHeadRequest method.
+     *
+     * Implementations must provide this method. Each test case returned
+     * must consist of the following three elements, in order:
+     *
+     * - string route path (the match string)
+     * - array route options (if any/required)
+     * - string request path (the path in the ServerRequest instance)
+     * - array params (expected route parameters matched)
+     */
+    abstract public function implicitRoutesAndRequests() : Generator;
+
+    /**
+     * @dataProvider implicitRoutesAndRequests
+     */
+    public function testImplicitHeadRequest(
+        string $routePath,
+        array $routeOptions,
+        string $requestPath,
+        array $expectedParams
+    ) {
         $finalResponse = (new Response())->withHeader('foo-bar', 'baz');
         $finalResponse->getBody()->write('FOO BAR BODY');
 
@@ -236,10 +256,11 @@ abstract class ImplicitMethodsIntegrationTest extends TestCase
         $middleware2 = $this->prophesize(MiddlewareInterface::class);
         $middleware2->process(Argument::any(), Argument::any())->shouldNotBeCalled();
 
-        $route1 = new Route('/api/v1/me', $middleware1->reveal(), [RequestMethod::METHOD_GET]);
+        $route1 = new Route($routePath, $middleware1->reveal(), [RequestMethod::METHOD_GET]);
+        $route1->setOptions($routeOptions);
         $middleware1
             ->process(
-                Argument::that(function (ServerRequestInterface $request) use ($route1) {
+                Argument::that(function (ServerRequestInterface $request) use ($route1, $expectedParams) {
                     Assert::assertSame(RequestMethod::METHOD_GET, $request->getMethod());
                     Assert::assertSame(
                         RequestMethod::METHOD_HEAD,
@@ -249,6 +270,14 @@ abstract class ImplicitMethodsIntegrationTest extends TestCase
                     $routeResult = $request->getAttribute(RouteResult::class);
                     Assert::assertInstanceOf(RouteResult::class, $routeResult);
                     Assert::assertTrue($routeResult->isSuccess());
+
+                    // Some implementations include more in the matched params than what we expect;
+                    // e.g., zend-router will include the middleware as well.
+                    $matchedParams = $routeResult->getMatchedParams();
+                    foreach ($expectedParams as $key => $value) {
+                        Assert::assertArrayHasKey($key, $matchedParams);
+                        Assert::assertSame($value, $matchedParams[$key]);
+                    }
 
                     $matchedRoute = $routeResult->getMatchedRoute();
                     Assert::assertNotNull($matchedRoute);
@@ -260,7 +289,8 @@ abstract class ImplicitMethodsIntegrationTest extends TestCase
             )
             ->willReturn($finalResponse);
 
-        $route2 = new Route('/api/v1/me', $middleware2->reveal(), [RequestMethod::METHOD_POST]);
+        $route2 = new Route($routePath, $middleware2->reveal(), [RequestMethod::METHOD_POST]);
+        $route2->setOptions($routeOptions);
 
         $router = $this->getRouter();
         $router->addRoute($route1);
@@ -278,7 +308,7 @@ abstract class ImplicitMethodsIntegrationTest extends TestCase
         $request = new ServerRequest(
             ['REQUEST_METHOD' => RequestMethod::METHOD_HEAD],
             [],
-            '/api/v1/me',
+            $requestPath,
             RequestMethod::METHOD_HEAD
         );
 
@@ -290,12 +320,20 @@ abstract class ImplicitMethodsIntegrationTest extends TestCase
         $this->assertSame('baz', $response->getHeaderLine('foo-bar'));
     }
 
-    public function testImplicitOptionsRequest()
-    {
+    /**
+     * @dataProvider implicitRoutesAndRequests
+     */
+    public function testImplicitOptionsRequest(
+        string $routePath,
+        array $routeOptions,
+        string $requestPath
+    ) {
         $middleware1 = $this->prophesize(MiddlewareInterface::class)->reveal();
         $middleware2 = $this->prophesize(MiddlewareInterface::class)->reveal();
-        $route1 = new Route('/api/v1/me', $middleware1, [RequestMethod::METHOD_GET]);
-        $route2 = new Route('/api/v1/me', $middleware2, [RequestMethod::METHOD_POST]);
+        $route1 = new Route($routePath, $middleware1, [RequestMethod::METHOD_GET]);
+        $route1->setOptions($routeOptions);
+        $route2 = new Route($routePath, $middleware2, [RequestMethod::METHOD_POST]);
+        $route2->setOptions($routeOptions);
 
         $router = $this->getRouter();
         $router->addRoute($route1);
@@ -312,7 +350,7 @@ abstract class ImplicitMethodsIntegrationTest extends TestCase
         $request = new ServerRequest(
             ['REQUEST_METHOD' => RequestMethod::METHOD_OPTIONS],
             [],
-            '/api/v1/me',
+            $requestPath,
             RequestMethod::METHOD_OPTIONS
         );
 
