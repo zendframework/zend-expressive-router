@@ -20,7 +20,6 @@ use TypeError;
 use Zend\Expressive\Router\Exception;
 use Zend\Expressive\Router\Middleware\PathBasedRoutingMiddleware;
 use Zend\Expressive\Router\Route;
-use Zend\Expressive\Router\RouteResult;
 use Zend\Expressive\Router\RouterInterface;
 
 class PathBasedRoutingMiddlewareTest extends TestCase

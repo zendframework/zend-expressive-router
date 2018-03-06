@@ -69,16 +69,16 @@ class RouteTest extends TestCase
         $this->assertFalse($route->allowsMethod(RequestMethod::METHOD_DELETE));
     }
 
-    public function testRouteAlwaysAllowsHeadMethod()
+    public function testRouteHeadMethodIsNotAllowedByDefault()
     {
         $route = new Route('/foo', $this->noopMiddleware, []);
-        $this->assertTrue($route->allowsMethod(RequestMethod::METHOD_HEAD));
+        $this->assertFalse($route->allowsMethod(RequestMethod::METHOD_HEAD));
     }
 
-    public function testRouteAlwaysAllowsOptionsMethod()
+    public function testRouteOptionsMethodIsNotAllowedByDefault()
     {
         $route = new Route('/foo', $this->noopMiddleware, []);
-        $this->assertTrue($route->allowsMethod(RequestMethod::METHOD_OPTIONS));
+        $this->assertFalse($route->allowsMethod(RequestMethod::METHOD_OPTIONS));
     }
 
     public function testRouteAllowsSpecifyingOptions()
@@ -175,40 +175,6 @@ class RouteTest extends TestCase
         $this->expectExceptionMessage('One or more HTTP methods were invalid');
 
         new Route('/test', $this->noopMiddleware, $invalidHttpMethods);
-    }
-
-    public function testProvidingArrayOfMethodsWithoutHeadOrOptionsImpliesBoth()
-    {
-        $route = new Route('/test', $this->noopMiddleware, [RequestMethod::METHOD_GET, RequestMethod::METHOD_POST]);
-        $this->assertTrue($route->implicitHead());
-        $this->assertTrue($route->implicitOptions());
-    }
-
-    public function headAndOptions()
-    {
-        return [
-            'head'    => [RequestMethod::METHOD_HEAD, 'implicitHead'],
-            'options' => [RequestMethod::METHOD_OPTIONS, 'implicitOptions'],
-        ];
-    }
-
-    /**
-     * @dataProvider headAndOptions
-     *
-     * @param string $httpMethod
-     * @param string $implicitMethod
-     */
-    public function testPassingHeadOrOptionsInMethodArrayDoesNotMarkAsImplicit($httpMethod, $implicitMethod)
-    {
-        $route = new Route('/test', $this->noopMiddleware, [$httpMethod]);
-        $this->assertFalse($route->{$implicitMethod}());
-    }
-
-    public function testPassingWildcardMethodDoesNotMarkAsImplicit()
-    {
-        $route = new Route('/test', $this->noopMiddleware, Route::HTTP_METHOD_ANY);
-        $this->assertFalse($route->implicitHead());
-        $this->assertFalse($route->implicitOptions());
     }
 
     public function testAllowsHttpInteropMiddleware()

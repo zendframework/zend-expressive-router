@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace ZendTest\Expressive\Router\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface as StatusCode;
-use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;

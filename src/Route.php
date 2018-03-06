@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Zend\Expressive\Router;
 
-use Fig\Http\Message\RequestMethodInterface as RequestMethod;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -34,18 +33,6 @@ class Route implements MiddlewareInterface
 {
     public const HTTP_METHOD_ANY = null;
     public const HTTP_METHOD_SEPARATOR = ':';
-
-    /**
-     * @var bool If HEAD was not provided to the Route instance, indicate
-     *     support for the method is implicit.
-     */
-    private $implicitHead;
-
-    /**
-     * @var bool If OPTIONS was not provided to the Route instance, indicate
-     *     support for the method is implicit.
-     */
-    private $implicitOptions;
 
     /**
      * @var null|string[] HTTP methods allowed with this route.
@@ -94,11 +81,6 @@ class Route implements MiddlewareInterface
                 : $path . '^' . implode(self::HTTP_METHOD_SEPARATOR, $this->methods);
         }
         $this->name = $name;
-
-        $this->implicitHead = is_array($this->methods)
-            && ! in_array(RequestMethod::METHOD_HEAD, $this->methods, true);
-        $this->implicitOptions = is_array($this->methods)
-            && ! in_array(RequestMethod::METHOD_OPTIONS, $this->methods, true);
     }
 
     /**
@@ -148,9 +130,7 @@ class Route implements MiddlewareInterface
     public function allowsMethod(string $method) : bool
     {
         $method = strtoupper($method);
-        if (RequestMethod::METHOD_HEAD === $method
-            || RequestMethod::METHOD_OPTIONS === $method
-            || $this->methods === self::HTTP_METHOD_ANY
+        if ($this->methods === self::HTTP_METHOD_ANY
             || in_array($method, $this->methods, true)
         ) {
             return true;
@@ -167,22 +147,6 @@ class Route implements MiddlewareInterface
     public function getOptions() : array
     {
         return $this->options;
-    }
-
-    /**
-     * Whether or not HEAD support is implicit (i.e., not explicitly specified)
-     */
-    public function implicitHead() : bool
-    {
-        return $this->implicitHead;
-    }
-
-    /**
-     * Whether or not OPTIONS support is implicit (i.e., not explicitly specified)
-     */
-    public function implicitOptions() : bool
-    {
-        return $this->implicitOptions;
     }
 
     /**

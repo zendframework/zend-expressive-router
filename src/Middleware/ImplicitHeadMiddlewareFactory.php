@@ -10,31 +10,31 @@ declare(strict_types=1);
 namespace Zend\Expressive\Router\Middleware;
 
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Zend\Expressive\Router\Exception\MissingDependencyException;
+use Zend\Expressive\Router\RouterInterface;
 
 /**
  * Create and return an ImplicitHeadMiddleware instance.
  *
  * This factory depends on two other services:
  *
- * - Psr\Http\Message\ResponseInterface, which should resolve to a callable
- *   that will produce an empty Psr\Http\Message\ResponseInterface instance.
+ * - Zend\Expressive\Router\RouterInterface, which should resolve to an
+ *   instance of that interface.
  * - Psr\Http\Message\StreamInterface, which should resolve to a callable
  *   that will produce an empty Psr\Http\Message\StreamInterface instance.
  */
 class ImplicitHeadMiddlewareFactory
 {
     /**
-     * @throws MissingDependencyException if either the Psr\Http\Message\ResponseInterface
+     * @throws MissingDependencyException if either the Zend\Expressive\Router\RouterInterface
      *     or Psr\Http\Message\StreamInterface services are missing.
      */
     public function __invoke(ContainerInterface $container) : ImplicitHeadMiddleware
     {
-        if (! $container->has(ResponseInterface::class)) {
+        if (! $container->has(RouterInterface::class)) {
             throw MissingDependencyException::dependencyForService(
-                ResponseInterface::class,
+                RouterInterface::class,
                 ImplicitHeadMiddleware::class
             );
         }
@@ -47,7 +47,7 @@ class ImplicitHeadMiddlewareFactory
         }
 
         return new ImplicitHeadMiddleware(
-            $container->get(ResponseInterface::class),
+            $container->get(RouterInterface::class),
             $container->get(StreamInterface::class)
         );
     }

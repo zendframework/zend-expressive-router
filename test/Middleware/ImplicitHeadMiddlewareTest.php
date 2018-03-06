@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace ZendTest\Expressive\Router\Middleware;
 
 use Fig\Http\Message\RequestMethodInterface as RequestMethod;
-use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
@@ -21,6 +20,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Expressive\Router\Middleware\ImplicitHeadMiddleware;
 use Zend\Expressive\Router\Route;
 use Zend\Expressive\Router\RouteResult;
+use Zend\Expressive\Router\RouterInterface;
 
 class ImplicitHeadMiddlewareTest extends TestCase
 {
@@ -30,21 +30,23 @@ class ImplicitHeadMiddlewareTest extends TestCase
     /** @var ResponseInterface|ObjectProphecy */
     private $response;
 
+    /** @var RouterInterface|ObjectProphecy */
+    private $router;
+
     /** @var StreamInterface|ObjectProphecy */
     private $stream;
 
     public function setUp()
     {
-        $this->response = $this->prophesize(ResponseInterface::class);
+        $this->router = $this->prophesize(RouterInterface::class);
         $this->stream = $this->prophesize(StreamInterface::class);
-        $responseFactory = function () {
-            return $this->response->reveal();
-        };
+
         $streamFactory = function () {
             return $this->stream->reveal();
         };
 
-        $this->middleware = new ImplicitHeadMiddleware($responseFactory, $streamFactory);
+        $this->middleware = new ImplicitHeadMiddleware($this->router->reveal(), $streamFactory);
+        $this->response = $this->prophesize(ResponseInterface::class);
     }
 
     public function testReturnsResultOfHandlerOnNonHeadRequests()
@@ -52,94 +54,65 @@ class ImplicitHeadMiddlewareTest extends TestCase
         $request = $this->prophesize(ServerRequestInterface::class);
         $request->getMethod()->willReturn(RequestMethod::METHOD_GET);
 
-        $response = $this->prophesize(ResponseInterface::class)->reveal();
-
         $handler = $this->prophesize(RequestHandlerInterface::class);
-        $handler->handle($request->reveal())
-            ->willReturn($response);
+        $handler->handle($request->reveal())->will([$this->response, 'reveal']);
 
         $result = $this->middleware->process($request->reveal(), $handler->reveal());
 
-        $this->assertSame($response, $result);
+        $this->assertSame($this->response->reveal(), $result);
     }
 
     public function testReturnsResultOfHandlerWhenNoRouteResultPresentInRequest()
     {
         $request = $this->prophesize(ServerRequestInterface::class);
         $request->getMethod()->willReturn(RequestMethod::METHOD_HEAD);
-        $request->getAttribute(RouteResult::class)->willReturn(false);
-
-        $response = $this->prophesize(ResponseInterface::class)->reveal();
+        $request->getAttribute(RouteResult::class)->willReturn(null);
 
         $handler = $this->prophesize(RequestHandlerInterface::class);
-        $handler->handle($request->reveal())
-            ->willReturn($response);
+        $handler->handle($request->reveal())->will([$this->response, 'reveal']);
 
         $result = $this->middleware->process($request->reveal(), $handler->reveal());
 
-        $this->assertSame($response, $result);
-    }
-
-    public function testReturnsResultOfHandlerWhenRouteResultDoesNotComposeRoute()
-    {
-        $result = $this->prophesize(RouteResult::class);
-        $result->getAllowedMethods()->willReturn([]);
-        $result->getMatchedRoute()->willReturn(false);
-
-        $request = $this->prophesize(ServerRequestInterface::class);
-        $request->getMethod()->willReturn(RequestMethod::METHOD_HEAD);
-        $request->getAttribute(RouteResult::class)->will([$result, 'reveal']);
-
-        $response = $this->prophesize(ResponseInterface::class)->reveal();
-
-        $handler = $this->prophesize(RequestHandlerInterface::class);
-        $handler->handle($request->reveal())
-            ->willReturn($response);
-
-        $result = $this->middleware->process($request->reveal(), $handler->reveal());
-
-        $this->assertSame($response, $result);
+        $this->assertSame($this->response->reveal(), $result);
     }
 
     public function testReturnsResultOfHandlerWhenRouteSupportsHeadExplicitly()
     {
         $route = $this->prophesize(Route::class);
-        $route->implicitHead()->willReturn(false);
 
         $result = $this->prophesize(RouteResult::class);
-        $result->getAllowedMethods()->willReturn([RequestMethod::METHOD_HEAD]);
-        $result->getMatchedRoute()->will([$route, 'reveal']);
+        $result->getMatchedRoute()->willReturn([$route, 'reveal']);
 
         $request = $this->prophesize(ServerRequestInterface::class);
         $request->getMethod()->willReturn(RequestMethod::METHOD_HEAD);
         $request->getAttribute(RouteResult::class)->will([$result, 'reveal']);
 
-        $response = $this->prophesize(ResponseInterface::class)->reveal();
-
         $handler = $this->prophesize(RequestHandlerInterface::class);
-        $handler->handle($request->reveal())
-            ->willReturn($response);
+        $handler->handle($request->reveal())->will([$this->response, 'reveal']);
 
         $result = $this->middleware->process($request->reveal(), $handler->reveal());
 
-        $this->assertSame($response, $result);
+        $this->assertSame($this->response->reveal(), $result);
     }
 
-    public function testReturnsComposedResponseWhenPresentWhenRouteImplicitlySupportsHeadAndDoesNotSupportGet()
+    public function testReturnsResultOfHandlerWhenRouteDoesNotExplicitlySupportHeadAndDoesNotSupportGet()
     {
-        $route = $this->prophesize(Route::class);
-        $route->implicitHead()->willReturn(true);
-
         $result = $this->prophesize(RouteResult::class);
-        $result->getAllowedMethods()->willReturn([RequestMethod::METHOD_HEAD]);
-        $result->getMatchedRoute()->will([$route, 'reveal']);
+        $result->getMatchedRoute()->willReturn(false);
 
         $request = $this->prophesize(ServerRequestInterface::class);
         $request->getMethod()->willReturn(RequestMethod::METHOD_HEAD);
         $request->getAttribute(RouteResult::class)->will([$result, 'reveal']);
+        $request->withMethod(RequestMethod::METHOD_GET)->will([$request, 'reveal']);
+
+        $result = $this->prophesize(RouteResult::class);
+        $result->isFailure()->willReturn(true);
+
+        $this->router->match($request)->will([$result, 'reveal']);
+        $request->withAttribute(RouteResult::class, $result)->will([$request, 'reveal']);
 
         $handler = $this->prophesize(RequestHandlerInterface::class);
-        $handler->handle($request->reveal())->shouldNotBeCalled();
+        $handler->handle($request->reveal())->will([$this->response, 'reveal']);
 
         $result = $this->middleware->process($request->reveal(), $handler->reveal());
 
@@ -148,12 +121,8 @@ class ImplicitHeadMiddlewareTest extends TestCase
 
     public function testInvokesHandlerWhenRouteImplicitlySupportsHeadAndSupportsGet()
     {
-        $route = $this->prophesize(Route::class);
-        $route->implicitHead()->willReturn(true);
-
         $result = $this->prophesize(RouteResult::class);
-        $result->getAllowedMethods()->willReturn([RequestMethod::METHOD_HEAD, RequestMethod::METHOD_GET]);
-        $result->getMatchedRoute()->will([$route, 'reveal']);
+        $result->getMatchedRoute()->willReturn(false);
 
         $request = $this->prophesize(ServerRequestInterface::class);
         $request->getMethod()->willReturn(RequestMethod::METHOD_HEAD);
@@ -169,7 +138,15 @@ class ImplicitHeadMiddlewareTest extends TestCase
         $response = $this->prophesize(ResponseInterface::class);
         $response->withBody($this->stream->reveal())->will([$response, 'reveal']);
 
-        $this->response->withBody($this->stream->reveal())->shouldNotBeCalled();
+        $route = $this->prophesize(Route::class);
+
+        $result = $this->prophesize(RouteResult::class);
+        $result->isFailure()->willReturn(false);
+        $result->getMatchedRoute()->will([$route, 'reveal']);
+
+        $request->withAttribute(RouteResult::class, $result->reveal())->will([$request, 'reveal']);
+
+        $this->router->match($request)->will([$result, 'reveal']);
 
         $handler = $this->prophesize(RequestHandlerInterface::class);
         $handler

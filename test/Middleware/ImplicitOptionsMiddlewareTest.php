@@ -56,7 +56,7 @@ class ImplicitOptionsMiddlewareTest extends TestCase
     {
         $request = $this->prophesize(ServerRequestInterface::class);
         $request->getMethod()->willReturn(RequestMethod::METHOD_OPTIONS);
-        $request->getAttribute(RouteResult::class, false)->willReturn(false);
+        $request->getAttribute(RouteResult::class)->willReturn(null);
 
         $response = $this->prophesize(ResponseInterface::class)->reveal();
 
@@ -67,37 +67,16 @@ class ImplicitOptionsMiddlewareTest extends TestCase
         $this->assertSame($response, $result);
     }
 
-    public function testMissingRouteInRouteResultInvokesHandler()
-    {
-        $result = $this->prophesize(RouteResult::class);
-        $result->getAllowedMethods()->willReturn([]);
-        $result->getMatchedRoute()->willReturn(false);
-
-        $request = $this->prophesize(ServerRequestInterface::class);
-        $request->getMethod()->willReturn(RequestMethod::METHOD_OPTIONS);
-        $request->getAttribute(RouteResult::class, false)->will([$result, 'reveal']);
-
-        $response = $this->prophesize(ResponseInterface::class)->reveal();
-
-        $handler = $this->prophesize(RequestHandlerInterface::class);
-        $handler->handle($request->reveal())->willReturn($response);
-
-        $result = $this->middleware->process($request->reveal(), $handler->reveal());
-        $this->assertSame($response, $result);
-    }
-
-    public function testOptionsRequestWhenRouteDefinesOptionsInvokesHandler()
+    public function testReturnsResultOfHandlerWhenRouteSupportsOptionsExplicitly()
     {
         $route = $this->prophesize(Route::class);
-        $route->implicitOptions()->willReturn(false);
 
         $result = $this->prophesize(RouteResult::class);
-        $result->getAllowedMethods()->willReturn([RequestMethod::METHOD_OPTIONS]);
         $result->getMatchedRoute()->will([$route, 'reveal']);
 
         $request = $this->prophesize(ServerRequestInterface::class);
         $request->getMethod()->willReturn(RequestMethod::METHOD_OPTIONS);
-        $request->getAttribute(RouteResult::class, false)->will([$result, 'reveal']);
+        $request->getAttribute(RouteResult::class)->will([$result, 'reveal']);
 
         $response = $this->prophesize(ResponseInterface::class)->reveal();
 
@@ -112,16 +91,13 @@ class ImplicitOptionsMiddlewareTest extends TestCase
     {
         $allowedMethods = [RequestMethod::METHOD_GET, RequestMethod::METHOD_POST];
 
-        $route = $this->prophesize(Route::class);
-        $route->implicitOptions()->willReturn(true);
-
         $result = $this->prophesize(RouteResult::class);
         $result->getAllowedMethods()->willReturn($allowedMethods);
-        $result->getMatchedRoute()->will([$route, 'reveal']);
+        $result->getMatchedRoute()->willReturn(false);
 
         $request = $this->prophesize(ServerRequestInterface::class);
         $request->getMethod()->willReturn(RequestMethod::METHOD_OPTIONS);
-        $request->getAttribute(RouteResult::class, false)->will([$result, 'reveal']);
+        $request->getAttribute(RouteResult::class)->will([$result, 'reveal']);
 
         $handler = $this->prophesize(RequestHandlerInterface::class);
         $handler->handle($request->reveal())->shouldNotBeCalled();
