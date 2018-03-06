@@ -16,6 +16,7 @@ use Psr\Http\Message\StreamInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Expressive\Router\RouteResult;
+use Zend\Expressive\Router\RouterInterface;
 
 /**
  * Handle implicit HEAD requests.
@@ -47,9 +48,9 @@ class ImplicitHeadMiddleware implements MiddlewareInterface
     public const FORWARDED_HTTP_METHOD_ATTRIBUTE = 'forwarded_http_method';
 
     /**
-     * @var callable
+     * @var RouterInterface
      */
-    private $responseFactory;
+    private $router;
 
     /**
      * @var callable
@@ -57,18 +58,14 @@ class ImplicitHeadMiddleware implements MiddlewareInterface
     private $streamFactory;
 
     /**
-     * @param callable $responseFactory A factory capable of returning an
-     *     empty ResponseInterface instance to return for implicit HEAD
-     *     requests.
      * @param callable $streamFactory A factory capable of returning an empty
      *     StreamInterface instance to inject in a response.
      */
-    public function __construct(callable $responseFactory, callable $streamFactory)
+    public function __construct(RouterInterface $router, callable $streamFactory)
     {
-        // Factories are wrapped in closures in order to enforce return type safety.
-        $this->responseFactory = function () use ($responseFactory) : ResponseInterface {
-            return $responseFactory();
-        };
+        $this->router = $router;
+
+        // Factory is wrapped in closur in order to enforce return type safety.
         $this->streamFactory = function () use ($streamFactory) : StreamInterface {
             return $streamFactory();
         };
@@ -99,12 +96,14 @@ class ImplicitHeadMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        if (! in_array(RequestMethod::METHOD_GET, $allowedMethods, true)) {
-            return ($this->responseFactory)();
+        $routeResult = $this->router->match($request->withMethod(RequestMethod::METHOD_GET));
+        if ($routeResult->isFailure()) {
+            return $handler->handle($request);
         }
 
         $response = $handler->handle(
             $request
+                ->withAttribute(RouteResult::class, $routeResult)
                 ->withMethod(RequestMethod::METHOD_GET)
                 ->withAttribute(self::FORWARDED_HTTP_METHOD_ATTRIBUTE, RequestMethod::METHOD_HEAD)
         );

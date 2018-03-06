@@ -69,16 +69,16 @@ class RouteTest extends TestCase
         $this->assertFalse($route->allowsMethod(RequestMethod::METHOD_DELETE));
     }
 
-    public function testRouteAlwaysAllowsHeadMethod()
+    public function testRouteHeadMethodIsNotAllowedByDefault()
     {
         $route = new Route('/foo', $this->noopMiddleware, []);
-        $this->assertTrue($route->allowsMethod(RequestMethod::METHOD_HEAD));
+        $this->assertFalse($route->allowsMethod(RequestMethod::METHOD_HEAD));
     }
 
-    public function testRouteAlwaysAllowsOptionsMethod()
+    public function testRouteOptionsMethodIsNotAllowedByDefault()
     {
         $route = new Route('/foo', $this->noopMiddleware, []);
-        $this->assertTrue($route->allowsMethod(RequestMethod::METHOD_OPTIONS));
+        $this->assertFalse($route->allowsMethod(RequestMethod::METHOD_OPTIONS));
     }
 
     public function testRouteAllowsSpecifyingOptions()

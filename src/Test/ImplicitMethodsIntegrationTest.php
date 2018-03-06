@@ -14,6 +14,7 @@ use Fig\Http\Message\StatusCodeInterface as StatusCode;
 use Generator;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -42,76 +43,72 @@ abstract class ImplicitMethodsIntegrationTest extends TestCase
 {
     abstract public function getRouter() : RouterInterface;
 
-    public function method() : Generator
+    public function getImplicitOptionsMiddleware(ResponseInterface $response = null) : ImplicitOptionsMiddleware
     {
-        $implicitHeadMiddleware = new ImplicitHeadMiddleware(
-            function () {
-                return new Response();
-            },
+        return new ImplicitOptionsMiddleware(
+            function () use ($response) {
+                return $response ?: new Response();
+            }
+        );
+    }
+
+    public function getImplicitHeadMiddleware(RouterInterface $router) : ImplicitHeadMiddleware
+    {
+        return new ImplicitHeadMiddleware(
+            $router,
             function () {
                 return new Stream('php://temp', 'rw');
             }
         );
+    }
 
-        $implicitOptionsMiddleware = new ImplicitOptionsMiddleware(
-            function () {
-                return new Response();
-            }
-        );
-
+    public function method() : Generator
+    {
         yield 'HEAD: head, post' => [
             RequestMethod::METHOD_HEAD,
             [RequestMethod::METHOD_HEAD, RequestMethod::METHOD_POST],
-            $implicitHeadMiddleware,
         ];
 
         yield 'HEAD: head, get' => [
             RequestMethod::METHOD_HEAD,
             [RequestMethod::METHOD_HEAD, RequestMethod::METHOD_GET],
-            $implicitHeadMiddleware,
         ];
 
         yield 'HEAD: post, head' => [
             RequestMethod::METHOD_HEAD,
             [RequestMethod::METHOD_POST, RequestMethod::METHOD_HEAD],
-            $implicitHeadMiddleware,
         ];
 
         yield 'HEAD: get, head' => [
             RequestMethod::METHOD_HEAD,
             [RequestMethod::METHOD_GET, RequestMethod::METHOD_HEAD],
-            $implicitHeadMiddleware,
         ];
 
         yield 'OPTIONS: options, post' => [
             RequestMethod::METHOD_OPTIONS,
             [RequestMethod::METHOD_OPTIONS, RequestMethod::METHOD_POST],
-            $implicitOptionsMiddleware,
         ];
 
         yield 'OPTIONS: options, get' => [
             RequestMethod::METHOD_OPTIONS,
             [RequestMethod::METHOD_OPTIONS, RequestMethod::METHOD_GET],
-            $implicitOptionsMiddleware,
         ];
 
         yield 'OPTIONS: post, options' => [
             RequestMethod::METHOD_OPTIONS,
             [RequestMethod::METHOD_POST, RequestMethod::METHOD_OPTIONS],
-            $implicitOptionsMiddleware,
         ];
 
         yield 'OPTIONS: get, options' => [
             RequestMethod::METHOD_OPTIONS,
             [RequestMethod::METHOD_GET, RequestMethod::METHOD_OPTIONS],
-            $implicitOptionsMiddleware,
         ];
     }
 
     /**
      * @dataProvider method
      */
-    public function testExplicitRequest(string $method, array $routes, MiddlewareInterface $middleware)
+    public function testExplicitRequest(string $method, array $routes)
     {
         $implicitRoute = null;
         $router = $this->getRouter();
@@ -130,7 +127,11 @@ abstract class ImplicitMethodsIntegrationTest extends TestCase
 
         $pipeline = new MiddlewarePipe();
         $pipeline->pipe(new PathBasedRoutingMiddleware($router));
-        $pipeline->pipe($middleware);
+        $pipeline->pipe(
+            $method === RequestMethod::METHOD_HEAD
+                ? $this->getImplicitHeadMiddleware($router)
+                : $this->getImplicitOptionsMiddleware()
+        );
         $pipeline->pipe(new MethodNotAllowedMiddleware(function () {
             return new Response();
         }));
@@ -286,14 +287,7 @@ abstract class ImplicitMethodsIntegrationTest extends TestCase
 
         $pipeline = new MiddlewarePipe();
         $pipeline->pipe(new PathBasedRoutingMiddleware($router));
-        $pipeline->pipe(new ImplicitHeadMiddleware(
-            function () {
-                return new Response();
-            },
-            function () {
-                return new Stream('php://temp', 'rw');
-            }
-        ));
+        $pipeline->pipe($this->getImplicitHeadMiddleware($router));
         $pipeline->pipe(new MethodNotAllowedMiddleware(function () {
             return new Response();
         }));
@@ -332,9 +326,7 @@ abstract class ImplicitMethodsIntegrationTest extends TestCase
 
         $pipeline = new MiddlewarePipe();
         $pipeline->pipe(new PathBasedRoutingMiddleware($router));
-        $pipeline->pipe(new ImplicitOptionsMiddleware(function () use ($finalResponse) {
-            return $finalResponse;
-        }));
+        $pipeline->pipe($this->getImplicitOptionsMiddleware($finalResponse));
         $pipeline->pipe(new MethodNotAllowedMiddleware(function () {
             return new Response();
         }));

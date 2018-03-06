@@ -17,6 +17,7 @@ use Psr\Http\Message\StreamInterface;
 use Zend\Expressive\Router\Exception\MissingDependencyException;
 use Zend\Expressive\Router\Middleware\ImplicitHeadMiddleware;
 use Zend\Expressive\Router\Middleware\ImplicitHeadMiddlewareFactory;
+use Zend\Expressive\Router\RouterInterface;
 
 class ImplicitHeadMiddlewareFactoryTest extends TestCase
 {
@@ -32,18 +33,8 @@ class ImplicitHeadMiddlewareFactoryTest extends TestCase
         $this->factory = new ImplicitHeadMiddlewareFactory();
     }
 
-    public function testFactoryRaisesExceptionIfResponseFactoryServiceIsMissing()
-    {
-        $this->container->has(ResponseInterface::class)->willReturn(false);
-        $this->container->has(StreamInterface::class)->shouldNotBeCalled();
-
-        $this->expectException(MissingDependencyException::class);
-        ($this->factory)($this->container->reveal());
-    }
-
     public function testFactoryRaisesExceptionIfStreamFactoryServiceIsMissing()
     {
-        $this->container->has(ResponseInterface::class)->willReturn(true);
         $this->container->has(StreamInterface::class)->willReturn(false);
 
         $this->expectException(MissingDependencyException::class);
@@ -52,16 +43,13 @@ class ImplicitHeadMiddlewareFactoryTest extends TestCase
 
     public function testFactoryProducesImplicitHeadMiddlewareWhenAllDependenciesPresent()
     {
-        $responseFactory = function () {
-        };
+        $router = $this->prophesize(RouterInterface::class);
         $streamFactory = function () {
         };
 
-        $this->container->has(ResponseInterface::class)->willReturn(true);
         $this->container->has(StreamInterface::class)->willReturn(true);
-
-        $this->container->get(ResponseInterface::class)->willReturn($responseFactory);
         $this->container->get(StreamInterface::class)->willReturn($streamFactory);
+        $this->container->get(RouterInterface::class)->will([$router, 'reveal']);
 
         $middleware = ($this->factory)($this->container->reveal());
 
