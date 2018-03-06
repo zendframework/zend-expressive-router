@@ -62,11 +62,21 @@ All notable changes to this project will be documented in this file, in reverse 
   [#45](https://github.com/zendframework/zend-expressive-router/pull/45) add
   PSR-15 `psr/http-server-middleware` support.
 
-- [#53](https://github.com/zendframework/zend-expressive-router/pull/53) adds an
+- [#53](https://github.com/zendframework/zend-expressive-router/pull/53) and
+  [#58](https://github.com/zendframework/zend-expressive-router/pull/58) add an
   abstract test case, `Zend\Expressive\Router\Test\ImplicitMethodsIntegrationTest`.
   Implementors of `RouterInterface` should extend this class in their own test
-  suite to ensure that they marshal the set of allowed methods for a given
-  path-based match correctly.
+  suite to ensure that they create appropriate `RouteResult` instances for each
+  of the following cases:
+  
+  - `HEAD` request called and matches one or more known routes, but the method
+    is not defined for any of them.
+  - `OPTIONS` request called and matches one or more known routes, but the method
+    is not defined for any of them.
+  - Request matches one or more known routes, but the method is not allowed.
+
+  In particular, these tests ensure that implementations marshal the list of
+  allowed HTTP methods correctly in the latter two cases.
 
 ### Changed
 
@@ -127,6 +137,17 @@ All notable changes to this project will be documented in this file, in reverse 
   `Zend\Expressive\Router\DispatchMiddleware` to
   `Zend\Expressive\Router\Middleware\DispatchMiddleware`.
 
+- [#58](https://github.com/zendframework/zend-expressive-router/pull/58) changes
+  the constructor of `ImplicitHeadMiddleware` to accept a `RouterInterface`
+  instead of a response factory. Internally, this allows it to re-match the
+  current request using the `GET` method; the middleware never generates its own
+  response any longer.
+
+- [#58](https://github.com/zendframework/zend-expressive-router/pull/58) changes
+  the logic of `Route::allowsMethod()`; it no longer returns `true` for `HEAD`
+  or `OPTIONS` requests if they are not explicitly in the list of allowed
+  methods.
+
 ### Deprecated
 
 - Nothing.
@@ -141,6 +162,12 @@ All notable changes to this project will be documented in this file, in reverse 
   removes the method `Zend\Expressive\Router\RouteResult::getMatchedMiddleware()`;
   the method is no longer necessary, as the class now implements
   `MiddlewareInterface` and proxies to the underlying route.
+
+- [#58](https://github.com/zendframework/zend-expressive-router/pull/58) removes
+  the following methods from `Route`, as they are no longer used:
+
+  - `implicitHead()`
+  - `implicitOptions()`
 
 ### Fixed
 
