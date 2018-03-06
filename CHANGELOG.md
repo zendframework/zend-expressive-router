@@ -6,7 +6,10 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Added
 
-- Nothing.
+- [#54](https://github.com/zendframework/zend-expressive-router/pull/54) adds
+  the middleware `Zend\Expressive\Router\Middleware\DispatchMiddleware` and
+  `Zend\Expressive\Router\Middleware\RouteMiddleware`. These are the same as the
+  versions shipped in 2.3.0, but under a new namespace.
 
 ### Changed
 
@@ -24,6 +27,12 @@ All notable changes to this project will be documented in this file, in reverse 
   deprecates passing non-MiddlewareInterface instances to the constructor of
   `Zend\Expressive\Route`. The class now triggers a deprecation notice when this
   occurs, indicating the changes the developer needs to make.
+
+- [#54](https://github.com/zendframework/zend-expressive-router/pull/54)
+  deprecates the middleware `Zend\Expressive\Router\DispatchMiddleware` and
+  `Zend\Expressive\Router\RouteMiddleware`. The final versions in the v3 release
+  will be under the `Zend\Expressive\Router\Middleware` namespace; please use
+  those instead.
 
 ### Removed
 
