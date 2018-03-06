@@ -14,7 +14,6 @@ use Fig\Http\Message\StatusCodeInterface as StatusCode;
 use Generator;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -23,10 +22,12 @@ use Zend\Diactoros\ServerRequest;
 use Zend\Diactoros\Stream;
 use Zend\Expressive\Router\Middleware\ImplicitHeadMiddleware;
 use Zend\Expressive\Router\Middleware\ImplicitOptionsMiddleware;
+use Zend\Expressive\Router\Middleware\MethodNotAllowedMiddleware;
 use Zend\Expressive\Router\Middleware\PathBasedRoutingMiddleware;
 use Zend\Expressive\Router\Route;
 use Zend\Expressive\Router\RouteResult;
 use Zend\Expressive\Router\RouterInterface;
+use Zend\Stratigility\MiddlewarePipe;
 
 /**
  * Base class for testing adapter integrations.
@@ -43,47 +44,103 @@ abstract class ImplicitMethodsIntegrationTest extends TestCase
 
     public function method() : Generator
     {
-        yield RequestMethod::METHOD_HEAD => [
+        $implicitHeadMiddleware = new ImplicitHeadMiddleware(
+            function () {
+                return new Response();
+            },
+            function () {
+                return new Stream('php://temp', 'rw');
+            }
+        );
+
+        $implicitOptionsMiddleware = new ImplicitOptionsMiddleware(
+            function () {
+                return new Response();
+            }
+        );
+
+        yield 'HEAD: head, post' => [
             RequestMethod::METHOD_HEAD,
-            new ImplicitHeadMiddleware(
-                function () {
-                    return new Response();
-                },
-                function () {
-                    return new Stream('php://temp', 'rw');
-                }
-            ),
+            [RequestMethod::METHOD_HEAD, RequestMethod::METHOD_POST],
+            $implicitHeadMiddleware,
         ];
-        yield RequestMethod::METHOD_OPTIONS => [
+
+        yield 'HEAD: head, get' => [
+            RequestMethod::METHOD_HEAD,
+            [RequestMethod::METHOD_HEAD, RequestMethod::METHOD_GET],
+            $implicitHeadMiddleware,
+        ];
+
+        yield 'HEAD: post, head' => [
+            RequestMethod::METHOD_HEAD,
+            [RequestMethod::METHOD_POST, RequestMethod::METHOD_HEAD],
+            $implicitHeadMiddleware,
+        ];
+
+        yield 'HEAD: get, head' => [
+            RequestMethod::METHOD_HEAD,
+            [RequestMethod::METHOD_GET, RequestMethod::METHOD_HEAD],
+            $implicitHeadMiddleware,
+        ];
+
+        yield 'OPTIONS: options, post' => [
             RequestMethod::METHOD_OPTIONS,
-            new ImplicitOptionsMiddleware(
-                function () {
-                    return new Response();
-                }
-            ),
+            [RequestMethod::METHOD_OPTIONS, RequestMethod::METHOD_POST],
+            $implicitOptionsMiddleware,
+        ];
+
+        yield 'OPTIONS: options, get' => [
+            RequestMethod::METHOD_OPTIONS,
+            [RequestMethod::METHOD_OPTIONS, RequestMethod::METHOD_GET],
+            $implicitOptionsMiddleware,
+        ];
+
+        yield 'OPTIONS: post, options' => [
+            RequestMethod::METHOD_OPTIONS,
+            [RequestMethod::METHOD_POST, RequestMethod::METHOD_OPTIONS],
+            $implicitOptionsMiddleware,
+        ];
+
+        yield 'OPTIONS: get, options' => [
+            RequestMethod::METHOD_OPTIONS,
+            [RequestMethod::METHOD_GET, RequestMethod::METHOD_OPTIONS],
+            $implicitOptionsMiddleware,
         ];
     }
 
     /**
      * @dataProvider method
      */
-    public function testExplicitRequest(string $method, MiddlewareInterface $middleware)
+    public function testExplicitRequest(string $method, array $routes, MiddlewareInterface $middleware)
     {
-        $middleware1 = $this->prophesize(MiddlewareInterface::class)->reveal();
-        $middleware2 = $this->prophesize(MiddlewareInterface::class)->reveal();
-        $route1 = new Route('/api/v1/me', $middleware1, [$method]);
-        $route2 = new Route('/api/v1/me', $middleware2, [RequestMethod::METHOD_GET]);
-
+        $implicitRoute = null;
         $router = $this->getRouter();
-        $router->addRoute($route1);
-        $router->addRoute($route2);
+        foreach ($routes as $routeMethod) {
+            $route = new Route(
+                '/api/v1/me',
+                $this->prophesize(MiddlewareInterface::class)->reveal(),
+                [$routeMethod]
+            );
+            $router->addRoute($route);
+
+            if ($routeMethod === $method) {
+                $implicitRoute = $route;
+            }
+        }
+
+        $pipeline = new MiddlewarePipe();
+        $pipeline->pipe(new PathBasedRoutingMiddleware($router));
+        $pipeline->pipe($middleware);
+        $pipeline->pipe(new MethodNotAllowedMiddleware(function () {
+            return new Response();
+        }));
 
         $finalResponse = (new Response())->withHeader('foo-bar', 'baz');
         $finalResponse->getBody()->write('FOO BAR BODY');
 
         $finalHandler = $this->prophesize(RequestHandlerInterface::class);
         $finalHandler
-            ->handle(Argument::that(function (ServerRequestInterface $request) use ($method, $route1) {
+            ->handle(Argument::that(function (ServerRequestInterface $request) use ($method, $implicitRoute) {
                 if ($request->getMethod() !== $method) {
                     return false;
                 }
@@ -106,7 +163,7 @@ abstract class ImplicitMethodsIntegrationTest extends TestCase
                     return false;
                 }
 
-                if ($matchedRoute !== $route1) {
+                if ($matchedRoute !== $implicitRoute) {
                     return false;
                 }
 
@@ -115,35 +172,66 @@ abstract class ImplicitMethodsIntegrationTest extends TestCase
             ->willReturn($finalResponse)
             ->shouldBeCalledTimes(1);
 
-        $routeMiddleware = new PathBasedRoutingMiddleware($router);
-        $handler = new class ($finalHandler->reveal(), $middleware) implements RequestHandlerInterface
-        {
-            /** @var RequestHandlerInterface */
-            private $handler;
+        $request = new ServerRequest(['REQUEST_METHOD' => $method], [], '/api/v1/me', $method);
 
-            /** @var MiddlewareInterface */
-            private $middleware;
-
-            public function __construct(RequestHandlerInterface $handler, MiddlewareInterface $middleware)
-            {
-                $this->handler = $handler;
-                $this->middleware = $middleware;
-            }
-
-            public function handle(ServerRequestInterface $request) : ResponseInterface
-            {
-                return $this->middleware->process($request, $this->handler);
-            }
-        };
-
-        $request = new ServerRequest([], [], '/api/v1/me', $method);
-
-        $response = $routeMiddleware->process($request, $handler);
+        $response = $pipeline->process($request, $finalHandler->reveal());
 
         $this->assertEquals(StatusCode::STATUS_OK, $response->getStatusCode());
         $this->assertSame('FOO BAR BODY', (string) $response->getBody());
         $this->assertTrue($response->hasHeader('foo-bar'));
         $this->assertSame('baz', $response->getHeaderLine('foo-bar'));
+    }
+
+    public function withoutImplicitMiddleware()
+    {
+        // request method, array of allowed methods for a route.
+        yield 'HEAD: get' => [RequestMethod::METHOD_HEAD, [RequestMethod::METHOD_GET]];
+        yield 'HEAD: post' => [RequestMethod::METHOD_HEAD, [RequestMethod::METHOD_POST]];
+        yield 'HEAD: get, post' => [RequestMethod::METHOD_HEAD, [RequestMethod::METHOD_GET, RequestMethod::METHOD_POST]];
+
+        yield 'OPTIONS: get' => [RequestMethod::METHOD_OPTIONS, [RequestMethod::METHOD_GET]];
+        yield 'OPTIONS: post' => [RequestMethod::METHOD_OPTIONS, [RequestMethod::METHOD_POST]];
+        yield 'OPTIONS: get, post' => [RequestMethod::METHOD_OPTIONS, [RequestMethod::METHOD_GET, RequestMethod::METHOD_POST]];
+    }
+
+    /**
+     * In case we are not using Implicit*Middlewares and we don't have any route with explicit method
+     * returned response should be 405: Method Not Allowed - handled by MethodNotAllowedMiddleware.
+     *
+     * @dataProvider withoutImplicitMiddleware
+     */
+    public function testWithoutImplicitMiddleware(string $method, array $routes)
+    {
+        $router = $this->getRouter();
+        foreach ($routes as $routeMethod) {
+            $route = new Route(
+                '/api/v1/me',
+                $this->prophesize(MiddlewareInterface::class)->reveal(),
+                [$routeMethod]
+            );
+            $router->addRoute($route);
+        }
+
+        $finalResponse = (new Response())->withHeader('mnl-bar', 'foo-baz');
+        $finalResponse->getBody()->write('Final METHOD NOT ALLOWED response.');
+
+        $pipeline = new MiddlewarePipe();
+        $pipeline->pipe(new PathBasedRoutingMiddleware($router));
+        $pipeline->pipe(new MethodNotAllowedMiddleware(function () use ($finalResponse) {
+            return $finalResponse;
+        }));
+
+        $finalHandler = $this->prophesize(RequestHandlerInterface::class);
+        $finalHandler->handle(Argument::any())->shouldNotBeCalled();
+
+        $request = new ServerRequest(['REQUEST_METHOD' => $method], [], '/api/v1/me', $method);
+
+        $response = $pipeline->process($request, $finalHandler->reveal());
+
+        $this->assertEquals(StatusCode::STATUS_METHOD_NOT_ALLOWED, $response->getStatusCode());
+        $this->assertSame('Final METHOD NOT ALLOWED response.', (string) $response->getBody());
+        $this->assertTrue($response->hasHeader('mnl-bar'));
+        $this->assertSame('foo-baz', $response->getHeaderLine('mnl-bar'));
     }
 
     public function testImplicitHeadRequest()
@@ -196,35 +284,28 @@ abstract class ImplicitMethodsIntegrationTest extends TestCase
             ->willReturn($finalResponse)
             ->shouldBeCalledTimes(1);
 
-        $routeMiddleware = new PathBasedRoutingMiddleware($router);
-        $handler = new class ($finalHandler->reveal()) implements RequestHandlerInterface
-        {
-            /** @var RequestHandlerInterface */
-            private $handler;
-
-            public function __construct(RequestHandlerInterface $handler)
-            {
-                $this->handler = $handler;
+        $pipeline = new MiddlewarePipe();
+        $pipeline->pipe(new PathBasedRoutingMiddleware($router));
+        $pipeline->pipe(new ImplicitHeadMiddleware(
+            function () {
+                return new Response();
+            },
+            function () {
+                return new Stream('php://temp', 'rw');
             }
+        ));
+        $pipeline->pipe(new MethodNotAllowedMiddleware(function () {
+            return new Response();
+        }));
 
-            public function handle(ServerRequestInterface $request) : ResponseInterface
-            {
-                $middleware = new ImplicitHeadMiddleware(
-                    function () {
-                        return new Response();
-                    },
-                    function () {
-                        return new Stream('php://temp', 'rw');
-                    }
-                );
+        $request = new ServerRequest(
+            ['REQUEST_METHOD' => RequestMethod::METHOD_HEAD],
+            [],
+            '/api/v1/me',
+            RequestMethod::METHOD_HEAD
+        );
 
-                return $middleware->process($request, $this->handler);
-            }
-        };
-
-        $request = new ServerRequest([], [], '/api/v1/me', RequestMethod::METHOD_HEAD);
-
-        $response = $routeMiddleware->process($request, $handler);
+        $response = $pipeline->process($request, $finalHandler->reveal());
 
         $this->assertEquals(StatusCode::STATUS_OK, $response->getStatusCode());
         $this->assertEmpty((string) $response->getBody());
@@ -249,32 +330,23 @@ abstract class ImplicitMethodsIntegrationTest extends TestCase
         $finalResponse = (new Response())->withHeader('foo-bar', 'baz');
         $finalResponse->getBody()->write('response body bar');
 
-        $routeMiddleware = new PathBasedRoutingMiddleware($router);
-        $handler = new class ($finalHandler->reveal(), $finalResponse) implements RequestHandlerInterface
-        {
-            /** @var RequestHandlerInterface */
-            private $handler;
+        $pipeline = new MiddlewarePipe();
+        $pipeline->pipe(new PathBasedRoutingMiddleware($router));
+        $pipeline->pipe(new ImplicitOptionsMiddleware(function () use ($finalResponse) {
+            return $finalResponse;
+        }));
+        $pipeline->pipe(new MethodNotAllowedMiddleware(function () {
+            return new Response();
+        }));
 
-            /** @var ResponseInterface */
-            private $response;
+        $request = new ServerRequest(
+            ['REQUEST_METHOD' => RequestMethod::METHOD_OPTIONS],
+            [],
+            '/api/v1/me',
+            RequestMethod::METHOD_OPTIONS
+        );
 
-            public function __construct(RequestHandlerInterface $handler, ResponseInterface $response)
-            {
-                $this->handler = $handler;
-                $this->response = $response;
-            }
-
-            public function handle(ServerRequestInterface $request) : ResponseInterface
-            {
-                return (new ImplicitOptionsMiddleware(function () {
-                    return $this->response;
-                }))->process($request, $this->handler);
-            }
-        };
-
-        $request = new ServerRequest([], [], '/api/v1/me', RequestMethod::METHOD_OPTIONS);
-
-        $response = $routeMiddleware->process($request, $handler);
+        $response = $pipeline->process($request, $finalHandler->reveal());
 
         $this->assertSame(StatusCode::STATUS_OK, $response->getStatusCode());
         $this->assertTrue($response->hasHeader('Allow'));

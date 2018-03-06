@@ -148,9 +148,7 @@ class Route implements MiddlewareInterface
     public function allowsMethod(string $method) : bool
     {
         $method = strtoupper($method);
-        if (RequestMethod::METHOD_HEAD === $method
-            || RequestMethod::METHOD_OPTIONS === $method
-            || $this->methods === self::HTTP_METHOD_ANY
+        if ($this->methods === self::HTTP_METHOD_ANY
             || in_array($method, $this->methods, true)
         ) {
             return true;
