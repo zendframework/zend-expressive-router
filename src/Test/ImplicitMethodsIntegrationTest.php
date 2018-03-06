@@ -12,6 +12,7 @@ namespace Zend\Expressive\Router\Test;
 use Fig\Http\Message\RequestMethodInterface as RequestMethod;
 use Fig\Http\Message\StatusCodeInterface as StatusCode;
 use Generator;
+use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Psr\Http\Message\ResponseInterface;
@@ -142,31 +143,16 @@ abstract class ImplicitMethodsIntegrationTest extends TestCase
         $finalHandler = $this->prophesize(RequestHandlerInterface::class);
         $finalHandler
             ->handle(Argument::that(function (ServerRequestInterface $request) use ($method, $implicitRoute) {
-                if ($request->getMethod() !== $method) {
-                    return false;
-                }
-
-                if ($request->getAttribute(ImplicitHeadMiddleware::FORWARDED_HTTP_METHOD_ATTRIBUTE) !== null) {
-                    return false;
-                }
+                Assert::assertSame($method, $request->getMethod());
+                Assert::assertNull($request->getAttribute(ImplicitHeadMiddleware::FORWARDED_HTTP_METHOD_ATTRIBUTE));
 
                 $routeResult = $request->getAttribute(RouteResult::class);
-                if (! $routeResult) {
-                    return false;
-                }
-
-                if (! $routeResult->isSuccess()) {
-                    return false;
-                }
+                Assert::assertInstanceOf(RouteResult::class, $routeResult);
+                Assert::assertTrue($routeResult->isSuccess());
 
                 $matchedRoute = $routeResult->getMatchedRoute();
-                if (! $matchedRoute) {
-                    return false;
-                }
-
-                if ($matchedRoute !== $implicitRoute) {
-                    return false;
-                }
+                Assert::assertNotNull($matchedRoute);
+                Assert::assertSame($implicitRoute, $matchedRoute);
 
                 return true;
             }))
@@ -252,33 +238,19 @@ abstract class ImplicitMethodsIntegrationTest extends TestCase
         $finalHandler = $this->prophesize(RequestHandlerInterface::class);
         $finalHandler
             ->handle(Argument::that(function (ServerRequestInterface $request) use ($route1) {
-                if ($request->getMethod() !== RequestMethod::METHOD_GET) {
-                    return false;
-                }
-
-                if ($request->getAttribute(ImplicitHeadMiddleware::FORWARDED_HTTP_METHOD_ATTRIBUTE)
-                    !== RequestMethod::METHOD_HEAD
-                ) {
-                    return false;
-                }
+                Assert::assertSame(RequestMethod::METHOD_GET, $request->getMethod());
+                Assert::assertSame(
+                    RequestMethod::METHOD_HEAD,
+                    $request->getAttribute(ImplicitHeadMiddleware::FORWARDED_HTTP_METHOD_ATTRIBUTE)
+                );
 
                 $routeResult = $request->getAttribute(RouteResult::class);
-                if (! $routeResult) {
-                    return false;
-                }
-
-                if (! $routeResult->isSuccess()) {
-                    return false;
-                }
+                Assert::assertInstanceOf(RouteResult::class, $routeResult);
+                Assert::assertTrue($routeResult->isSuccess());
 
                 $matchedRoute = $routeResult->getMatchedRoute();
-                if (! $matchedRoute) {
-                    return false;
-                }
-
-                if ($matchedRoute !== $route1) {
-                    return false;
-                }
+                Assert::assertNotNull($matchedRoute);
+                Assert::assertSame($route1, $matchedRoute);
 
                 return true;
             }))
