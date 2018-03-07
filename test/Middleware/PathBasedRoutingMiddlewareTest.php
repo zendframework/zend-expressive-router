@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace ZendTest\Expressive\Router\Middleware;
 
+use Fig\Http\Message\RequestMethodInterface as RequestMethod;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
@@ -72,11 +73,11 @@ class PathBasedRoutingMiddlewareTest extends TestCase
     public function commonHttpMethods()
     {
         return [
-            'GET'    => ['GET'],
-            'POST'   => ['POST'],
-            'PUT'    => ['PUT'],
-            'PATCH'  => ['PATCH'],
-            'DELETE' => ['DELETE'],
+            RequestMethod::METHOD_GET    => [RequestMethod::METHOD_GET],
+            RequestMethod::METHOD_POST   => [RequestMethod::METHOD_POST],
+            RequestMethod::METHOD_PUT    => [RequestMethod::METHOD_PUT],
+            RequestMethod::METHOD_PATCH  => [RequestMethod::METHOD_PATCH],
+            RequestMethod::METHOD_DELETE => [RequestMethod::METHOD_DELETE],
         ];
     }
 
@@ -178,7 +179,7 @@ class PathBasedRoutingMiddlewareTest extends TestCase
     public function testCreatingHttpRouteMethodWithExistingPathButDifferentMethodCreatesNewRouteInstance()
     {
         $this->router->addRoute(Argument::type(Route::class))->shouldBeCalledTimes(2);
-        $route = $this->middleware->route('/foo', $this->noopMiddleware, []);
+        $route = $this->middleware->route('/foo', $this->noopMiddleware, [RequestMethod::METHOD_POST]);
 
         $middleware = $this->createNoopMiddleware();
         $test = $this->middleware->get('/foo', $middleware);
