@@ -153,6 +153,10 @@ All notable changes to this project will be documented in this file, in reverse 
   list of HTTP methods provided to it is empty. Routes MUST have one or more
   HTTP methods associated.
 
+- [#60](https://github.com/zendframework/zend-expressive-router/pull/60) changes
+  the behavior of the `RouteResult::getAllowedMethods()` to allow a nullable
+  return value; this will return `null` if all methods are allowed.
+
 ### Deprecated
 
 - Nothing.
