@@ -48,9 +48,9 @@ class ImplicitHeadMiddleware implements MiddlewareInterface
     const FORWARDED_HTTP_METHOD_ATTRIBUTE = 'forwarded_http_method';
 
     /**
-     * @var RouterInterface
+     * @var ResponseInterface
      */
-    private $router;
+    private $response;
 
     /**
      * @var callable
@@ -61,9 +61,9 @@ class ImplicitHeadMiddleware implements MiddlewareInterface
      * @param callable $streamFactory A factory capable of returning an empty
      *     StreamInterface instance to inject in a response.
      */
-    public function __construct(RouterInterface $router, callable $streamFactory)
+    public function __construct(ResponseInterface $response, callable $streamFactory)
     {
-        $this->router = $router;
+        $this->response = $response;
         $this->streamFactory = $streamFactory;
     }
 
@@ -87,18 +87,17 @@ class ImplicitHeadMiddleware implements MiddlewareInterface
             return $handler->{HANDLER_METHOD}($request);
         }
 
-        if ($result->getMatchedRoute()) {
+        $route = $result->getMatchedRoute();
+        if (! $route || ! $route->implicitHead()) {
             return $handler->{HANDLER_METHOD}($request);
         }
 
-        $routeResult = $this->router->match($request->withMethod(RequestMethod::METHOD_GET));
-        if ($routeResult->isFailure()) {
-            return $handler->{HANDLER_METHOD}($request);
+        if (! $route->allowsMethod(RequestMethod::METHOD_GET)) {
+            return $this->response;
         }
 
         $response = $handler->{HANDLER_METHOD}(
             $request
-                ->withAttribute(RouteResult::class, $routeResult)
                 ->withMethod(RequestMethod::METHOD_GET)
                 ->withAttribute(self::FORWARDED_HTTP_METHOD_ATTRIBUTE, RequestMethod::METHOD_HEAD)
         );
@@ -106,6 +105,6 @@ class ImplicitHeadMiddleware implements MiddlewareInterface
         $streamFactory = $this->streamFactory;
         /** @var StreamInterface $body */
         $body = $streamFactory();
-        return $response->withBody($body);
+        return $this->response->withBody($body);
     }
 }
