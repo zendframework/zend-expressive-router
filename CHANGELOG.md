@@ -11,6 +11,14 @@ All notable changes to this project will be documented in this file, in reverse 
   `Zend\Expressive\Router\Middleware\RouteMiddleware`. These are the same as the
   versions shipped in 2.3.0, but under a new namespace.
 
+- [#55](https://github.com/zendframework/zend-expressive-router/pull/55) adds
+  `Zend\Expressive\Router\Middleware\ImplicitHeadMiddleware`. It is imported
+  from zend-expressive, and implements the same functionality.
+
+- [#55](https://github.com/zendframework/zend-expressive-router/pull/55) adds
+  `Zend\Expressive\Router\Middleware\ImplicitOptionsMiddleware`. It is imported
+  from zend-expressive, and implements the same functionality.
+
 ### Changed
 
 - Nothing.
