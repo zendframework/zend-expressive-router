@@ -39,7 +39,7 @@ class RouteResultTest extends TestCase
     public function testRouteFailureRetrieveAllHttpMethods()
     {
         $result = RouteResult::fromRouteFailure(Route::HTTP_METHOD_ANY);
-        $this->assertSame(['*'], $result->getAllowedMethods());
+        $this->assertSame(Route::HTTP_METHOD_ANY, $result->getAllowedMethods());
     }
 
     public function testRouteFailureRetrieveHttpMethods()
@@ -122,7 +122,7 @@ class RouteResultTest extends TestCase
     public function testAllowedMethodsIncludesASingleWildcardEntryWhenAllMethodsAllowedForFailureResult(
         RouteResult $result
     ) {
-        $this->assertSame(['*'], $result->getAllowedMethods());
+        $this->assertSame(Route::HTTP_METHOD_ANY, $result->getAllowedMethods());
     }
 
     public function testFailureResultProcessedAsMiddlewareDelegatesToHandler()
