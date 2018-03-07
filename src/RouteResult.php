@@ -37,7 +37,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 class RouteResult implements MiddlewareInterface
 {
     /**
-     * @var array
+     * @var null|string[]
      */
     private $allowedMethods = [];
 
@@ -88,14 +88,7 @@ class RouteResult implements MiddlewareInterface
     {
         $result = new self();
         $result->success = false;
-
-        if ($methods === Route::HTTP_METHOD_ANY) {
-            $result->allowedMethods = ['*'];
-        }
-
-        if (is_array($methods)) {
-            $result->allowedMethods = $methods;
-        }
+        $result->allowedMethods = $methods;
 
         return $result;
     }
@@ -180,7 +173,7 @@ class RouteResult implements MiddlewareInterface
      */
     public function isMethodFailure() : bool
     {
-        if ($this->isSuccess() || ['*'] === $this->allowedMethods) {
+        if ($this->isSuccess() || $this->allowedMethods === Route::HTTP_METHOD_ANY) {
             return false;
         }
 
@@ -190,9 +183,9 @@ class RouteResult implements MiddlewareInterface
     /**
      * Retrieve the allowed methods for the route failure.
      *
-     * @return string[] HTTP methods allowed
+     * @return null|string[] HTTP methods allowed
      */
-    public function getAllowedMethods() : array
+    public function getAllowedMethods() : ?array
     {
         if ($this->isSuccess()) {
             return $this->route
