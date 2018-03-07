@@ -160,6 +160,12 @@ class Route implements MiddlewareInterface
      */
     private function validateHttpMethods(array $methods) : array
     {
+        if (empty($methods)) {
+            throw new Exception\InvalidArgumentException(
+                'HTTP methods argument was empty; must contain at least one method'
+            );
+        }
+
         if (false === array_reduce($methods, function ($valid, $method) {
             if (false === $valid) {
                 return false;

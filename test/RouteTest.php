@@ -71,13 +71,13 @@ class RouteTest extends TestCase
 
     public function testRouteHeadMethodIsNotAllowedByDefault()
     {
-        $route = new Route('/foo', $this->noopMiddleware, []);
+        $route = new Route('/foo', $this->noopMiddleware, ['GET']);
         $this->assertFalse($route->allowsMethod(RequestMethod::METHOD_HEAD));
     }
 
     public function testRouteOptionsMethodIsNotAllowedByDefault()
     {
-        $route = new Route('/foo', $this->noopMiddleware, []);
+        $route = new Route('/foo', $this->noopMiddleware, ['GET']);
         $this->assertFalse($route->allowsMethod(RequestMethod::METHOD_OPTIONS));
     }
 
@@ -103,7 +103,7 @@ class RouteTest extends TestCase
 
     public function testRouteNameWithConstructor()
     {
-        $route = new Route('/test', $this->noopMiddleware, [], 'test');
+        $route = new Route('/test', $this->noopMiddleware, ['GET'], 'test');
         $this->assertSame('test', $route->getName());
     }
 
@@ -229,5 +229,14 @@ class RouteTest extends TestCase
 
         $route = new Route('/foo', $middleware->reveal());
         $this->assertSame($response, $route->process($request, $handler));
+    }
+
+    public function testConstructorShouldRaiseExceptionIfMethodsArgumentIsAnEmptyArray()
+    {
+        $middleware = $this->prophesize(MiddlewareInterface::class)->reveal();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('empty');
+        new Route('/foo', $middleware, []);
     }
 }

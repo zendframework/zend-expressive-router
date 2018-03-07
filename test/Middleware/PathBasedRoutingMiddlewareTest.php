@@ -178,7 +178,7 @@ class PathBasedRoutingMiddlewareTest extends TestCase
     public function testCreatingHttpRouteMethodWithExistingPathButDifferentMethodCreatesNewRouteInstance()
     {
         $this->router->addRoute(Argument::type(Route::class))->shouldBeCalledTimes(2);
-        $route = $this->middleware->route('/foo', $this->noopMiddleware, []);
+        $route = $this->middleware->route('/foo', $this->noopMiddleware, ['POST']);
 
         $middleware = $this->createNoopMiddleware();
         $test = $this->middleware->get('/foo', $middleware);
