@@ -208,6 +208,9 @@ class Route
     /**
      * Whether or not HEAD support is implicit (i.e., not explicitly specified)
      *
+     * @deprecated Since 2.4.0; to be removed in 3.0.0. Router implementations
+     *     will be expected to return route failures for HEAD requests that
+     *     contain a full list of allowed methods.
      * @return bool
      */
     public function implicitHead()
@@ -218,6 +221,9 @@ class Route
     /**
      * Whether or not OPTIONS support is implicit (i.e., not explicitly specified)
      *
+     * @deprecated Since 2.4.0; to be removed in 3.0.0. Router implementations
+     *     will be expected to return route failures for OPTIONS requests that
+     *     contain a full list of allowed methods.
      * @return bool
      */
     public function implicitOptions()
