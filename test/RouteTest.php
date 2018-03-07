@@ -71,13 +71,13 @@ class RouteTest extends TestCase
 
     public function testRouteHeadMethodIsNotAllowedByDefault()
     {
-        $route = new Route('/foo', $this->noopMiddleware, ['GET']);
+        $route = new Route('/foo', $this->noopMiddleware, [RequestMethod::METHOD_GET]);
         $this->assertFalse($route->allowsMethod(RequestMethod::METHOD_HEAD));
     }
 
     public function testRouteOptionsMethodIsNotAllowedByDefault()
     {
-        $route = new Route('/foo', $this->noopMiddleware, ['GET']);
+        $route = new Route('/foo', $this->noopMiddleware, [RequestMethod::METHOD_GET]);
         $this->assertFalse($route->allowsMethod(RequestMethod::METHOD_OPTIONS));
     }
 
@@ -103,7 +103,7 @@ class RouteTest extends TestCase
 
     public function testRouteNameWithConstructor()
     {
-        $route = new Route('/test', $this->noopMiddleware, ['GET'], 'test');
+        $route = new Route('/test', $this->noopMiddleware, [RequestMethod::METHOD_GET], 'test');
         $this->assertSame('test', $route->getName());
     }
 
@@ -116,7 +116,7 @@ class RouteTest extends TestCase
     public function testRouteNameWithGetAndPost()
     {
         $route = new Route('/test', $this->noopMiddleware, [RequestMethod::METHOD_GET, RequestMethod::METHOD_POST]);
-        $this->assertSame('/test^GET' . Route::HTTP_METHOD_SEPARATOR . 'POST', $route->getName());
+        $this->assertSame('/test^GET' . Route::HTTP_METHOD_SEPARATOR . RequestMethod::METHOD_POST, $route->getName());
     }
 
     public function testThrowsExceptionDuringConstructionIfPathIsNotString()
