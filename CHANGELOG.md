@@ -148,6 +148,11 @@ All notable changes to this project will be documented in this file, in reverse 
   or `OPTIONS` requests if they are not explicitly in the list of allowed
   methods.
 
+- [#59](https://github.com/zendframework/zend-expressive-router/pull/59) changes
+  the behavior of the `Route` constructor: it now raises an exception if the
+  list of HTTP methods provided to it is empty. Routes MUST have one or more
+  HTTP methods associated.
+
 ### Deprecated
 
 - Nothing.
