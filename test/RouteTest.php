@@ -7,6 +7,9 @@
 
 namespace ZendTest\Expressive\Router;
 
+use Interop\Http\Middleware\ServerMiddlewareInterface as LegacyPre041MiddlewareInterface;
+use Interop\Http\ServerMiddleware\MiddlewareInterface as Legacy041MiddlewareInterface;
+use Interop\Http\Server\MiddlewareInterface as Legacy050MiddlewareInterface;
 use Fig\Http\Message\RequestMethodInterface as RequestMethod;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Prophecy\ObjectProphecy;
@@ -281,25 +284,59 @@ class RouteTest extends TestCase
 
     public function validNonInteropMiddleware()
     {
-        yield 'string-callable' => ['sprintf'];
-        yield 'array' => [['sprintf']];
-        yield 'array-callable' => [[$this, 'setUp']];
+        yield 'string-callable' => ['sprintf', '"callable:sprintf"'];
+        yield 'array' => [['sprintf'], '"array"'];
+        yield 'array-callable' => [[$this, 'setUp'], '"callable"'];
     }
 
     /**
      * @dataProvider validNonInteropMiddleware
      * @param mixed $middleware
+     * @param string $expectedMessage
      */
-    public function testPassingNonInteropMiddlewareToConstructorTriggersDeprecationNotice($middleware)
-    {
-        $spy = (object) ['found' => false];
+    public function testPassingNonInteropMiddlewareToConstructorTriggersDeprecationNotice(
+        $middleware,
+        $expectedMessage
+    ) {
+        $spy = (object) ['found' => false, 'message' => ''];
         $this->errorHandler = set_error_handler(function ($errno, $errstr) use ($spy) {
             $spy->found = true;
+            $spy->message = $errstr;
             return true;
         }, E_USER_DEPRECATED);
 
         new Route('/test', $middleware);
 
         $this->assertTrue($spy->found);
+        $this->assertContains($expectedMessage, $spy->message);
+    }
+
+    public function testNoDeprecationNoticeRaisedForValidHttpInteropMiddlewareArguments()
+    {
+        switch (true) {
+            case (interface_exists(LegacyPre041MiddlewareInterface::class)):
+                $class = LegacyPre041MiddlewareInterface::class;
+                break;
+            case (interface_exists(Legacy041MiddlewareInterface::class)):
+                $class = Legacy041MiddlewareInterface::class;
+                break;
+            case (interface_exists(Legacy050MiddlewareInterface::class)):
+                $class = Legacy050MiddlewareInterface::class;
+                break;
+            default:
+                $this->fail('No http-interop middleware interfaces detected? Did you run composer install?');
+        }
+        $middleware = $this->prophesize($class)->reveal();
+
+        $test = (object) ['triggered' => false];
+        set_error_handler(function ($errno, $errstr) use ($test) {
+            $test->triggered = true;
+            return true;
+        }, E_USER_DEPRECATED);
+        $route = new Route('/foo', $middleware);
+        restore_error_handler();
+
+        $this->assertSame($middleware, $route->getMiddleware());
+        $this->assertFalse($test->triggered);
     }
 }
