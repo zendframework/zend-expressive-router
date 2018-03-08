@@ -1,9 +1,11 @@
 <?php
 /**
  * @see       https://github.com/zendframework/zend-expressive-router for the canonical source repository
- * @copyright Copyright (c) 2018 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2018 Zend Technologies USA Inc. (https://www.zend.com)
  * @license   https://github.com/zendframework/zend-expressive-router/blob/master/LICENSE.md New BSD License
  */
+
+declare(strict_types=1);
 
 namespace ZendTest\Expressive\Router\Middleware;
 
@@ -34,34 +36,19 @@ class ImplicitOptionsMiddlewareFactoryTest extends TestCase
         $this->container->has(ResponseInterface::class)->willReturn(false);
 
         $this->expectException(MissingDependencyException::class);
-        $this->factory->__invoke($this->container->reveal());
+        ($this->factory)($this->container->reveal());
     }
 
     public function testFactoryProducesImplicitOptionsMiddlewareWhenAllDependenciesPresent()
     {
-        $response = $this->prophesize(ResponseInterface::class)->reveal();
-        $responseFactory = function () use ($response) {
-            return $response;
+        $factory = function () {
         };
 
         $this->container->has(ResponseInterface::class)->willReturn(true);
-        $this->container->get(ResponseInterface::class)->willReturn($responseFactory);
+        $this->container->get(ResponseInterface::class)->willReturn($factory);
 
-        $middleware = $this->factory->__invoke($this->container->reveal());
-
-        $this->assertInstanceOf(ImplicitOptionsMiddleware::class, $middleware);
-        $this->assertAttributeSame($response, 'response', $middleware);
-    }
-
-    public function testFactoryProducesImplicitOptionsMiddlewareWhenCResponseInstanceReturnedFromContainer()
-    {
-        $response = $this->prophesize(ResponseInterface::class)->reveal();
-        $this->container->has(ResponseInterface::class)->willReturn(true);
-        $this->container->get(ResponseInterface::class)->willReturn($response);
-
-        $middleware = $this->factory->__invoke($this->container->reveal());
+        $middleware = ($this->factory)($this->container->reveal());
 
         $this->assertInstanceOf(ImplicitOptionsMiddleware::class, $middleware);
-        $this->assertAttributeSame($response, 'response', $middleware);
     }
 }

@@ -1,9 +1,11 @@
 <?php
 /**
  * @see       https://github.com/zendframework/zend-expressive-router for the canonical source repository
- * @copyright Copyright (c) 2018 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2018 Zend Technologies USA Inc. (https://www.zend.com)
  * @license   https://github.com/zendframework/zend-expressive-router/blob/master/LICENSE.md New BSD License
  */
+
+declare(strict_types=1);
 
 namespace Zend\Expressive\Router\Middleware;
 
@@ -11,12 +13,10 @@ use Fig\Http\Message\RequestMethodInterface as RequestMethod;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
-use Webimpress\HttpMiddlewareCompatibility\HandlerInterface as RequestHandlerInterface;
-use Webimpress\HttpMiddlewareCompatibility\MiddlewareInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Expressive\Router\RouteResult;
 use Zend\Expressive\Router\RouterInterface;
-
-use const Webimpress\HttpMiddlewareCompatibility\HANDLER_METHOD;
 
 /**
  * Handle implicit HEAD requests.
@@ -45,12 +45,12 @@ use const Webimpress\HttpMiddlewareCompatibility\HANDLER_METHOD;
  */
 class ImplicitHeadMiddleware implements MiddlewareInterface
 {
-    const FORWARDED_HTTP_METHOD_ATTRIBUTE = 'forwarded_http_method';
+    public const FORWARDED_HTTP_METHOD_ATTRIBUTE = 'forwarded_http_method';
 
     /**
-     * @var ResponseInterface
+     * @var RouterInterface
      */
-    private $response;
+    private $router;
 
     /**
      * @var callable
@@ -61,10 +61,14 @@ class ImplicitHeadMiddleware implements MiddlewareInterface
      * @param callable $streamFactory A factory capable of returning an empty
      *     StreamInterface instance to inject in a response.
      */
-    public function __construct(ResponseInterface $response, callable $streamFactory)
+    public function __construct(RouterInterface $router, callable $streamFactory)
     {
-        $this->response = $response;
-        $this->streamFactory = $streamFactory;
+        $this->router = $router;
+
+        // Factory is wrapped in closur in order to enforce return type safety.
+        $this->streamFactory = function () use ($streamFactory) : StreamInterface {
+            return $streamFactory();
+        };
     }
 
     /**
@@ -73,38 +77,36 @@ class ImplicitHeadMiddleware implements MiddlewareInterface
      * If the route allows GET requests, dispatches as a GET request and
      * resets the response body to be empty; otherwise, creates a new empty
      * response.
-     *
-     * @return ResponseInterface
      */
-    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler)
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
     {
         if ($request->getMethod() !== RequestMethod::METHOD_HEAD) {
-            return $handler->{HANDLER_METHOD}($request);
+            return $handler->handle($request);
         }
 
         $result = $request->getAttribute(RouteResult::class);
         if (! $result) {
-            return $handler->{HANDLER_METHOD}($request);
+            return $handler->handle($request);
         }
 
-        $route = $result->getMatchedRoute();
-        if (! $route || ! $route->implicitHead()) {
-            return $handler->{HANDLER_METHOD}($request);
+        if ($result->getMatchedRoute()) {
+            return $handler->handle($request);
         }
 
-        if (! $route->allowsMethod(RequestMethod::METHOD_GET)) {
-            return $this->response;
+        $routeResult = $this->router->match($request->withMethod(RequestMethod::METHOD_GET));
+        if ($routeResult->isFailure()) {
+            return $handler->handle($request);
         }
 
-        $response = $handler->{HANDLER_METHOD}(
+        $response = $handler->handle(
             $request
+                ->withAttribute(RouteResult::class, $routeResult)
                 ->withMethod(RequestMethod::METHOD_GET)
                 ->withAttribute(self::FORWARDED_HTTP_METHOD_ATTRIBUTE, RequestMethod::METHOD_HEAD)
         );
 
-        $streamFactory = $this->streamFactory;
         /** @var StreamInterface $body */
-        $body = $streamFactory();
+        $body = ($this->streamFactory)();
         return $response->withBody($body);
     }
 }

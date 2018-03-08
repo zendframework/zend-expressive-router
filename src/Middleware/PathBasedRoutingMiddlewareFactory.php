@@ -14,28 +14,28 @@ use Zend\Expressive\Router\Exception\MissingDependencyException;
 use Zend\Expressive\Router\RouterInterface;
 
 /**
- * Create and return a RouteMiddleware instance.
+ * Create and return a PathBasedRoutingMiddleware instance.
  *
  * This factory depends on one other service:
  *
  * - Zend\Expressive\Router\RouterInterface, which should resolve to
  *   a class implementing that interface.
  */
-class RouteMiddlewareFactory
+class PathBasedRoutingMiddlewareFactory
 {
     /**
      * @throws MissingDependencyException if the RouterInterface service is
      *     missing.
      */
-    public function __invoke(ContainerInterface $container) : RouteMiddleware
+    public function __invoke(ContainerInterface $container) : PathBasedRoutingMiddleware
     {
         if (! $container->has(RouterInterface::class)) {
             throw MissingDependencyException::dependencyForService(
                 RouterInterface::class,
-                RouteMiddleware::class
+                PathBasedRoutingMiddleware::class
             );
         }
 
-        return new RouteMiddleware($container->get(RouterInterface::class));
+        return new PathBasedRoutingMiddleware($container->get(RouterInterface::class));
     }
 }

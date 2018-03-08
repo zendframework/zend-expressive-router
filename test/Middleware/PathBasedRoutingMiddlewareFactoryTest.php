@@ -13,22 +13,22 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Prophecy\ObjectProphecy;
 use Psr\Container\ContainerInterface;
 use Zend\Expressive\Router\Exception\MissingDependencyException;
-use Zend\Expressive\Router\Middleware\RouteMiddleware;
-use Zend\Expressive\Router\Middleware\RouteMiddlewareFactory;
+use Zend\Expressive\Router\Middleware\PathBasedRoutingMiddleware;
+use Zend\Expressive\Router\Middleware\PathBasedRoutingMiddlewareFactory;
 use Zend\Expressive\Router\RouterInterface;
 
-class RouteMiddlewareFactoryTest extends TestCase
+class PathBasedRoutingMiddlewareFactoryTest extends TestCase
 {
     /** @var ContainerInterface|ObjectProphecy */
     private $container;
 
-    /** @var RouteMiddlewareFactory */
+    /** @var PathBasedRoutingMiddlewareFactory */
     private $factory;
 
     public function setUp()
     {
         $this->container = $this->prophesize(ContainerInterface::class);
-        $this->factory = new RouteMiddlewareFactory();
+        $this->factory = new PathBasedRoutingMiddlewareFactory();
     }
 
     public function testFactoryRaisesExceptionIfRouterServiceIsMissing()
@@ -39,7 +39,7 @@ class RouteMiddlewareFactoryTest extends TestCase
         ($this->factory)($this->container->reveal());
     }
 
-    public function testFactoryProducesRouteMiddlewareWhenAllDependenciesPresent()
+    public function testFactoryProducesPathBasedRoutingMiddlewareWhenAllDependenciesPresent()
     {
         $router = $this->prophesize(RouterInterface::class)->reveal();
         $this->container->has(RouterInterface::class)->willReturn(true);
@@ -47,6 +47,6 @@ class RouteMiddlewareFactoryTest extends TestCase
 
         $middleware = ($this->factory)($this->container->reveal());
 
-        $this->assertInstanceOf(RouteMiddleware::class, $middleware);
+        $this->assertInstanceOf(PathBasedRoutingMiddleware::class, $middleware);
     }
 }

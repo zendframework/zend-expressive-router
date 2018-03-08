@@ -1,14 +1,18 @@
 <?php
 /**
  * @see       https://github.com/zendframework/zend-expressive-router for the canonical source repository
- * @copyright Copyright (c) 2015-2016 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2015-2018 Zend Technologies USA Inc. (https://www.zend.com)
  * @license   https://github.com/zendframework/zend-expressive-router/blob/master/LICENSE.md New BSD License
  */
 
+declare(strict_types=1);
+
 namespace Zend\Expressive\Router;
 
-use Fig\Http\Message\RequestMethodInterface as RequestMethod;
-use Webimpress\HttpMiddlewareCompatibility\MiddlewareInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 /**
  * Value object representing a single route.
@@ -25,30 +29,18 @@ use Webimpress\HttpMiddlewareCompatibility\MiddlewareInterface;
  * be provided after instantiation via the "options" property and related
  * setOptions() method.
  */
-class Route
+class Route implements MiddlewareInterface
 {
-    const HTTP_METHOD_ANY = 0xff;
-    const HTTP_METHOD_SEPARATOR = ':';
+    public const HTTP_METHOD_ANY = null;
+    public const HTTP_METHOD_SEPARATOR = ':';
 
     /**
-     * @var bool If HEAD was not provided to the Route instance, indicate
-     *     support for the method is implicit.
+     * @var null|string[] HTTP methods allowed with this route.
      */
-    private $implicitHead = true;
+    private $methods;
 
     /**
-     * @var bool If OPTIONS was not provided to the Route instance, indicate
-     *     support for the method is implicit.
-     */
-    private $implicitOptions = true;
-
-    /**
-     * @var int|string[] HTTP methods allowed with this route.
-     */
-    private $methods = self::HTTP_METHOD_ANY;
-
-    /**
-     * @var callable|string Middleware or service name of middleware associated with route.
+     * @var MiddlewareInterface Middleware associated with route.
      */
     private $middleware;
 
@@ -69,102 +61,63 @@ class Route
 
     /**
      * @param string $path Path to match.
-     * @param string|callable|MiddlewareInterface $middleware Middleware to use when this route is matched.
-     * @param int|array $methods Allowed HTTP methods; defaults to HTTP_METHOD_ANY.
-     * @param string|null $name the route name
-     * @throws Exception\InvalidArgumentException for invalid path type.
-     * @throws Exception\InvalidArgumentException for invalid middleware type.
-     * @throws Exception\InvalidArgumentException for any invalid HTTP method names.
+     * @param MiddlewareInterface $middleware Middleware to use when this route is matched.
+     * @param null|string[] $methods Allowed HTTP methods; defaults to HTTP_METHOD_ANY.
+     * @param null|string $name the route name
      */
-    public function __construct($path, $middleware, $methods = self::HTTP_METHOD_ANY, $name = null)
-    {
-        if (! is_string($path)) {
-            throw new Exception\InvalidArgumentException('Invalid path; must be a string');
-        }
-
-        if (! $middleware instanceof MiddlewareInterface) {
-            trigger_error(sprintf(
-                '%1$s will not accept anything other than objects implementing the MiddlewareInterface'
-                . ' starting in version 3.0.0. Please update your code to create %1$s instances'
-                . ' using MiddlewareInterface instances.',
-                __CLASS__
-            ), E_USER_DEPRECATED);
-        }
-
-        if (! is_callable($middleware)
-            && ! $middleware instanceof MiddlewareInterface
-            && ! is_string($middleware)
-            && ! is_array($middleware)
-        ) {
-            throw new Exception\InvalidArgumentException(sprintf(
-                'Invalid middleware; must be a callable, a %s instance, a service name, '
-                . 'or an array of any of these types',
-                MiddlewareInterface::class
-            ));
-        }
-
-        if ($methods !== self::HTTP_METHOD_ANY && ! is_array($methods)) {
-            throw new Exception\InvalidArgumentException(sprintf(
-                'Invalid HTTP methods; must be an array or %s::HTTP_METHOD_ANY',
-                __CLASS__
-            ));
-        }
-
+    public function __construct(
+        string $path,
+        MiddlewareInterface $middleware,
+        array $methods = self::HTTP_METHOD_ANY,
+        string $name = null
+    ) {
         $this->path       = $path;
         $this->middleware = $middleware;
         $this->methods    = is_array($methods) ? $this->validateHttpMethods($methods) : $methods;
 
-        if (empty($name)) {
-            $name = ($this->methods === self::HTTP_METHOD_ANY)
+        if (! $name) {
+            $name = $this->methods === self::HTTP_METHOD_ANY
                 ? $path
                 : $path . '^' . implode(self::HTTP_METHOD_SEPARATOR, $this->methods);
         }
         $this->name = $name;
-
-        $this->implicitHead = is_array($this->methods)
-            && ! in_array(RequestMethod::METHOD_HEAD, $this->methods, true);
-        $this->implicitOptions = is_array($this->methods)
-            && ! in_array(RequestMethod::METHOD_OPTIONS, $this->methods, true);
     }
 
     /**
-     * @return string
+     * Proxies to the middleware composed during instantiation.
      */
-    public function getPath()
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
+    {
+        return $this->middleware->process($request, $handler);
+    }
+
+    public function getPath() : string
     {
         return $this->path;
     }
 
     /**
      * Set the route name.
-     *
-     * @param string $name
      */
-    public function setName($name)
+    public function setName(string $name) : void
     {
-        $this->name = (string) $name;
+        $this->name = $name;
     }
 
-    /**
-     * @return string
-     */
-    public function getName()
+    public function getName() : string
     {
         return $this->name;
     }
 
-    /**
-     * @return string|callable|MiddlewareInterface
-     */
-    public function getMiddleware()
+    public function getMiddleware() : MiddlewareInterface
     {
         return $this->middleware;
     }
 
     /**
-     * @return int|string[] Returns HTTP_METHOD_ANY or array of allowed methods.
+     * @return null|string[] Returns HTTP_METHOD_ANY or array of allowed methods.
      */
-    public function getAllowedMethods()
+    public function getAllowedMethods() : ?array
     {
         return $this->methods;
     }
@@ -173,14 +126,11 @@ class Route
      * Indicate whether the specified method is allowed by the route.
      *
      * @param string $method HTTP method to test.
-     * @return bool
      */
-    public function allowsMethod($method)
+    public function allowsMethod(string $method) : bool
     {
         $method = strtoupper($method);
-        if (RequestMethod::METHOD_HEAD === $method
-            || RequestMethod::METHOD_OPTIONS === $method
-            || $this->methods === self::HTTP_METHOD_ANY
+        if ($this->methods === self::HTTP_METHOD_ANY
             || in_array($method, $this->methods, true)
         ) {
             return true;
@@ -189,46 +139,14 @@ class Route
         return false;
     }
 
-    /**
-     * @param array $options
-     */
-    public function setOptions(array $options)
+    public function setOptions(array $options) : void
     {
         $this->options = $options;
     }
 
-    /**
-     * @return array
-     */
-    public function getOptions()
+    public function getOptions() : array
     {
         return $this->options;
-    }
-
-    /**
-     * Whether or not HEAD support is implicit (i.e., not explicitly specified)
-     *
-     * @deprecated Since 2.4.0; to be removed in 3.0.0. Router implementations
-     *     will be expected to return route failures for HEAD requests that
-     *     contain a full list of allowed methods.
-     * @return bool
-     */
-    public function implicitHead()
-    {
-        return $this->implicitHead;
-    }
-
-    /**
-     * Whether or not OPTIONS support is implicit (i.e., not explicitly specified)
-     *
-     * @deprecated Since 2.4.0; to be removed in 3.0.0. Router implementations
-     *     will be expected to return route failures for OPTIONS requests that
-     *     contain a full list of allowed methods.
-     * @return bool
-     */
-    public function implicitOptions()
-    {
-        return $this->implicitOptions;
     }
 
     /**
@@ -240,8 +158,14 @@ class Route
      * @return string[]
      * @throws Exception\InvalidArgumentException for any invalid method names.
      */
-    private function validateHttpMethods(array $methods)
+    private function validateHttpMethods(array $methods) : array
     {
+        if (empty($methods)) {
+            throw new Exception\InvalidArgumentException(
+                'HTTP methods argument was empty; must contain at least one method'
+            );
+        }
+
         if (false === array_reduce($methods, function ($valid, $method) {
             if (false === $valid) {
                 return false;
