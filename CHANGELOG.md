@@ -157,10 +157,6 @@ All notable changes to this project will be documented in this file, in reverse 
   the behavior of the `RouteResult::getAllowedMethods()` to allow a nullable
   return value; this will return `null` if all methods are allowed.
 
-### Deprecated
-
-- Nothing.
-
 ### Removed
 
 - [#39](https://github.com/zendframework/zend-expressive-router/pull/39) and
@@ -184,6 +180,32 @@ All notable changes to this project will be documented in this file, in reverse 
   logic in the `ImplicitHeadMiddleware` and `ImplicitOptionsMiddleware` classes
   with regards to how they determine that an implicit `HEAD` or `OPTIONS`
   request (respectively) has occurred.
+
+## 2.4.1 - 2018-03-08
+
+### Added
+
+- Nothing.
+
+### Changed
+
+- [#63](https://github.com/zendframework/zend-expressive-router/pull/63)
+  improves the deprecation notice raised by the `Zend\Expressive\Router\Route`
+  constructor when non-middleware interface implementations are passed for the
+  `$middleware` argument. The message not contains the path, HTTP methods, and
+  middleware type that were used to create the `Route` instance.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- Nothing.
 
 ## 2.4.0 - 2018-03-08
 
