@@ -19,6 +19,19 @@ All notable changes to this project will be documented in this file, in reverse 
   `Zend\Expressive\Router\Middleware\ImplicitOptionsMiddleware`. It is imported
   from zend-expressive, and implements the same functionality.
 
+- [#57](https://github.com/zendframework/zend-expressive-router/pull/57) adds
+  the following factories for use with PSR-11 containers:
+
+  - Zend\Expressive\Router\Middleware\DispatchMiddlewareFactory`
+  - Zend\Expressive\Router\Middleware\ImplicitHeadMiddlewareFactory`
+  - Zend\Expressive\Router\Middleware\ImplicitOptionsMiddlewareFactory`
+  - Zend\Expressive\Router\Middleware\RouteMiddlewareFactory`
+
+- [#57](https://github.com/zendframework/zend-expressive-router/pull/57) adds
+  `Zend\Expressive\Router\ConfigProvider`, mapping the above factories to their
+  respective middleware, and exposing it to zend-component-installer via the
+  package definition.
+
 ### Changed
 
 - Nothing.
