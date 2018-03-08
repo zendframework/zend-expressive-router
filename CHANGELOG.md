@@ -11,6 +11,14 @@ All notable changes to this project will be documented in this file, in reverse 
   `Zend\Expressive\Router\Middleware\RouteMiddleware`. These are the same as the
   versions shipped in 2.3.0, but under a new namespace.
 
+- [#55](https://github.com/zendframework/zend-expressive-router/pull/55) adds
+  `Zend\Expressive\Router\Middleware\ImplicitHeadMiddleware`. It is imported
+  from zend-expressive, and implements the same functionality.
+
+- [#55](https://github.com/zendframework/zend-expressive-router/pull/55) adds
+  `Zend\Expressive\Router\Middleware\ImplicitOptionsMiddleware`. It is imported
+  from zend-expressive, and implements the same functionality.
+
 ### Changed
 
 - Nothing.
@@ -33,6 +41,15 @@ All notable changes to this project will be documented in this file, in reverse 
   `Zend\Expressive\Router\RouteMiddleware`. The final versions in the v3 release
   will be under the `Zend\Expressive\Router\Middleware` namespace; please use
   those instead.
+
+- [#55](https://github.com/zendframework/zend-expressive-router/pull/55)
+  deprecates two methods in `Zend\Expressive\Router\Route`:
+
+  - `implicitHead()`
+  - `implicitOptions()`
+
+  Starting in 3.0.0, implementations will need to return route result failures
+  that include all allowed methods when matching `HEAD` or `OPTIONS` implicitly.
 
 ### Removed
 
