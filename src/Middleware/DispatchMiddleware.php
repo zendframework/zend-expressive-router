@@ -7,9 +7,6 @@
 
 namespace Zend\Expressive\Router\Middleware;
 
-use Interop\Http\Middleware\ServerMiddlewareInterface as LegacyLegacyMiddlewareInterface;
-use Interop\Http\ServerMiddleware\MiddlewareInterface as LegacyMiddlewareInterface;
-use Interop\Http\Server\MiddlewareInterface as InteropMiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Webimpress\HttpMiddlewareCompatibility\HandlerInterface;
@@ -47,10 +44,7 @@ class DispatchMiddleware implements MiddlewareInterface
 
         $middleware = $routeResult->getMatchedMiddleware();
 
-        if (! $middleware instanceof LegacyLegacyMiddlewareInterface
-            && ! $middleware instanceof LegacyMiddlewareInterface
-            && ! $middleware instanceof InteropMiddlewareInterface
-        ) {
+        if (! $middleware instanceof MiddlewareInterface) {
             throw new Exception\RuntimeException(sprintf(
                 'Unknown middleware type stored in route; %s expects an http-interop'
                 . ' middleware instance; received %s',
