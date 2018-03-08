@@ -284,26 +284,31 @@ class RouteTest extends TestCase
 
     public function validNonInteropMiddleware()
     {
-        yield 'string-callable' => ['sprintf'];
-        yield 'array' => [['sprintf']];
-        yield 'array-callable' => [[$this, 'setUp']];
+        yield 'string-callable' => ['sprintf', '"callable:sprintf"'];
+        yield 'array' => [['sprintf'], '"array"'];
+        yield 'array-callable' => [[$this, 'setUp'], '"callable"'];
     }
 
     /**
      * @dataProvider validNonInteropMiddleware
      * @param mixed $middleware
+     * @param string $expectedMessage
      */
-    public function testPassingNonInteropMiddlewareToConstructorTriggersDeprecationNotice($middleware)
-    {
-        $spy = (object) ['found' => false];
+    public function testPassingNonInteropMiddlewareToConstructorTriggersDeprecationNotice(
+        $middleware,
+        $expectedMessage
+    ) {
+        $spy = (object) ['found' => false, 'message' => ''];
         $this->errorHandler = set_error_handler(function ($errno, $errstr) use ($spy) {
             $spy->found = true;
+            $spy->message = $errstr;
             return true;
         }, E_USER_DEPRECATED);
 
         new Route('/test', $middleware);
 
         $this->assertTrue($spy->found);
+        $this->assertContains($expectedMessage, $spy->message);
     }
 
     public function testNoDeprecationNoticeRaisedForValidHttpInteropMiddlewareArguments()
