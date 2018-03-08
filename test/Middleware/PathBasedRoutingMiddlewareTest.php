@@ -197,4 +197,28 @@ class PathBasedRoutingMiddlewareTest extends TestCase
         $this->expectException(Exception\DuplicateRouteException::class);
         $this->middleware->get('/foo', $this->createNoopMiddleware());
     }
+
+    public function testGetRoutes()
+    {
+        $middleware1 = $this->prophesize(MiddlewareInterface::class)->reveal();
+        $this->middleware->any('/foo', $middleware1, 'abc');
+        $middleware2 = $this->prophesize(MiddlewareInterface::class)->reveal();
+        $this->middleware->get('/bar', $middleware2, 'def');
+
+        $routes = $this->middleware->getRoutes();
+
+        $this->assertInternalType('array', $routes);
+        $this->assertCount(2, $routes);
+        $this->assertContainsOnlyInstancesOf(Route::class, $routes);
+
+        $this->assertSame('/foo', $routes[0]->getPath());
+        $this->assertSame($middleware1, $routes[0]->getMiddleware());
+        $this->assertSame('abc', $routes[0]->getName());
+        $this->assertNull($routes[0]->getAllowedMethods());
+
+        $this->assertSame('/bar', $routes[1]->getPath());
+        $this->assertSame($middleware2, $routes[1]->getMiddleware());
+        $this->assertSame('def', $routes[1]->getName());
+        $this->assertSame([RequestMethod::METHOD_GET], $routes[1]->getAllowedMethods());
+    }
 }
