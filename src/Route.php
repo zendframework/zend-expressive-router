@@ -82,6 +82,15 @@ class Route
             throw new Exception\InvalidArgumentException('Invalid path; must be a string');
         }
 
+        if (! $middleware instanceof MiddlewareInterface) {
+            trigger_error(sprintf(
+                '%1$s will not accept anything other than objects implementing the MiddlewareInterface'
+                . ' starting in version 3.0.0. Please update your code to create %1$s instances'
+                . ' using MiddlewareInterface instances.',
+                __CLASS__
+            ), E_USER_DEPRECATED);
+        }
+
         if (! is_callable($middleware)
             && ! $middleware instanceof MiddlewareInterface
             && ! is_string($middleware)
@@ -199,6 +208,9 @@ class Route
     /**
      * Whether or not HEAD support is implicit (i.e., not explicitly specified)
      *
+     * @deprecated Since 2.4.0; to be removed in 3.0.0. Router implementations
+     *     will be expected to return route failures for HEAD requests that
+     *     contain a full list of allowed methods.
      * @return bool
      */
     public function implicitHead()
@@ -209,6 +221,9 @@ class Route
     /**
      * Whether or not OPTIONS support is implicit (i.e., not explicitly specified)
      *
+     * @deprecated Since 2.4.0; to be removed in 3.0.0. Router implementations
+     *     will be expected to return route failures for OPTIONS requests that
+     *     contain a full list of allowed methods.
      * @return bool
      */
     public function implicitOptions()

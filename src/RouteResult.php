@@ -147,6 +147,10 @@ class RouteResult
     /**
      * Retrieve the matched middleware, if possible.
      *
+     * @deprecated since 2.4.0; to remove in 3.0.0. Retrieve using
+     *     `getMatchedRoute()->getMiddleware()` if access is required. In version 3,
+     *     RouteResult will implement the PSR-15 MiddlewareInterface, and proxy to the
+     *     matched middleware if present, and to the handler argument otherwise.
      * @return false|callable|string|MiddlewareInterface|array Returns false if
      *     the result represents a failure; otherwise, a callable, a string
      *     service name, a MiddlewareInterface instance, or array of any of

@@ -5,7 +5,7 @@
  * @license   https://github.com/zendframework/zend-expressive-router/blob/master/LICENSE.md New BSD License
  */
 
-namespace ZendTest\Expressive\Router;
+namespace ZendTest\Expressive\Router\Middleware;
 
 use PHPUnit\Framework\TestCase;
 use Prophecy\Prophecy\ObjectProphecy;
@@ -22,6 +22,9 @@ use const Webimpress\HttpMiddlewareCompatibility\HANDLER_METHOD;
 
 class DispatchMiddlewareTest extends TestCase
 {
+    /** @var null|callable */
+    private $errorHandler;
+
     /** @var HandlerInterface|ObjectProphecy */
     private $handler;
 
@@ -33,6 +36,14 @@ class DispatchMiddlewareTest extends TestCase
         $this->request    = $this->prophesize(ServerRequestInterface::class);
         $this->handler    = $this->prophesize(HandlerInterface::class);
         $this->middleware = new DispatchMiddleware();
+    }
+
+    public function tearDown()
+    {
+        if ($this->errorHandler) {
+            restore_error_handler();
+            $this->errorHandler = null;
+        }
     }
 
     public function testInvokesDelegateIfRequestDoesNotContainRouteResult()
@@ -85,6 +96,10 @@ class DispatchMiddlewareTest extends TestCase
      */
     public function testInvalidRoutedMiddlewareInRouteResultResultsInException($middleware)
     {
+        $this->errorHandler = set_error_handler(function ($errno, $errstr) {
+            return true;
+        }, E_USER_DEPRECATED);
+
         $this->handler->{HANDLER_METHOD}()->shouldNotBeCalled();
         $routeResult = RouteResult::fromRoute(new Route('/', $middleware));
         $this->request->getAttribute(RouteResult::class, false)->willReturn($routeResult);

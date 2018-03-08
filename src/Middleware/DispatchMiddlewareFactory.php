@@ -5,12 +5,17 @@
  * @license   https://github.com/zendframework/zend-expressive-router/blob/master/LICENSE.md New BSD License
  */
 
-namespace Zend\Expressive\Router;
+namespace Zend\Expressive\Router\Middleware;
 
-/**
- * @deprecated since 2.4.0; to remove in 3.0.0. Use
- *     Zend\Expressive\Router\Middleware\RouteMiddleware instead.
- */
-class RouteMiddleware extends Middleware\RouteMiddleware
+use Psr\Container\ContainerInterface;
+
+class DispatchMiddlewareFactory
 {
+    /**
+     * @return DispatchMiddleware
+     */
+    public function __invoke(ContainerInterface $container)
+    {
+        return new DispatchMiddleware();
+    }
 }

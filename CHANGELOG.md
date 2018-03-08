@@ -2,6 +2,76 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
+## 2.4.0 - TBD
+
+### Added
+
+- [#54](https://github.com/zendframework/zend-expressive-router/pull/54) adds
+  the middleware `Zend\Expressive\Router\Middleware\DispatchMiddleware` and
+  `Zend\Expressive\Router\Middleware\RouteMiddleware`. These are the same as the
+  versions shipped in 2.3.0, but under a new namespace.
+
+- [#55](https://github.com/zendframework/zend-expressive-router/pull/55) adds
+  `Zend\Expressive\Router\Middleware\ImplicitHeadMiddleware`. It is imported
+  from zend-expressive, and implements the same functionality.
+
+- [#55](https://github.com/zendframework/zend-expressive-router/pull/55) adds
+  `Zend\Expressive\Router\Middleware\ImplicitOptionsMiddleware`. It is imported
+  from zend-expressive, and implements the same functionality.
+
+- [#57](https://github.com/zendframework/zend-expressive-router/pull/57) adds
+  the following factories for use with PSR-11 containers:
+
+  - Zend\Expressive\Router\Middleware\DispatchMiddlewareFactory`
+  - Zend\Expressive\Router\Middleware\ImplicitHeadMiddlewareFactory`
+  - Zend\Expressive\Router\Middleware\ImplicitOptionsMiddlewareFactory`
+  - Zend\Expressive\Router\Middleware\RouteMiddlewareFactory`
+
+- [#57](https://github.com/zendframework/zend-expressive-router/pull/57) adds
+  `Zend\Expressive\Router\ConfigProvider`, mapping the above factories to their
+  respective middleware, and exposing it to zend-component-installer via the
+  package definition.
+
+### Changed
+
+- Nothing.
+
+### Deprecated
+
+- [#56](https://github.com/zendframework/zend-expressive-router/pull/56)
+  deprecates the method `Zend\Expressive\RouteResult::getMatchedMiddleware()`,
+  as it will be removed in version 3. If you need access to the middleware,
+  use `getMatchedRoute()->getMiddleware()`. (In version 3, the `RouteResult`
+  _is_ middleware, and will proxy to it.)
+
+- [#56](https://github.com/zendframework/zend-expressive-router/pull/56)
+  deprecates passing non-MiddlewareInterface instances to the constructor of
+  `Zend\Expressive\Route`. The class now triggers a deprecation notice when this
+  occurs, indicating the changes the developer needs to make.
+
+- [#54](https://github.com/zendframework/zend-expressive-router/pull/54)
+  deprecates the middleware `Zend\Expressive\Router\DispatchMiddleware` and
+  `Zend\Expressive\Router\RouteMiddleware`. The final versions in the v3 release
+  will be under the `Zend\Expressive\Router\Middleware` namespace; please use
+  those instead.
+
+- [#55](https://github.com/zendframework/zend-expressive-router/pull/55)
+  deprecates two methods in `Zend\Expressive\Router\Route`:
+
+  - `implicitHead()`
+  - `implicitOptions()`
+
+  Starting in 3.0.0, implementations will need to return route result failures
+  that include all allowed methods when matching `HEAD` or `OPTIONS` implicitly.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- Nothing.
+
 ## 2.3.0 - 2018-02-01
 
 ### Added
