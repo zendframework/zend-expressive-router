@@ -53,9 +53,8 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "2.3.x-dev",
-            "dev-develop": "2.4.x-dev",
-            "dev-release-3.0.0": "3.0.x-dev"
+            "dev-master": "2.4.x-dev",
+            "dev-develop": "3.0.x-dev"
         },
         "zf": {
             "config-provider": "Zend\\Expressive\\Router\\ConfigProvider"
