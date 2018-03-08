@@ -27,6 +27,7 @@
         "webimpress/http-middleware-compatibility": "^0.1.1"
     },
     "require-dev": {
+        "http-interop/http-middleware": "0.4.1",
         "malukenho/docheader": "^0.1.5",
         "phpunit/phpunit": "^5.7.23 || ^6.4.3",
         "zendframework/zend-coding-standard": "~1.0.0"
