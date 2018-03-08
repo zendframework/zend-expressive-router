@@ -287,8 +287,8 @@ class Route
         trigger_error(sprintf(
             '%1$s will not accept anything other than objects implementing the MiddlewareInterface'
             . ' starting in version 3.0.0; we detected usage of "%2$s" for path "%3$s" using methods %4$s.'
-            . ' Please update your code to create %1$s instances'
-            . ' using MiddlewareInterface instances.',
+            . ' Please update your code to create middleware instances implementing MiddlewareInterface;'
+            . ' use decorators for callable middleware if needed.',
             __CLASS__,
             $type,
             $path,
