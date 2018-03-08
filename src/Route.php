@@ -272,7 +272,7 @@ class Route
             $type = 'callable:' . $middleware;
         } elseif (is_string($middleware) && ! is_callable($middleware)) {
             $type = 'string:' . $middleware;
-        } elseif (is_callable($middleware) && is_object($middleware)) {
+        } elseif (is_object($middleware)) {
             $type = get_class($middleware);
         } elseif (is_callable($middleware)) {
             $type = 'callable';
