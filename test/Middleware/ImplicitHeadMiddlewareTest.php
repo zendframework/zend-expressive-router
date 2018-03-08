@@ -133,35 +133,33 @@ class ImplicitHeadMiddlewareTest extends TestCase
 
     public function testInvokesHandlerWhenRouteImplicitlySupportsHeadAndSupportsGet()
     {
-        $result = $this->prophesize(RouteResult::class);
-        $result->getMatchedRoute()->willReturn(false);
+        $headRoute = $this->prophesize(Route::class);
+        $headRoute->implicitHead()->willReturn(true);
+        $headRoute->allowsMethod(RequestMethod::METHOD_GET)->willReturn(true);
+
+        $headResult = $this->prophesize(RouteResult::class);
+        $headResult->getMatchedRoute()->will([$headRoute, 'reveal']);
+
+        $handler = $this->prophesize(RequestHandlerInterface::class);
+
+        $response = $this->prophesize(ResponseInterface::class);
+        $response->withBody($this->stream->reveal())->will([$response, 'reveal']);
 
         $request = $this->prophesize(ServerRequestInterface::class);
         $request->getMethod()->willReturn(RequestMethod::METHOD_HEAD);
-        $request->getAttribute(RouteResult::class)->will([$result, 'reveal']);
+        $request->getAttribute(RouteResult::class)->will([$headResult, 'reveal']);
         $request->withMethod(RequestMethod::METHOD_GET)->will([$request, 'reveal']);
         $request
             ->withAttribute(
                 ImplicitHeadMiddleware::FORWARDED_HTTP_METHOD_ATTRIBUTE,
                 RequestMethod::METHOD_HEAD
             )
-            ->will([$request, 'reveal']);
-
-        $response = $this->prophesize(ResponseInterface::class);
-        $response->withBody($this->stream->reveal())->will([$response, 'reveal']);
-
-        $route = $this->prophesize(Route::class);
-
-        $result = $this->prophesize(RouteResult::class);
-        $result->isFailure()->willReturn(false);
-        $result->getMatchedRoute()->will([$route, 'reveal']);
-
-        $request->withAttribute(RouteResult::class, $result->reveal())->will([$request, 'reveal']);
-
-        $handler = $this->prophesize(RequestHandlerInterface::class);
-        $handler
-            ->{HANDLER_METHOD}(Argument::that([$request, 'reveal']))
-            ->will([$response, 'reveal']);
+            ->will(function () use ($request, $response, $handler) {
+                $handler
+                    ->{HANDLER_METHOD}(Argument::that([$request, 'reveal']))
+                    ->will([$response, 'reveal']);
+                return $request->reveal();
+            });
 
         $result = $this->middleware->process($request->reveal(), $handler->reveal());
 

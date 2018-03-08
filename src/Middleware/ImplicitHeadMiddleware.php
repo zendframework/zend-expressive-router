@@ -105,6 +105,6 @@ class ImplicitHeadMiddleware implements MiddlewareInterface
         $streamFactory = $this->streamFactory;
         /** @var StreamInterface $body */
         $body = $streamFactory();
-        return $this->response->withBody($body);
+        return $response->withBody($body);
     }
 }
