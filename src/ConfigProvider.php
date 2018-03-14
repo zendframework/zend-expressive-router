@@ -27,8 +27,8 @@ class ConfigProvider
                 Middleware\ImplicitHeadMiddleware::class     => Middleware\ImplicitHeadMiddlewareFactory::class,
                 Middleware\ImplicitOptionsMiddleware::class  => Middleware\ImplicitOptionsMiddlewareFactory::class,
                 Middleware\MethodNotAllowedMiddleware::class => Middleware\MethodNotAllowedMiddlewareFactory::class,
-                Middleware\PathBasedRoutingMiddleware::class => Middleware\PathBasedRoutingMiddlewareFactory::class,
                 Middleware\RouteMiddleware::class            => Middleware\RouteMiddlewareFactory::class,
+                RouteCollector::class                        => RouteCollectorFactory::class,
             ]
         ];
         // @codingStandardsIgnoreEnd

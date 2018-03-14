@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace ZendTest\Expressive\Router\Middleware;
+namespace ZendTest\Expressive\Router;
 
 use Fig\Http\Message\RequestMethodInterface as RequestMethod;
 use PHPUnit\Framework\TestCase;
@@ -19,11 +19,11 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use TypeError;
 use Zend\Expressive\Router\Exception;
-use Zend\Expressive\Router\Middleware\PathBasedRoutingMiddleware;
 use Zend\Expressive\Router\Route;
+use Zend\Expressive\Router\RouteCollector;
 use Zend\Expressive\Router\RouterInterface;
 
-class PathBasedRoutingMiddlewareTest extends TestCase
+class RouteCollectorTest extends TestCase
 {
     /** @var RouterInterface|ObjectProphecy */
     private $router;
@@ -31,7 +31,7 @@ class PathBasedRoutingMiddlewareTest extends TestCase
     /** @var ResponseInterface|ObjectProphecy */
     private $response;
 
-    /** @var PathBasedRoutingMiddleware */
+    /** @var RouteCollector */
     private $middleware;
 
     /** @var ServerRequestInterface|ObjectProphecy */
@@ -42,9 +42,9 @@ class PathBasedRoutingMiddlewareTest extends TestCase
 
     public function setUp()
     {
-        $this->router     = $this->prophesize(RouterInterface::class);
-        $this->response   = $this->prophesize(ResponseInterface::class);
-        $this->middleware = new PathBasedRoutingMiddleware($this->router->reveal());
+        $this->router    = $this->prophesize(RouterInterface::class);
+        $this->response  = $this->prophesize(ResponseInterface::class);
+        $this->collector = new RouteCollector($this->router->reveal());
 
         $this->request  = $this->prophesize(ServerRequestInterface::class);
         $this->handler = $this->prophesize(RequestHandlerInterface::class);
@@ -84,7 +84,7 @@ class PathBasedRoutingMiddlewareTest extends TestCase
     public function testRouteMethodReturnsRouteInstance()
     {
         $this->router->addRoute(Argument::type(Route::class))->shouldBeCalled();
-        $route = $this->middleware->route('/foo', $this->noopMiddleware);
+        $route = $this->collector->route('/foo', $this->noopMiddleware);
         $this->assertInstanceOf(Route::class, $route);
         $this->assertEquals('/foo', $route->getPath());
         $this->assertSame($this->noopMiddleware, $route->getMiddleware());
@@ -93,7 +93,7 @@ class PathBasedRoutingMiddlewareTest extends TestCase
     public function testAnyRouteMethod()
     {
         $this->router->addRoute(Argument::type(Route::class))->shouldBeCalled();
-        $route = $this->middleware->any('/foo', $this->noopMiddleware);
+        $route = $this->collector->any('/foo', $this->noopMiddleware);
         $this->assertInstanceOf(Route::class, $route);
         $this->assertEquals('/foo', $route->getPath());
         $this->assertSame($this->noopMiddleware, $route->getMiddleware());
@@ -108,7 +108,7 @@ class PathBasedRoutingMiddlewareTest extends TestCase
     public function testCanCallRouteWithHttpMethods($method)
     {
         $this->router->addRoute(Argument::type(Route::class))->shouldBeCalled();
-        $route = $this->middleware->route('/foo', $this->noopMiddleware, [$method]);
+        $route = $this->collector->route('/foo', $this->noopMiddleware, [$method]);
         $this->assertInstanceOf(Route::class, $route);
         $this->assertEquals('/foo', $route->getPath());
         $this->assertSame($this->noopMiddleware, $route->getMiddleware());
@@ -120,7 +120,7 @@ class PathBasedRoutingMiddlewareTest extends TestCase
     {
         $this->router->addRoute(Argument::type(Route::class))->shouldBeCalled();
         $methods = array_keys($this->commonHttpMethods());
-        $route = $this->middleware->route('/foo', $this->noopMiddleware, $methods);
+        $route = $this->collector->route('/foo', $this->noopMiddleware, $methods);
         $this->assertInstanceOf(Route::class, $route);
         $this->assertEquals('/foo', $route->getPath());
         $this->assertSame($this->noopMiddleware, $route->getMiddleware());
@@ -130,10 +130,10 @@ class PathBasedRoutingMiddlewareTest extends TestCase
     public function testCallingRouteWithExistingPathAndOmittingMethodsArgumentRaisesException()
     {
         $this->router->addRoute(Argument::type(Route::class))->shouldBeCalledTimes(2);
-        $this->middleware->route('/foo', $this->noopMiddleware);
-        $this->middleware->route('/bar', $this->noopMiddleware);
+        $this->collector->route('/foo', $this->noopMiddleware);
+        $this->collector->route('/bar', $this->noopMiddleware);
         $this->expectException(Exception\DuplicateRouteException::class);
-        $this->middleware->route('/foo', $this->createNoopMiddleware());
+        $this->collector->route('/foo', $this->createNoopMiddleware());
     }
 
     public function invalidPathTypes()
@@ -159,7 +159,7 @@ class PathBasedRoutingMiddlewareTest extends TestCase
     public function testCallingRouteWithAnInvalidPathTypeRaisesAnException($path)
     {
         $this->expectException(TypeError::class);
-        $this->middleware->route($path, $this->createNoopMiddleware());
+        $this->collector->route($path, $this->createNoopMiddleware());
     }
 
     /**
@@ -169,7 +169,7 @@ class PathBasedRoutingMiddlewareTest extends TestCase
      */
     public function testCommonHttpMethodsAreExposedAsClassMethodsAndReturnRoutes($method)
     {
-        $route = $this->middleware->{$method}('/foo', $this->noopMiddleware);
+        $route = $this->collector->{$method}('/foo', $this->noopMiddleware);
         $this->assertInstanceOf(Route::class, $route);
         $this->assertEquals('/foo', $route->getPath());
         $this->assertSame($this->noopMiddleware, $route->getMiddleware());
@@ -179,10 +179,10 @@ class PathBasedRoutingMiddlewareTest extends TestCase
     public function testCreatingHttpRouteMethodWithExistingPathButDifferentMethodCreatesNewRouteInstance()
     {
         $this->router->addRoute(Argument::type(Route::class))->shouldBeCalledTimes(2);
-        $route = $this->middleware->route('/foo', $this->noopMiddleware, [RequestMethod::METHOD_POST]);
+        $route = $this->collector->route('/foo', $this->noopMiddleware, [RequestMethod::METHOD_POST]);
 
         $middleware = $this->createNoopMiddleware();
-        $test = $this->middleware->get('/foo', $middleware);
+        $test = $this->collector->get('/foo', $middleware);
         $this->assertNotSame($route, $test);
         $this->assertSame($route->getPath(), $test->getPath());
         $this->assertSame(['GET'], $test->getAllowedMethods());
@@ -192,20 +192,20 @@ class PathBasedRoutingMiddlewareTest extends TestCase
     public function testCreatingHttpRouteWithExistingPathAndMethodRaisesException()
     {
         $this->router->addRoute(Argument::type(Route::class))->shouldBeCalledTimes(1);
-        $this->middleware->get('/foo', $this->noopMiddleware);
+        $this->collector->get('/foo', $this->noopMiddleware);
 
         $this->expectException(Exception\DuplicateRouteException::class);
-        $this->middleware->get('/foo', $this->createNoopMiddleware());
+        $this->collector->get('/foo', $this->createNoopMiddleware());
     }
 
     public function testGetRoutes()
     {
         $middleware1 = $this->prophesize(MiddlewareInterface::class)->reveal();
-        $this->middleware->any('/foo', $middleware1, 'abc');
+        $this->collector->any('/foo', $middleware1, 'abc');
         $middleware2 = $this->prophesize(MiddlewareInterface::class)->reveal();
-        $this->middleware->get('/bar', $middleware2, 'def');
+        $this->collector->get('/bar', $middleware2, 'def');
 
-        $routes = $this->middleware->getRoutes();
+        $routes = $this->collector->getRoutes();
 
         $this->assertInternalType('array', $routes);
         $this->assertCount(2, $routes);

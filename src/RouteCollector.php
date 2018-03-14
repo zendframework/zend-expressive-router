@@ -7,17 +7,15 @@
 
 declare(strict_types=1);
 
-namespace Zend\Expressive\Router\Middleware;
+namespace Zend\Expressive\Router;
 
 use Psr\Http\Server\MiddlewareInterface;
-use Zend\Expressive\Router\Exception;
-use Zend\Expressive\Router\Route;
 
 /**
- * Routing middleware for path-based routes.
+ * Aggregate routes for the router.
  *
- * This middleware extends the RouteMiddleware in order to provide additional
- * methods for creating path+HTTP method-based routes:
+ * This class provides * methods for creating path+HTTP method-based routes and
+ * injecting them into the router:
  *
  * - get
  * - post
@@ -29,18 +27,28 @@ use Zend\Expressive\Router\Route;
  * A general `route()` method allows specifying multiple request methods and/or
  * arbitrary request methods when creating a path-based route.
  *
- * Internally, the middleware performs some checks for duplicate routes when
+ * Internally, the class performs some checks for duplicate routes when
  * attaching via one of the exposed methods, and will raise an exception when a
  * collision occurs.
  */
-class PathBasedRoutingMiddleware extends RouteMiddleware
+class RouteCollector
 {
+    /**
+     * @var RouterInterface
+     */
+    protected $router;
+
     /**
      * List of all routes registered directly with the application.
      *
      * @var Route[]
      */
     private $routes = [];
+
+    public function __construct(RouterInterface $router)
+    {
+        $this->router = $router;
+    }
 
     /**
      * Add a route for the route middleware to match.
