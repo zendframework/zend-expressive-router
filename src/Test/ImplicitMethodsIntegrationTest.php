@@ -26,7 +26,7 @@ use Zend\Expressive\Router\Middleware\DispatchMiddleware;
 use Zend\Expressive\Router\Middleware\ImplicitHeadMiddleware;
 use Zend\Expressive\Router\Middleware\ImplicitOptionsMiddleware;
 use Zend\Expressive\Router\Middleware\MethodNotAllowedMiddleware;
-use Zend\Expressive\Router\Middleware\PathBasedRoutingMiddleware;
+use Zend\Expressive\Router\Middleware\RouteMiddleware;
 use Zend\Expressive\Router\Route;
 use Zend\Expressive\Router\RouteResult;
 use Zend\Expressive\Router\RouterInterface;
@@ -135,7 +135,7 @@ abstract class ImplicitMethodsIntegrationTest extends TestCase
         }
 
         $pipeline = new MiddlewarePipe();
-        $pipeline->pipe(new PathBasedRoutingMiddleware($router));
+        $pipeline->pipe(new RouteMiddleware($router));
         $pipeline->pipe(
             $method === RequestMethod::METHOD_HEAD
                 ? $this->getImplicitHeadMiddleware($router)
@@ -212,7 +212,7 @@ abstract class ImplicitMethodsIntegrationTest extends TestCase
         $finalResponse->withHeader('Allow', implode(',', $allowedMethods))->will([$finalResponse, 'reveal']);
 
         $pipeline = new MiddlewarePipe();
-        $pipeline->pipe(new PathBasedRoutingMiddleware($router));
+        $pipeline->pipe(new RouteMiddleware($router));
         $pipeline->pipe(new MethodNotAllowedMiddleware(function () use ($finalResponse) {
             return $finalResponse->reveal();
         }));
@@ -300,7 +300,7 @@ abstract class ImplicitMethodsIntegrationTest extends TestCase
         $finalHandler->handle(Argument::any())->shouldNotBeCalled();
 
         $pipeline = new MiddlewarePipe();
-        $pipeline->pipe(new PathBasedRoutingMiddleware($router));
+        $pipeline->pipe(new RouteMiddleware($router));
         $pipeline->pipe($this->getImplicitHeadMiddleware($router));
         $pipeline->pipe(new MethodNotAllowedMiddleware($this->createInvalidResponseFactory()));
         $pipeline->pipe(new DispatchMiddleware());
@@ -343,7 +343,7 @@ abstract class ImplicitMethodsIntegrationTest extends TestCase
         $finalResponse->withHeader('Allow', 'GET,POST')->will([$finalResponse, 'reveal']);
 
         $pipeline = new MiddlewarePipe();
-        $pipeline->pipe(new PathBasedRoutingMiddleware($router));
+        $pipeline->pipe(new RouteMiddleware($router));
         $pipeline->pipe($this->getImplicitOptionsMiddleware($finalResponse->reveal()));
         $pipeline->pipe(new MethodNotAllowedMiddleware($this->createInvalidResponseFactory()));
 
