@@ -164,8 +164,10 @@ class RouteCollector
         });
 
         if (! empty($matches)) {
+            $first = reset( $matches );
+            $example = implode( ",", $first->getAllowedMethods() ?: [] ). " : ".$first->getPath(). " : ".$first->getName();
             throw new Exception\DuplicateRouteException(
-                'Duplicate route detected; same name or path, and one or more HTTP methods intersect'
+                sprintf('Duplicate route detected; "%s"', $example)
             );
         }
     }
