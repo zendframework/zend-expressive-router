@@ -17,11 +17,12 @@ All notable changes to this project will be documented in this file, in reverse 
   need to configure within your application in order to work properly. See each
   factory for details.
 
-- [#47](https://github.com/zendframework/zend-expressive-router/pull/47) and
-  [#50](https://github.com/zendframework/zend-expressive-router/pull/50) add
-  the middleware `Zend\Expressive\Router\Middleware\PathBasedRoutingMiddleware`,
-  which extends the `RouteMiddleware` to add methods for defining and creating
-  path+method based routes. It exposes the following methods:
+- [#47](https://github.com/zendframework/zend-expressive-router/pull/47),
+  [#50](https://github.com/zendframework/zend-expressive-router/pull/50), and
+  [#64](https://github.com/zendframework/zend-expressive-router/pull/64) add
+  the `Zend\Expressive\Router\RouteCollector` class,
+  which composes a `RouterInterface`, and provides methods for defining and
+  creating path+method based routes. It exposes the following methods:
 
   - `route(string $path, MiddlewareInterface $middleware, array $methods = null, string $name = null) : Route`
   - `get(string $path, MiddlewareInterface $middleware, string $name = null) : Route`

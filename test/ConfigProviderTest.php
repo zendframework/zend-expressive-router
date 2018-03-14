@@ -12,6 +12,7 @@ namespace ZendTest\Expressive\Router;
 use PHPUnit\Framework\TestCase;
 use Zend\Expressive\Router\ConfigProvider;
 use Zend\Expressive\Router\Middleware;
+use Zend\Expressive\Router\RouteCollector;
 
 class ConfigProviderTest extends TestCase
 {
@@ -26,7 +27,7 @@ class ConfigProviderTest extends TestCase
         $this->assertArrayHasKey(Middleware\ImplicitHeadMiddleware::class, $factories);
         $this->assertArrayHasKey(Middleware\ImplicitOptionsMiddleware::class, $factories);
         $this->assertArrayHasKey(Middleware\MethodNotAllowedMiddleware::class, $factories);
-        $this->assertArrayHasKey(Middleware\PathBasedRoutingMiddleware::class, $factories);
         $this->assertArrayHasKey(Middleware\RouteMiddleware::class, $factories);
+        $this->assertArrayHasKey(RouteCollector::class, $factories);
     }
 }
