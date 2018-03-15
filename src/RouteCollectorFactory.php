@@ -7,35 +7,33 @@
 
 declare(strict_types=1);
 
-namespace Zend\Expressive\Router\Middleware;
+namespace Zend\Expressive\Router;
 
 use Psr\Container\ContainerInterface;
-use Zend\Expressive\Router\Exception\MissingDependencyException;
-use Zend\Expressive\Router\RouterInterface;
 
 /**
- * Create and return a RouteMiddleware instance.
+ * Create and return a RouteCollector instance.
  *
  * This factory depends on one other service:
  *
  * - Zend\Expressive\Router\RouterInterface, which should resolve to
  *   a class implementing that interface.
  */
-class RouteMiddlewareFactory
+class RouteCollectorFactory
 {
     /**
      * @throws MissingDependencyException if the RouterInterface service is
      *     missing.
      */
-    public function __invoke(ContainerInterface $container) : RouteMiddleware
+    public function __invoke(ContainerInterface $container) : RouteCollector
     {
         if (! $container->has(RouterInterface::class)) {
-            throw MissingDependencyException::dependencyForService(
+            throw Exception\MissingDependencyException::dependencyForService(
                 RouterInterface::class,
-                RouteMiddleware::class
+                PathBasedRoutingMiddleware::class
             );
         }
 
-        return new RouteMiddleware($container->get(RouterInterface::class));
+        return new RouteCollector($container->get(RouterInterface::class));
     }
 }

@@ -2,6 +2,190 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
+## 3.0.0 - 2018-03-15
+
+### Added
+
+- [#50](https://github.com/zendframework/zend-expressive-router/pull/50) adds
+  `Zend\Expressive\Router\ConfigProvider`, and registers it with the package.
+  The class defines and returns the initial dependencies for the package.
+
+- [#50](https://github.com/zendframework/zend-expressive-router/pull/50) adds
+  factory classes for all shipped middleware. In some cases
+  (`ImplicitHeadMiddleware`, `ImplicitOptionsMiddleware`, and
+  `MethodNotAllowedMiddleware`), these rely on additional services that you will
+  need to configure within your application in order to work properly. See each
+  factory for details.
+
+- [#47](https://github.com/zendframework/zend-expressive-router/pull/47),
+  [#50](https://github.com/zendframework/zend-expressive-router/pull/50), and
+  [#64](https://github.com/zendframework/zend-expressive-router/pull/64) add
+  the `Zend\Expressive\Router\RouteCollector` class,
+  which composes a `RouterInterface`, and provides methods for defining and
+  creating path+method based routes. It exposes the following methods:
+
+  - `route(string $path, MiddlewareInterface $middleware, array $methods = null, string $name = null) : Route`
+  - `get(string $path, MiddlewareInterface $middleware, string $name = null) : Route`
+  - `post(string $path, MiddlewareInterface $middleware, string $name = null) : Route`
+  - `put(string $path, MiddlewareInterface $middleware, string $name = null) : Route`
+  - `patch(string $path, MiddlewareInterface $middleware, string $name = null) : Route`
+  - `delete(string $path, MiddlewareInterface $middleware, string $name = null) : Route`
+  - `any(string $path, MiddlewareInterface $middleware, string $name = null) : Route`
+
+- [#48](https://github.com/zendframework/zend-expressive-router/pull/48) and
+  [#50](https://github.com/zendframework/zend-expressive-router/pull/50) adds
+  `Zend\Expressive\Router\Middleware\MethodNotAllowedMiddleware`. This middleware checks if
+  the request composes a `RouteResult`, and, if so, if it is due to a method
+  failure. If neither of those conditions is true, it delegates processing of
+  the request to the handler. Otherwise, it uses a composed response prototype
+  in order to create a "405 Method Not Allowed" response, with an `Allow` header
+  containing the list of allowed request methods.
+
+- [#49](https://github.com/zendframework/zend-expressive-router/pull/49) and
+  [#50](https://github.com/zendframework/zend-expressive-router/pull/50) add
+  the class `Zend\Expressive\Router\Middleware\ImplicitHeadMiddleware`. This
+  middleware will answer a `HEAD` request for a given route. If no route was
+  matched, or the route allows `HEAD` requests, it delegates to the handler. If
+  the route does not allow a `GET` request, it returns an empty response, as
+  composed in the middleware. Otherwise, it issues a `GET` request to the
+  handler, indicating the method was forwarded for a `HEAD` request, and then
+  returns the response with an empty body.
+
+- [#49](https://github.com/zendframework/zend-expressive-router/pull/49) and
+  [#50](https://github.com/zendframework/zend-expressive-router/pull/50) add
+  the class `Zend\Expressive\Router\Middleware\ImplicitOptionsMiddleware`. This
+  middleware handles `OPTIONS` requests when a route result is present and the
+  route does not explicitly support `OPTIONS` (and otherwise delegates to the
+  handler). In those conditions, it returns the response composed in the
+  middleware, with an `Allow` header indicating the allowed methods.
+
+- [#39](https://github.com/zendframework/zend-expressive-router/pull/39) and
+  [#45](https://github.com/zendframework/zend-expressive-router/pull/45) add
+  PSR-15 `psr/http-server-middleware` support.
+
+- [#53](https://github.com/zendframework/zend-expressive-router/pull/53) and
+  [#58](https://github.com/zendframework/zend-expressive-router/pull/58) add an
+  abstract test case, `Zend\Expressive\Router\Test\ImplicitMethodsIntegrationTest`.
+  Implementors of `RouterInterface` should extend this class in their own test
+  suite to ensure that they create appropriate `RouteResult` instances for each
+  of the following cases:
+  
+  - `HEAD` request called and matches one or more known routes, but the method
+    is not defined for any of them.
+  - `OPTIONS` request called and matches one or more known routes, but the method
+    is not defined for any of them.
+  - Request matches one or more known routes, but the method is not allowed.
+
+  In particular, these tests ensure that implementations marshal the list of
+  allowed HTTP methods correctly in the latter two cases.
+
+### Changed
+
+- [#41](https://github.com/zendframework/zend-expressive-router/pull/41) updates
+  the `Route` class to provide typehints for all arguments and return values.
+  Typehints were generally derived from the existing annotations, with the
+  following items of particular note:
+  - The constructor `$middleware` argument typehints on the PSR-15
+    `MiddlewareInterface`.
+  - The `getMiddleware()` method now explicitly returns a PSR-15
+    `MiddlewareInterface` instance.
+  - `getAllowedMethods()` now returns a nullable `array`.
+
+- [#41](https://github.com/zendframework/zend-expressive-router/pull/41) and
+  [#43](https://github.com/zendframework/zend-expressive-router/pull/43) update
+  the `RouteResult` class to add typehints for all arguments and return values,
+  where possible. Typehints were generally derived from the existing
+  annotations, with the following items of particular note:
+  - The `$methods` argument to `fromRouteFailure()` is now a nullable array
+    (with `null` representing the fact that any method is allowed),
+    **without a default value**. You must provide a value when creating a route
+    failure.
+  - `getAllowedMethods()` will now return `['*']` when any HTTP method is
+    allowed; this will evaluate to a valid `Allows` header value, and is the
+    recommended value when any HTTP method is allowed.
+
+- [#41](https://github.com/zendframework/zend-expressive-router/pull/41) updates
+  the `RouteInterface` to add typehints for all arguments and return values. In
+  particular, thse are now:
+  - `addRoute(Route $route) : void`
+  - `match(Psr\Http\Message\ServerRequestInterface $request) : RouteResult`
+  - `generateUri(string $name, array $substitutions = [], array $options = []) : string`
+
+- [#47](https://github.com/zendframework/zend-expressive-router/pull/47)
+  modifies the `RouteMiddleware::$router` property to make it `protected`
+  visibility, allowing extensions to work with it.
+
+- [#48](https://github.com/zendframework/zend-expressive-router/pull/48)
+  modifies `Zend\Expressive\Router\Route` to implement the PSR-15
+  `MiddlewareInterface`. The new `process()` method proxies to the composed
+  middleware.
+
+- [#48](https://github.com/zendframework/zend-expressive-router/pull/48)
+  modifies `Zend\Expressive\Router\RouteResult` to implement the PSR-15
+  `MiddlewareInterface`. The new `process()` method proxies to the composed
+  `Route` instance in the case of a success, and otherwise delegates to the
+  passed handler instance.
+
+- [#48](https://github.com/zendframework/zend-expressive-router/pull/48)
+  modifies `Zend\Expressive\Router\DispatchMiddleware` to process the
+  `RouteResult` directly, instead of pulling middleware from it.
+
+- [#50](https://github.com/zendframework/zend-expressive-router/pull/50) renames
+  `Zend\Expressive\Router\RouteMiddleware` to
+  `Zend\Expressive\Router\Middleware\RouteMiddleware`.
+
+- [#50](https://github.com/zendframework/zend-expressive-router/pull/50) renames
+  `Zend\Expressive\Router\DispatchMiddleware` to
+  `Zend\Expressive\Router\Middleware\DispatchMiddleware`.
+
+- [#58](https://github.com/zendframework/zend-expressive-router/pull/58) changes
+  the constructor of `ImplicitHeadMiddleware` to accept a `RouterInterface`
+  instead of a response factory. Internally, this allows it to re-match the
+  current request using the `GET` method; the middleware never generates its own
+  response any longer.
+
+- [#58](https://github.com/zendframework/zend-expressive-router/pull/58) changes
+  the logic of `Route::allowsMethod()`; it no longer returns `true` for `HEAD`
+  or `OPTIONS` requests if they are not explicitly in the list of allowed
+  methods.
+
+- [#59](https://github.com/zendframework/zend-expressive-router/pull/59) changes
+  the behavior of the `Route` constructor: it now raises an exception if the
+  list of HTTP methods provided to it is empty. Routes MUST have one or more
+  HTTP methods associated.
+
+- [#60](https://github.com/zendframework/zend-expressive-router/pull/60) changes
+  the behavior of the `RouteResult::getAllowedMethods()` to allow a nullable
+  return value; this will return `null` if all methods are allowed.
+
+### Removed
+
+- [#39](https://github.com/zendframework/zend-expressive-router/pull/39) and
+  [#41](https://github.com/zendframework/zend-expressive-router/pull/41) remove
+  PHP 5.6 and PHP 7.0 support.
+
+- [#48](https://github.com/zendframework/zend-expressive-router/pull/48)
+  removes the method `Zend\Expressive\Router\RouteResult::getMatchedMiddleware()`;
+  the method is no longer necessary, as the class now implements
+  `MiddlewareInterface` and proxies to the underlying route.
+
+- [#58](https://github.com/zendframework/zend-expressive-router/pull/58) removes
+  the following methods from `Route`, as they are no longer used:
+
+  - `implicitHead()`
+  - `implicitOptions()`
+
+### Fixed
+
+- [#53](https://github.com/zendframework/zend-expressive-router/pull/53) fixes
+  logic in the `ImplicitHeadMiddleware` and `ImplicitOptionsMiddleware` classes
+  with regards to how they determine that an implicit `HEAD` or `OPTIONS`
+  request (respectively) has occurred.
+
+- [#66](https://github.com/zendframework/zend-expressive-router/pull/66)
+  improves the exception message raised when a route conflict is detected to
+  include the path, HTTP methods, and name (if available).
+
 ## 2.4.1 - 2018-03-08
 
 ### Added

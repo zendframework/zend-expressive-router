@@ -1,13 +1,18 @@
 <?php
 /**
  * @see       https://github.com/zendframework/zend-expressive-router for the canonical source repository
- * @copyright Copyright (c) 2015-2016 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright Copyright (c) 2015-2018 Zend Technologies USA Inc. (https://www.zend.com)
  * @license   https://github.com/zendframework/zend-expressive-router/blob/master/LICENSE.md New BSD License
  */
 
+declare(strict_types=1);
+
 namespace Zend\Expressive\Router;
 
-use Webimpress\HttpMiddlewareCompatibility\MiddlewareInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 /**
  * Value object representing the results of routing.
@@ -29,12 +34,12 @@ use Webimpress\HttpMiddlewareCompatibility\MiddlewareInterface;
  * RouteResult instances are consumed by the Application in the routing
  * middleware.
  */
-class RouteResult
+class RouteResult implements MiddlewareInterface
 {
     /**
-     * @var null|array
+     * @var null|string[]
      */
-    private $allowedMethods;
+    private $allowedMethods = [];
 
     /**
      * @var array
@@ -45,11 +50,6 @@ class RouteResult
      * @var string
      */
     private $matchedRouteName;
-
-    /**
-     * @var callable|string|MiddlewareInterface|array
-     */
-    private $matchedMiddleware;
 
     /**
      * Route matched during routing
@@ -67,11 +67,9 @@ class RouteResult
     /**
      * Create an instance representing a route succes from the matching route.
      *
-     * @param Route $route
      * @param array $params Parameters associated with the matched route, if any.
-     * @return static
      */
-    public static function fromRoute(Route $route, array $params = [])
+    public static function fromRoute(Route $route, array $params = []) : self
     {
         $result                = new self();
         $result->success       = true;
@@ -83,31 +81,39 @@ class RouteResult
     /**
      * Create an instance representing a route failure.
      *
-     * @param null|int|array $methods HTTP methods allowed for the current URI, if any
-     * @return static
+     * @param null|array $methods HTTP methods allowed for the current URI, if any.
+     *     null is equivalent to allowing any HTTP method; empty array means none.
      */
-    public static function fromRouteFailure($methods = null)
+    public static function fromRouteFailure(?array $methods) : self
     {
         $result = new self();
         $result->success = false;
-
-        if ($methods === Route::HTTP_METHOD_ANY) {
-            $result->allowedMethods = ['*'];
-        }
-
-        if (is_array($methods)) {
-            $result->allowedMethods = $methods;
-        }
+        $result->allowedMethods = $methods;
 
         return $result;
     }
 
     /**
-     * Does the result represent successful routing?
+     * Process the result as middleware.
      *
-     * @return bool
+     * If the result represents a failure, it passes handling to the handler.
+     *
+     * Otherwise, it processes the composed middleware using the provide request
+     * and handler.
      */
-    public function isSuccess()
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
+    {
+        if ($this->isFailure()) {
+            return $handler->handle($request);
+        }
+
+        return $this->getMatchedRoute()->process($request, $handler);
+    }
+
+    /**
+     * Does the result represent successful routing?
+     */
+    public function isSuccess() : bool
     {
         return $this->success;
     }
@@ -129,7 +135,7 @@ class RouteResult
      * If this result represents a failure, return false; otherwise, return the
      * matched route name.
      *
-     * @return string
+     * @return false|string
      */
     public function getMatchedRouteName()
     {
@@ -145,60 +151,29 @@ class RouteResult
     }
 
     /**
-     * Retrieve the matched middleware, if possible.
-     *
-     * @deprecated since 2.4.0; to remove in 3.0.0. Retrieve using
-     *     `getMatchedRoute()->getMiddleware()` if access is required. In version 3,
-     *     RouteResult will implement the PSR-15 MiddlewareInterface, and proxy to the
-     *     matched middleware if present, and to the handler argument otherwise.
-     * @return false|callable|string|MiddlewareInterface|array Returns false if
-     *     the result represents a failure; otherwise, a callable, a string
-     *     service name, a MiddlewareInterface instance, or array of any of
-     *     these types.
-     */
-    public function getMatchedMiddleware()
-    {
-        if ($this->isFailure()) {
-            return false;
-        }
-
-        if (! $this->matchedMiddleware && $this->route) {
-            $this->matchedMiddleware = $this->route->getMiddleware();
-        }
-
-        return $this->matchedMiddleware;
-    }
-
-    /**
      * Returns the matched params.
      *
      * Guaranted to return an array, even if it is simply empty.
-     *
-     * @return array
      */
-    public function getMatchedParams()
+    public function getMatchedParams() : array
     {
         return $this->matchedParams;
     }
 
     /**
      * Is this a routing failure result?
-     *
-     * @return bool
      */
-    public function isFailure()
+    public function isFailure() : bool
     {
         return (! $this->success);
     }
 
     /**
      * Does the result represent failure to route due to HTTP method?
-     *
-     * @return bool
      */
-    public function isMethodFailure()
+    public function isMethodFailure() : bool
     {
-        if ($this->isSuccess() || null === $this->allowedMethods) {
+        if ($this->isSuccess() || $this->allowedMethods === Route::HTTP_METHOD_ANY) {
             return false;
         }
 
@@ -208,18 +183,14 @@ class RouteResult
     /**
      * Retrieve the allowed methods for the route failure.
      *
-     * @return string[] HTTP methods allowed
+     * @return null|string[] HTTP methods allowed
      */
-    public function getAllowedMethods()
+    public function getAllowedMethods() : ?array
     {
         if ($this->isSuccess()) {
             return $this->route
                 ? $this->route->getAllowedMethods()
                 : [];
-        }
-
-        if (null === $this->allowedMethods) {
-            return [];
         }
 
         return $this->allowedMethods;

@@ -14,29 +14,29 @@ use Psr\Http\Message\ResponseInterface;
 use Zend\Expressive\Router\Exception\MissingDependencyException;
 
 /**
- * Create and return an ImplicitOptionsMiddleware instance.
+ * Create and return a MethodNotAllowedMiddleware instance.
  *
  * This factory depends on one other service:
  *
  * - Psr\Http\Message\ResponseInterface, which should resolve to a callable
  *   that will produce an empty Psr\Http\Message\ResponseInterface instance.
  */
-class ImplicitOptionsMiddlewareFactory
+class MethodNotAllowedMiddlewareFactory
 {
     /**
      * @throws MissingDependencyException if the Psr\Http\Message\ResponseInterface
      *     service is missing.
      */
-    public function __invoke(ContainerInterface $container) : ImplicitOptionsMiddleware
+    public function __invoke(ContainerInterface $container) : MethodNotAllowedMiddleware
     {
         if (! $container->has(ResponseInterface::class)) {
             throw MissingDependencyException::dependencyForService(
                 ResponseInterface::class,
-                ImplicitOptionsMiddleware::class
+                MethodNotAllowedMiddleware::class
             );
         }
 
-        return new ImplicitOptionsMiddleware(
+        return new MethodNotAllowedMiddleware(
             $container->get(ResponseInterface::class)
         );
     }
