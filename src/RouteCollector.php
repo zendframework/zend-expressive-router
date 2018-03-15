@@ -165,11 +165,13 @@ class RouteCollector
 
         if (! empty($matches)) {
             $match = reset($matches);
+            $allowedMethods = $match->getAllowedMethods() ?: ['(any)'];
+            $name = $match->getName();
             throw new Exception\DuplicateRouteException(sprintf(
-                'Duplicate route detected; "%s : %s : %s"',
-                implode(',', $match->getAllowedMethods() ?? []),
+                'Duplicate route detected; path "%s" answering to methods [%s]%s',
                 $match->getPath(),
-                $match->getName()
+                implode(',', $allowedMethods),
+                $name ? sprintf(', with name "%s"', $name) : ''
             ));
         }
     }
