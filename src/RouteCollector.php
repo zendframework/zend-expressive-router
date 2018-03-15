@@ -164,11 +164,13 @@ class RouteCollector
         });
 
         if (! empty($matches)) {
-            $first = reset( $matches );
-            $example = implode( ",", $first->getAllowedMethods() ?: [] ). " : ".$first->getPath(). " : ".$first->getName();
-            throw new Exception\DuplicateRouteException(
-                sprintf('Duplicate route detected; "%s"', $example)
-            );
+            $match = reset( $matches );
+            throw new Exception\DuplicateRouteException(sprintf(
+                'Duplicate route detected; "%s : %s : %s"',
+                implode( ',', $match->getAllowedMethods() ?? [] ),
+                $match->getPath(),
+                $match->getName()
+            ));
         }
     }
 }
