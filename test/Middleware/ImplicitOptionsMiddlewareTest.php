@@ -19,6 +19,8 @@ use Zend\Expressive\Router\Middleware\ImplicitOptionsMiddleware;
 use Zend\Expressive\Router\Route;
 use Zend\Expressive\Router\RouteResult;
 
+use function implode;
+
 class ImplicitOptionsMiddlewareTest extends TestCase
 {
     /** @var ImplicitOptionsMiddleware */

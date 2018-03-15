@@ -23,6 +23,8 @@ use Zend\Expressive\Router\Route;
 use Zend\Expressive\Router\RouteCollector;
 use Zend\Expressive\Router\RouterInterface;
 
+use function array_keys;
+
 class RouteCollectorTest extends TestCase
 {
     /** @var RouterInterface|ObjectProphecy */
