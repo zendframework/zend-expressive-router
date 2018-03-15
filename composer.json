@@ -29,9 +29,7 @@
     "require-dev": {
         "malukenho/docheader": "^0.1.6",
         "phpunit/phpunit": "^7.0.2",
-        "zendframework/zend-coding-standard": "~1.0.0",
-        "zendframework/zend-diactoros": "^1.7.1",
-        "zendframework/zend-stratigility": "^3.0.0rc1"
+        "zendframework/zend-coding-standard": "~1.0.0"
     },
     "suggest": {
         "zendframework/zend-expressive-aurarouter": "^3.0 to use the Aura.Router routing adapter",
@@ -53,8 +51,8 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "2.4.x-dev",
-            "dev-develop": "3.0.x-dev"
+            "dev-master": "3.0.x-dev",
+            "dev-develop": "3.1.x-dev"
         },
         "zf": {
             "config-provider": "Zend\\Expressive\\Router\\ConfigProvider"
