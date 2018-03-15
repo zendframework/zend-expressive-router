@@ -16,6 +16,8 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Expressive\Router\RouteResult;
 
+use function implode;
+
 /**
  * Handle implicit OPTIONS requests.
  *

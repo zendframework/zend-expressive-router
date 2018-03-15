@@ -32,6 +32,8 @@ use Zend\Expressive\Router\RouteResult;
 use Zend\Expressive\Router\RouterInterface;
 use Zend\Stratigility\MiddlewarePipe;
 
+use function implode;
+
 /**
  * Base class for testing adapter integrations.
  *

@@ -12,6 +12,8 @@ namespace Zend\Expressive\Router\Exception;
 use Psr\Container\NotFoundExceptionInterface;
 use RuntimeException;
 
+use function sprintf;
+
 class MissingDependencyException extends RuntimeException implements
     ExceptionInterface,
     NotFoundExceptionInterface

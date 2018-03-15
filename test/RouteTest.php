@@ -19,6 +19,8 @@ use TypeError;
 use Zend\Expressive\Router\Exception\InvalidArgumentException;
 use Zend\Expressive\Router\Route;
 
+use function sprintf;
+
 /**
  * @covers \Zend\Expressive\Router\Route
  */

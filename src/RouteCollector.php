@@ -11,6 +11,9 @@ namespace Zend\Expressive\Router;
 
 use Psr\Http\Server\MiddlewareInterface;
 
+use function array_filter;
+use function array_reduce;
+
 /**
  * Aggregate routes for the router.
  *
