@@ -182,6 +182,10 @@ All notable changes to this project will be documented in this file, in reverse 
   with regards to how they determine that an implicit `HEAD` or `OPTIONS`
   request (respectively) has occurred.
 
+- [#66](https://github.com/zendframework/zend-expressive-router/pull/66)
+  improves the exception message raised when a route conflict is detected to
+  include the path, HTTP methods, and name (if available).
+
 ## 2.4.1 - 2018-03-08
 
 ### Added
