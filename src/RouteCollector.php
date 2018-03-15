@@ -164,10 +164,10 @@ class RouteCollector
         });
 
         if (! empty($matches)) {
-            $match = reset( $matches );
+            $match = reset($matches);
             throw new Exception\DuplicateRouteException(sprintf(
                 'Duplicate route detected; "%s : %s : %s"',
-                implode( ',', $match->getAllowedMethods() ?? [] ),
+                implode(',', $match->getAllowedMethods() ?? []),
                 $match->getPath(),
                 $match->getName()
             ));
