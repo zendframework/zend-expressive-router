@@ -22,7 +22,7 @@ use Psr\Container\ContainerInterface;
 class RouteCollectorFactory
 {
     /**
-     * @throws MissingDependencyException if the RouterInterface service is
+     * @throws Exception\MissingDependencyException if the RouterInterface service is
      *     missing.
      */
     public function __invoke(ContainerInterface $container) : RouteCollector
