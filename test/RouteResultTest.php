@@ -12,7 +12,6 @@ namespace ZendTest\Expressive\Router;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Expressive\Router\Route;
 use Zend\Expressive\Router\RouteResult;
@@ -91,7 +90,6 @@ class RouteResultTest extends TestCase
      */
     public function testAllAccessorsShouldReturnExpectedDataWhenResultCreatedViaFromRoute(array $data)
     {
-        $middleware = $this->prophesize(MiddlewareInterface::class);
         $result = $data['result'];
         $route = $data['route'];
 
