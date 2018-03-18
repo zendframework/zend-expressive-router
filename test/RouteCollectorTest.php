@@ -34,7 +34,7 @@ class RouteCollectorTest extends TestCase
     private $response;
 
     /** @var RouteCollector */
-    private $middleware;
+    private $collector;
 
 
     public function setUp()
