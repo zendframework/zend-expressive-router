@@ -22,7 +22,9 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Fixed
 
-- Nothing.
+- [#69](https://github.com/zendframework/zend-expressive-router/pull/69) fixes
+  exception message on missing dependencies on creating `RouteCollector` to refer
+  that class.
 
 ## 3.0.0 - 2018-03-15
 
