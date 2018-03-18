@@ -36,6 +36,8 @@ class RouteCollectorTest extends TestCase
     /** @var RouteCollector */
     private $collector;
 
+    /** @var MiddlewareInterface */
+    private $noopMiddleware;
 
     public function setUp()
     {
