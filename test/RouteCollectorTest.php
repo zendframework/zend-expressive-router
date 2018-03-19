@@ -34,22 +34,16 @@ class RouteCollectorTest extends TestCase
     private $response;
 
     /** @var RouteCollector */
-    private $middleware;
+    private $collector;
 
-    /** @var ServerRequestInterface|ObjectProphecy */
-    private $request;
-
-    /** @var RequestHandlerInterface|ObjectProphecy */
-    private $handler;
+    /** @var MiddlewareInterface */
+    private $noopMiddleware;
 
     public function setUp()
     {
         $this->router    = $this->prophesize(RouterInterface::class);
         $this->response  = $this->prophesize(ResponseInterface::class);
         $this->collector = new RouteCollector($this->router->reveal());
-
-        $this->request  = $this->prophesize(ServerRequestInterface::class);
-        $this->handler = $this->prophesize(RequestHandlerInterface::class);
         $this->noopMiddleware = $this->createNoopMiddleware();
     }
 
