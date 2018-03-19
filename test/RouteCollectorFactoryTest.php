@@ -36,6 +36,7 @@ class RouteCollectorFactoryTest extends TestCase
         $this->container->has(RouterInterface::class)->willReturn(false);
 
         $this->expectException(MissingDependencyException::class);
+        $this->expectExceptionMessage(RouteCollector::class);
         ($this->factory)($this->container->reveal());
     }
 

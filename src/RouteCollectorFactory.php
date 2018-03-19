@@ -30,7 +30,7 @@ class RouteCollectorFactory
         if (! $container->has(RouterInterface::class)) {
             throw Exception\MissingDependencyException::dependencyForService(
                 RouterInterface::class,
-                PathBasedRoutingMiddleware::class
+                RouteCollector::class
             );
         }
 
