@@ -75,6 +75,10 @@ class ImplicitOptionsMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
+        if ($result->isFailure() && ! $result->isMethodFailure()) {
+            return $handler->handle($request);
+        }
+
         if ($result->getMatchedRoute()) {
             return $handler->handle($request);
         }
