@@ -24,7 +24,7 @@ All notable changes to this project will be documented in this file, in reverse 
 
 - Nothing.
 
-## 3.0.2 - TBD
+## 3.0.2 - 2018-03-21
 
 ### Added
 
@@ -44,7 +44,10 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Fixed
 
-- Nothing.
+- [#73](https://github.com/zendframework/zend-expressive-router/pull/73) fixes
+  an issue with the `ImplicitOptionsMiddleware` whereby a path match failure was
+  incorrectly being identified as a method match failure, triggering the
+  `ImplicitOptionsMiddleware` to attempt to return a response.
 
 ## 3.0.1 - 2018-03-19
 

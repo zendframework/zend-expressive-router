@@ -363,4 +363,51 @@ abstract class ImplicitMethodsIntegrationTest extends TestCase
 
         $this->assertSame($finalResponse->reveal(), $response);
     }
+
+    public function testImplicitOptionsRequestRouteNotFound()
+    {
+        $router = $this->getRouter();
+
+        $pipeline = new MiddlewarePipe();
+        $pipeline->pipe(new RouteMiddleware($router));
+        $pipeline->pipe($this->getImplicitOptionsMiddleware());
+        $pipeline->pipe(new MethodNotAllowedMiddleware($this->createInvalidResponseFactory()));
+        $pipeline->pipe(new DispatchMiddleware());
+
+        $finalResponse = (new Response())
+            ->withStatus(StatusCode::STATUS_IM_A_TEAPOT)
+            ->withHeader('foo-bar', 'baz');
+        $finalResponse->getBody()->write('FOO BAR BODY');
+
+        $request = new ServerRequest(
+            ['REQUEST_METHOD' => RequestMethod::METHOD_OPTIONS],
+            [],
+            '/not-found',
+            RequestMethod::METHOD_OPTIONS
+        );
+
+        $finalHandler = $this->prophesize(RequestHandlerInterface::class);
+        $finalHandler
+            ->handle(Argument::that(function (ServerRequestInterface $request) {
+                Assert::assertSame(RequestMethod::METHOD_OPTIONS, $request->getMethod());
+
+                $routeResult = $request->getAttribute(RouteResult::class);
+                Assert::assertInstanceOf(RouteResult::class, $routeResult);
+                Assert::assertTrue($routeResult->isFailure());
+                Assert::assertFalse($routeResult->isSuccess());
+                Assert::assertFalse($routeResult->isMethodFailure());
+                Assert::assertFalse($routeResult->getMatchedRoute());
+
+                return true;
+            }))
+            ->willReturn($finalResponse)
+            ->shouldBeCalledTimes(1);
+
+        $response = $pipeline->process($request, $finalHandler->reveal());
+
+        $this->assertEquals(StatusCode::STATUS_IM_A_TEAPOT, $response->getStatusCode());
+        $this->assertSame('FOO BAR BODY', (string) $response->getBody());
+        $this->assertTrue($response->hasHeader('foo-bar'));
+        $this->assertSame('baz', $response->getHeaderLine('foo-bar'));
+    }
 }
