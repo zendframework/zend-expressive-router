@@ -98,6 +98,11 @@ class ImplicitHeadMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
+        // Copy matched parameters like RouteMiddleware does
+        foreach ($routeResult->getMatchedParams() as $param => $value) {
+            $request = $request->withAttribute($param, $value);
+        }
+
         $response = $handler->handle(
             $request
                 ->withAttribute(RouteResult::class, $routeResult)
