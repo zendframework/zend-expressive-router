@@ -143,8 +143,52 @@ class ImplicitHeadMiddlewareTest extends TestCase
         $result = $this->prophesize(RouteResult::class);
         $result->isFailure()->willReturn(false);
         $result->getMatchedRoute()->will([$route, 'reveal']);
+        $result->getMatchedParams()->willReturn([]);
 
         $request->withAttribute(RouteResult::class, $result->reveal())->will([$request, 'reveal']);
+
+        $this->router->match($request)->will([$result, 'reveal']);
+
+        $handler = $this->prophesize(RequestHandlerInterface::class);
+        $handler
+            ->handle(Argument::that([$request, 'reveal']))
+            ->will([$response, 'reveal']);
+
+        $result = $this->middleware->process($request->reveal(), $handler->reveal());
+
+        $this->assertSame($response->reveal(), $result);
+    }
+
+    public function testInvokesHandlerWithRequestComposingRouteResultAndAttributes()
+    {
+        $result = $this->prophesize(RouteResult::class);
+        $result->getMatchedRoute()->willReturn(false);
+
+        $request = $this->prophesize(ServerRequestInterface::class);
+        $request->getMethod()->willReturn(RequestMethod::METHOD_HEAD);
+        $request->getAttribute(RouteResult::class)->will([$result, 'reveal']);
+        $request->withMethod(RequestMethod::METHOD_GET)->will([$request, 'reveal']);
+        $request
+            ->withAttribute(
+                ImplicitHeadMiddleware::FORWARDED_HTTP_METHOD_ATTRIBUTE,
+                RequestMethod::METHOD_HEAD
+            )
+            ->will([$request, 'reveal']);
+
+        $response = $this->prophesize(ResponseInterface::class);
+        $response->withBody($this->stream->reveal())->will([$response, 'reveal']);
+
+        $route = $this->prophesize(Route::class);
+
+        $parameters = ['foo' => 'bar', 'baz' => 'bat'];
+        $result = $this->prophesize(RouteResult::class);
+        $result->isFailure()->willReturn(false);
+        $result->getMatchedRoute()->will([$route, 'reveal']);
+        $result->getMatchedParams()->willReturn($parameters)->shouldBeCalled();
+
+        $request->withAttribute(RouteResult::class, $result->reveal())->will([$request, 'reveal']);
+        $request->withAttribute('foo', 'bar')->will([$request, 'reveal'])->shouldBeCalled();
+        $request->withAttribute('baz', 'bat')->will([$request, 'reveal'])->shouldBeCalled();
 
         $this->router->match($request)->will([$result, 'reveal']);
 
