@@ -22,7 +22,10 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Fixed
 
-- Nothing.
+- [#74](https://github.com/zendframework/zend-expressive-router/pull/74) fixes
+  an issue with the `ImplicitHeadMiddleware` where matched route parameters
+  were not copied into the request and would cause exceptions that would
+  normally not happen for GET requests.
 
 ## 3.0.2 - 2018-03-21
 
@@ -140,7 +143,7 @@ All notable changes to this project will be documented in this file, in reverse 
   Implementors of `RouterInterface` should extend this class in their own test
   suite to ensure that they create appropriate `RouteResult` instances for each
   of the following cases:
-  
+
   - `HEAD` request called and matches one or more known routes, but the method
     is not defined for any of them.
   - `OPTIONS` request called and matches one or more known routes, but the method
