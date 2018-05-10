@@ -17,6 +17,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Expressive\Router\Middleware\MethodNotAllowedMiddleware;
+use Zend\Expressive\Router\Route;
 use Zend\Expressive\Router\RouteResult;
 
 class MethodNotAllowedMiddlewareTest extends TestCase
@@ -61,10 +62,9 @@ class MethodNotAllowedMiddlewareTest extends TestCase
 
     public function testDelegatesToHandlerIfRouteResultNotAMethodFailure()
     {
-        $result = $this->prophesize(RouteResult::class);
-        $result->isMethodFailure()->willReturn(false);
+        $result = RouteResult::fromRouteFailure(Route::HTTP_METHOD_ANY);
 
-        $this->request->getAttribute(RouteResult::class)->will([$result, 'reveal']);
+        $this->request->getAttribute(RouteResult::class)->willReturn($result);
         $this->handler->handle(Argument::that([$this->request, 'reveal']))->will([$this->response, 'reveal']);
 
         $this->response->withStatus(Argument::any())->shouldNotBeCalled();
@@ -78,11 +78,9 @@ class MethodNotAllowedMiddlewareTest extends TestCase
 
     public function testReturns405ResponseWithAllowHeaderIfResultDueToMethodFailure()
     {
-        $result = $this->prophesize(RouteResult::class);
-        $result->isMethodFailure()->willReturn(true);
-        $result->getAllowedMethods()->willReturn(['GET', 'POST']);
+        $result = RouteResult::fromRouteFailure(['GET', 'POST']);
 
-        $this->request->getAttribute(RouteResult::class)->will([$result, 'reveal']);
+        $this->request->getAttribute(RouteResult::class)->willReturn($result);
         $this->handler->handle(Argument::that([$this->request, 'reveal']))->shouldNotBeCalled();
 
         $this->response->withStatus(StatusCode::STATUS_METHOD_NOT_ALLOWED)->will([$this->response, 'reveal']);
