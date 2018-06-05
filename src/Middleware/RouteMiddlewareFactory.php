@@ -23,19 +23,41 @@ use Zend\Expressive\Router\RouterInterface;
  */
 class RouteMiddlewareFactory
 {
+    /** @var string */
+    private $routerServiceName;
+
+    /**
+     * Allow serialization
+     */
+    public static function __set_state(array $data) : self
+    {
+        return new self(
+            $data['routerServiceName'] ?? RouterInterface::class
+        );
+    }
+
+    /**
+     * Provide the name of the router service to use when creating the route
+     * middleware.
+     */
+    public function __construct(string $routerServiceName = RouterInterface::class)
+    {
+        $this->routerServiceName = $routerServiceName;
+    }
+
     /**
      * @throws MissingDependencyException if the RouterInterface service is
      *     missing.
      */
     public function __invoke(ContainerInterface $container) : RouteMiddleware
     {
-        if (! $container->has(RouterInterface::class)) {
+        if (! $container->has($this->routerServiceName)) {
             throw MissingDependencyException::dependencyForService(
-                RouterInterface::class,
+                $this->routerServiceName,
                 RouteMiddleware::class
             );
         }
 
-        return new RouteMiddleware($container->get(RouterInterface::class));
+        return new RouteMiddleware($container->get($this->routerServiceName));
     }
 }
