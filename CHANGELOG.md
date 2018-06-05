@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
-## 3.1.0 - TBD
+## 3.1.0 - 2018-06-05
 
 ### Added
 
@@ -10,7 +10,10 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Changed
 
-- Nothing.
+- [#76](https://github.com/zendframework/zend-expressive-router/pull/76) modifies the `RouteMiddlewareFactory` to allow specifying a string
+  `$routererviceName` to its constructor. This change allows having discrete
+  factory instances for generating route middleware that use different router
+  instances.
 
 ### Deprecated
 

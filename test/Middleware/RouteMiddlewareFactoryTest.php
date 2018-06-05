@@ -49,4 +49,27 @@ class RouteMiddlewareFactoryTest extends TestCase
 
         $this->assertInstanceOf(RouteMiddleware::class, $middleware);
     }
+
+    public function testFactoryAllowsSpecifyingRouterServiceViaConstructor()
+    {
+        $router = $this->prophesize(RouterInterface::class)->reveal();
+        $this->container->has(Router::class)->willReturn(true);
+        $this->container->get(Router::class)->willReturn($router);
+
+        $factory = new RouteMiddlewareFactory(Router::class);
+
+        $middleware = $factory($this->container->reveal());
+
+        $this->assertInstanceOf(RouteMiddleware::class, $middleware);
+        $this->assertAttributeSame($router, 'router', $middleware);
+    }
+
+    public function testFactoryIsSerializable()
+    {
+        $factory = RouteMiddlewareFactory::__set_state([
+            'routerServiceName' => Router::class,
+        ]);
+
+        $this->assertAttributeSame(Router::class, 'routerServiceName', $factory);
+    }
 }
