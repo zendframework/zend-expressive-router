@@ -26,7 +26,7 @@ interface RouterInterface
      * modify route instances before matching (e.g., to provide route options,
      * inject a name, etc.).
      *
-     * The method MUST raise Exception\RuntimeException if called after either `match()`
+     * The method CAN raise an Exception\RuntimeException if called after either `match()`
      * or `generateUri()` have already been called, to ensure integrity of the
      * router between invocations of either of those methods.
      *
