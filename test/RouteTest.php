@@ -61,6 +61,19 @@ class RouteTest extends TestCase
         $this->assertSame($methods, $route->getAllowedMethods());
     }
 
+    public function testRouteAllowsNotAnyMethod()
+    {
+        $methods = [ RequestMethod::METHOD_GET, RequestMethod::METHOD_POST ];
+        $route = new Route('/foo', $this->noopMiddleware, $methods);
+        $this->assertFalse($route->allowsAnyMethod());
+    }
+
+    public function testRouteAllowsAnyMethod()
+    {
+        $route = new Route('/foo', $this->noopMiddleware);
+        $this->assertTrue($route->allowsAnyMethod());
+    }
+
     public function testRouteCanMatchMethod()
     {
         $methods = [RequestMethod::METHOD_GET, RequestMethod::METHOD_POST];

@@ -11,9 +11,6 @@ namespace Zend\Expressive\Router;
 
 use Psr\Http\Server\MiddlewareInterface;
 
-use function array_filter;
-use function array_reduce;
-
 /**
  * Aggregate routes for the router.
  *
@@ -48,6 +45,16 @@ class RouteCollector
      */
     private $routes = [];
 
+    /**
+     * @var array
+     */
+    private $routesNames = [];
+
+    /**
+     * @var array
+     */
+    private $routesPathes = [];
+
     public function __construct(RouterInterface $router)
     {
         $this->router = $router;
@@ -68,15 +75,28 @@ class RouteCollector
         array $methods = null,
         string $name = null
     ) : Route {
-        $this->checkForDuplicateRoute($path, $methods);
 
-        $methods = null === $methods ? Route::HTTP_METHOD_ANY : $methods;
+        $methods = $methods ?? Route::HTTP_METHOD_ANY;
         $route   = new Route($path, $middleware, $methods, $name);
-
+        $this->checkForDuplicateRoute($route);
+        $this->fillRouteSearchStructure($route);
         $this->routes[] = $route;
         $this->router->addRoute($route);
 
         return $route;
+    }
+
+    private function fillRouteSearchStructure(Route $route): void
+    {
+        $this->routesNames[ $route->getName() ] = $route;
+        if ($route->allowsAnyMethod()) {
+            $this->routesPathes[ $route->getPath() ][ 'any' ] = $route;
+        }
+
+        $allowedMethods = $route->getAllowedMethods() ?? [];
+        foreach ($allowedMethods as $allowedMethod) {
+            $this->routesPathes[ $route->getPath() ][ 'methods' ][ $allowedMethod ] = $route;
+        }
     }
 
     /**
@@ -146,36 +166,39 @@ class RouteCollector
      *
      * @throws Exception\DuplicateRouteException on duplicate route detection.
      */
-    private function checkForDuplicateRoute(string $path, array $methods = null) : void
+    private function checkForDuplicateRoute(Route $route) : void
     {
-        if (null === $methods) {
-            $methods = Route::HTTP_METHOD_ANY;
+        if (! isset($this->routesPathes[ $route->getPath() ])) {
+            return;
         }
 
-        $matches = array_filter($this->routes, function (Route $route) use ($path, $methods) {
-            if ($path !== $route->getPath()) {
-                return false;
+        if (isset($this->routesPathes[ $route->getPath() ][ 'any' ])) {
+            $this->duplicateRouteDetected($route);
+        }
+
+        if ($route->allowsAnyMethod() && isset($this->routesPathes[ $route->getPath() ][ 'methods' ])) {
+            $this->duplicateRouteDetected($route);
+        }
+
+        $allowedMethods = $route->getAllowedMethods() ?? [];
+        foreach ($allowedMethods as $method) {
+            if (isset($this->routesPathes[ $route->getPath() ][ 'methods' ][ $method ])) {
+                $this->duplicateRouteDetected($route);
             }
+        }
+    }
 
-            if ($methods === Route::HTTP_METHOD_ANY) {
-                return true;
-            }
-
-            return array_reduce($methods, function ($carry, $method) use ($route) {
-                return ($carry || $route->allowsMethod($method));
-            }, false);
-        });
-
-        if (! empty($matches)) {
-            $match = reset($matches);
-            $allowedMethods = $match->getAllowedMethods() ?: ['(any)'];
-            $name = $match->getName();
-            throw new Exception\DuplicateRouteException(sprintf(
+    private function duplicateRouteDetected(Route $duplicate):void
+    {
+        $allowedMethods = $duplicate->getAllowedMethods() ?: [ '(any)' ];
+        $name = $duplicate->getName();
+        throw new Exception\DuplicateRouteException(
+            sprintf(
                 'Duplicate route detected; path "%s" answering to methods [%s]%s',
-                $match->getPath(),
+                $duplicate->getPath(),
                 implode(',', $allowedMethods),
                 $name ? sprintf(', with name "%s"', $name) : ''
-            ));
-        }
+            )
+        );
     }
 }

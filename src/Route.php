@@ -21,6 +21,7 @@ use function in_array;
 use function is_array;
 use function is_string;
 use function preg_match;
+use function sprintf;
 use function strtoupper;
 
 /**
@@ -146,6 +147,14 @@ class Route implements MiddlewareInterface
         }
 
         return false;
+    }
+
+    /**
+     * Indicate whether any method is allowed by the route.
+     */
+    public function allowsAnyMethod(): bool
+    {
+        return $this->methods === self::HTTP_METHOD_ANY;
     }
 
     public function setOptions(array $options) : void

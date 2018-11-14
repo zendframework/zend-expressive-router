@@ -23,6 +23,7 @@ use Zend\Expressive\Router\Route;
 use Zend\Expressive\Router\RouteCollector;
 use Zend\Expressive\Router\RouterInterface;
 
+use function microtime;
 use function array_keys;
 
 class RouteCollectorTest extends TestCase
@@ -185,13 +186,57 @@ class RouteCollectorTest extends TestCase
         $this->assertSame($middleware, $test->getMiddleware());
     }
 
+    public function testCreatingHttpRouteWithExistingPathShouldBeLinear()
+    {
+        $start = microtime(true);
+        foreach (range(1, 10) as $item) {
+            $this->collector->get("/bar$item", $this->noopMiddleware);
+        }
+        $baseDuration = microtime(true) - $start;
+        $this->collector = new RouteCollector($this->router->reveal());
+
+        $start = microtime(true);
+        foreach (range(1, 10000) as $item) {
+            $this->collector->get("/foo$item", $this->noopMiddleware);
+        }
+
+        $duration = microtime(true) - $start;
+        $expectedDuration = $baseDuration * 1000;
+        $error = 30 * $expectedDuration / 100;
+        $this->assertTrue(
+            $expectedDuration + $error > $duration,
+            "Route add time should be linear by amount of routes" .
+            ", expected duration: $expectedDuration" .
+            ", possible error: $error" .
+            ", actual duration: $duration"
+        );
+    }
+
     public function testCreatingHttpRouteWithExistingPathAndMethodRaisesException()
     {
         $this->router->addRoute(Argument::type(Route::class))->shouldBeCalledTimes(1);
-        $this->collector->get('/foo', $this->noopMiddleware);
+        $this->collector->get('/foo', $this->noopMiddleware, 'route1');
 
         $this->expectException(Exception\DuplicateRouteException::class);
-        $this->collector->get('/foo', $this->createNoopMiddleware());
+        $this->collector->get('/foo', $this->createNoopMiddleware(), 'route2');
+    }
+
+    public function testCheckDuplicateRouteWhenExistsRouteForAnyMethods()
+    {
+        $this->router->addRoute(Argument::type(Route::class))->shouldBeCalledTimes(1);
+        $this->collector->any('/foo', $this->noopMiddleware, 'route1');
+
+        $this->expectException(Exception\DuplicateRouteException::class);
+        $this->collector->get('/foo', $this->createNoopMiddleware(), 'route2');
+    }
+
+    public function testCheckDuplicateRouteWhenExistsRouteForGetMethodsAndAddingRouteForAnyMethod()
+    {
+        $this->router->addRoute(Argument::type(Route::class))->shouldBeCalledTimes(1);
+        $this->collector->get('/foo', $this->noopMiddleware, 'route1');
+
+        $this->expectException(Exception\DuplicateRouteException::class);
+        $this->collector->any('/foo', $this->createNoopMiddleware(), 'route2');
     }
 
     public function testGetRoutes()
