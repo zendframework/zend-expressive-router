@@ -168,6 +168,10 @@ class RouteCollector
      */
     private function checkForDuplicateRoute(Route $route) : void
     {
+        if (isset($this->routesNames[ $route->getName() ])) {
+            $this->duplicateRouteDetected($route);
+        }
+
         if (! isset($this->routesPathes[ $route->getPath() ])) {
             return;
         }

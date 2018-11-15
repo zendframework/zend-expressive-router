@@ -239,6 +239,15 @@ class RouteCollectorTest extends TestCase
         $this->collector->any('/foo', $this->createNoopMiddleware(), 'route2');
     }
 
+    public function testCreatingHttpRouteWithExistingNameRaisesException()
+    {
+        $this->router->addRoute(Argument::type(Route::class))->shouldBeCalledTimes(1);
+        $this->collector->get('/foo', $this->noopMiddleware, 'duplicate.route');
+
+        $this->expectException(Exception\DuplicateRouteException::class);
+        $this->collector->get('/foo/baz', $this->createNoopMiddleware(), 'duplicate.route');
+    }
+
     public function testGetRoutes()
     {
         $middleware1 = $this->prophesize(MiddlewareInterface::class)->reveal();
