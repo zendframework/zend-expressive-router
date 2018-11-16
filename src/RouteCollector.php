@@ -48,12 +48,12 @@ class RouteCollector
     /**
      * @var array
      */
-    private $routesNames = [];
+    private $routeNames = [];
 
     /**
      * @var array
      */
-    private $routesPathes = [];
+    private $routePaths = [];
 
     public function __construct(RouterInterface $router)
     {
@@ -88,14 +88,14 @@ class RouteCollector
 
     private function fillRouteSearchStructure(Route $route): void
     {
-        $this->routesNames[ $route->getName() ] = $route;
+        $this->routeNames[$route->getName()] = $route;
         if ($route->allowsAnyMethod()) {
-            $this->routesPathes[ $route->getPath() ][ 'any' ] = $route;
+            $this->routePaths[$route->getPath()]['any'] = $route;
         }
 
         $allowedMethods = $route->getAllowedMethods() ?? [];
         foreach ($allowedMethods as $allowedMethod) {
-            $this->routesPathes[ $route->getPath() ][ 'methods' ][ $allowedMethod ] = $route;
+            $this->routePaths[$route->getPath()]['methods'][$allowedMethod] = $route;
         }
     }
 
@@ -168,25 +168,25 @@ class RouteCollector
      */
     private function checkForDuplicateRoute(Route $route) : void
     {
-        if (isset($this->routesNames[ $route->getName() ])) {
+        if (isset($this->routeNames[$route->getName()])) {
             $this->duplicateRouteDetected($route);
         }
 
-        if (! isset($this->routesPathes[ $route->getPath() ])) {
+        if (! isset($this->routePaths[$route->getPath()])) {
             return;
         }
 
-        if (isset($this->routesPathes[ $route->getPath() ][ 'any' ])) {
+        if (isset($this->routePaths[$route->getPath()]['any'])) {
             $this->duplicateRouteDetected($route);
         }
 
-        if ($route->allowsAnyMethod() && isset($this->routesPathes[ $route->getPath() ][ 'methods' ])) {
+        if ($route->allowsAnyMethod() && isset($this->routePaths[$route->getPath()]['methods'])) {
             $this->duplicateRouteDetected($route);
         }
 
         $allowedMethods = $route->getAllowedMethods() ?? [];
         foreach ($allowedMethods as $method) {
-            if (isset($this->routesPathes[ $route->getPath() ][ 'methods' ][ $method ])) {
+            if (isset($this->routePaths[$route->getPath()]['methods'][$method])) {
                 $this->duplicateRouteDetected($route);
             }
         }
@@ -194,7 +194,7 @@ class RouteCollector
 
     private function duplicateRouteDetected(Route $duplicate):void
     {
-        $allowedMethods = $duplicate->getAllowedMethods() ?: [ '(any)' ];
+        $allowedMethods = $duplicate->getAllowedMethods() ?: ['(any)'];
         $name = $duplicate->getName();
         throw new Exception\DuplicateRouteException(
             sprintf(

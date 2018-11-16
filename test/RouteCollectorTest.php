@@ -22,9 +22,8 @@ use Zend\Expressive\Router\Exception;
 use Zend\Expressive\Router\Route;
 use Zend\Expressive\Router\RouteCollector;
 use Zend\Expressive\Router\RouterInterface;
-
-use function microtime;
 use function array_keys;
+use function microtime;
 
 class RouteCollectorTest extends TestCase
 {
@@ -205,10 +204,13 @@ class RouteCollectorTest extends TestCase
         $error = 30 * $expectedDuration / 100;
         $this->assertTrue(
             $expectedDuration + $error > $duration,
-            "Route add time should be linear by amount of routes" .
-            ", expected duration: $expectedDuration" .
-            ", possible error: $error" .
-            ", actual duration: $duration"
+            sprintf(
+                'Route add time should be linear by amount of routes,'
+                . ' expected duration: %s, possible error: %s, actual duration: %s',
+                $expectedDuration,
+                $error,
+                $duration
+            )
         );
     }
 
