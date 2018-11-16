@@ -220,6 +220,9 @@ class RouteCollectorTest extends TestCase
         $this->collector->get('/foo', $this->noopMiddleware, 'route1');
 
         $this->expectException(Exception\DuplicateRouteException::class);
+        $message = 'Duplicate route detected; path "/foo" answering to methods [GET], with name "route2"';
+        $this->expectExceptionMessage($message);
+
         $this->collector->get('/foo', $this->createNoopMiddleware(), 'route2');
     }
 
@@ -229,6 +232,9 @@ class RouteCollectorTest extends TestCase
         $this->collector->any('/foo', $this->noopMiddleware, 'route1');
 
         $this->expectException(Exception\DuplicateRouteException::class);
+        $message = 'Duplicate route detected; path "/foo" answering to methods [GET], with name "route2"';
+        $this->expectExceptionMessage($message);
+
         $this->collector->get('/foo', $this->createNoopMiddleware(), 'route2');
     }
 
@@ -238,16 +244,22 @@ class RouteCollectorTest extends TestCase
         $this->collector->get('/foo', $this->noopMiddleware, 'route1');
 
         $this->expectException(Exception\DuplicateRouteException::class);
+        $message = 'Duplicate route detected; path "/foo" answering to methods [(any)], with name "route2"';
+        $this->expectExceptionMessage($message);
+
         $this->collector->any('/foo', $this->createNoopMiddleware(), 'route2');
     }
 
     public function testCreatingHttpRouteWithExistingNameRaisesException()
     {
         $this->router->addRoute(Argument::type(Route::class))->shouldBeCalledTimes(1);
-        $this->collector->get('/foo', $this->noopMiddleware, 'duplicate.route');
+        $this->collector->get('/foo', $this->noopMiddleware, 'duplicate');
 
         $this->expectException(Exception\DuplicateRouteException::class);
-        $this->collector->get('/foo/baz', $this->createNoopMiddleware(), 'duplicate.route');
+        $message = 'Duplicate route detected; path "/foo/baz" answering to methods [GET], with name "duplicate"';
+        $this->expectExceptionMessage($message);
+
+        $this->collector->get('/foo/baz', $this->createNoopMiddleware(), 'duplicate');
     }
 
     public function testGetRoutes()
