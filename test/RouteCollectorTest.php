@@ -24,6 +24,8 @@ use Zend\Expressive\Router\RouteCollector;
 use Zend\Expressive\Router\RouterInterface;
 use function array_keys;
 use function microtime;
+use function range;
+use function sprintf;
 
 class RouteCollectorTest extends TestCase
 {
