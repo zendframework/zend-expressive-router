@@ -46,11 +46,25 @@ class RouteCollector
     private $routes = [];
 
     /**
-     * @var array
+     * List of all routes indexed by name
+     *
+     * @var Route[]
      */
     private $routeNames = [];
 
     /**
+     * Search structure for duplicate path-method detection
+     * Indexed by path + method. Leaves are instances of Route
+     *  [
+     *      '/path/foo' => [
+     *          'methods' => [
+     *              'GET' => $route1,
+     *              'POST' => $route2,
+     *          ],
+     *      ],
+     *      '/path/bar' => [ 'any' => $route3 ],
+     *  ]
+     *
      * @var array
      */
     private $routePaths = [];
