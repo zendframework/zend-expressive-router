@@ -33,6 +33,9 @@ use Psr\Http\Server\MiddlewareInterface;
  */
 class RouteCollector
 {
+    private const ROUTE_SEARCH_ANY = 'any';
+    private const ROUTE_SEARCH_METHODS = 'methods';
+
     /**
      * @var RouterInterface
      */
@@ -104,12 +107,12 @@ class RouteCollector
     {
         $this->routeNames[$route->getName()] = $route;
         if ($route->allowsAnyMethod()) {
-            $this->routePaths[$route->getPath()]['any'] = $route;
+            $this->routePaths[$route->getPath()][self::ROUTE_SEARCH_ANY] = $route;
         }
 
         $allowedMethods = $route->getAllowedMethods() ?? [];
         foreach ($allowedMethods as $allowedMethod) {
-            $this->routePaths[$route->getPath()]['methods'][$allowedMethod] = $route;
+            $this->routePaths[$route->getPath()][self::ROUTE_SEARCH_METHODS][ $allowedMethod] = $route;
         }
     }
 
@@ -190,17 +193,17 @@ class RouteCollector
             return;
         }
 
-        if (isset($this->routePaths[$route->getPath()]['any'])) {
+        if (isset($this->routePaths[$route->getPath()][self::ROUTE_SEARCH_ANY])) {
             $this->duplicateRouteDetected($route);
         }
 
-        if ($route->allowsAnyMethod() && isset($this->routePaths[$route->getPath()]['methods'])) {
+        if ($route->allowsAnyMethod() && isset($this->routePaths[$route->getPath()][self::ROUTE_SEARCH_METHODS])) {
             $this->duplicateRouteDetected($route);
         }
 
         $allowedMethods = $route->getAllowedMethods() ?? [];
         foreach ($allowedMethods as $method) {
-            if (isset($this->routePaths[$route->getPath()]['methods'][$method])) {
+            if (isset($this->routePaths[$route->getPath()][self::ROUTE_SEARCH_METHODS][ $method])) {
                 $this->duplicateRouteDetected($route);
             }
         }
