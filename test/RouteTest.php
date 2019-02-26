@@ -124,7 +124,7 @@ class RouteTest extends TestCase
     public function testThrowsExceptionDuringConstructionIfPathIsNotString()
     {
         $this->expectException(TypeError::class);
-        $this->expectExceptionMessage('must be of the type string, integer given');
+        $this->expectExceptionMessage('must be of the type string');
 
         new Route(12345, $this->noopMiddleware);
     }
