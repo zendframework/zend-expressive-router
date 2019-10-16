@@ -121,10 +121,24 @@ class RouteTest extends TestCase
         $this->assertSame('/test^GET' . Route::HTTP_METHOD_SEPARATOR . RequestMethod::METHOD_POST, $route->getName());
     }
 
-    public function testThrowsExceptionDuringConstructionIfPathIsNotString()
+    /**
+     * @requires PHP < 7.3
+     */
+    public function testThrowsExceptionDuringConstructionIfPathIsNotStringPhpPriorTo73()
     {
         $this->expectException(TypeError::class);
         $this->expectExceptionMessage('must be of the type string, integer given');
+
+        new Route(12345, $this->noopMiddleware);
+    }
+
+    /**
+     * @requires PHP 7.3
+     */
+    public function testThrowsExceptionDuringConstructionIfPathIsNotString()
+    {
+        $this->expectException(TypeError::class);
+        $this->expectExceptionMessage('must be of the type string, int given');
 
         new Route(12345, $this->noopMiddleware);
     }
