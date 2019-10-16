@@ -26,7 +26,7 @@ class ImplicitHeadMiddlewareFactoryTest extends TestCase
     /** @var ImplicitHeadMiddlewareFactory */
     private $factory;
 
-    public function setUp()
+    protected function setUp() : void
     {
         $this->container = $this->prophesize(ContainerInterface::class);
         $this->factory = new ImplicitHeadMiddlewareFactory();

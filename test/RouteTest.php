@@ -31,7 +31,7 @@ class RouteTest extends TestCase
      */
     private $noopMiddleware;
 
-    public function setUp()
+    protected function setUp() : void
     {
         $this->noopMiddleware = $this->prophesize(MiddlewareInterface::class)->reveal();
     }

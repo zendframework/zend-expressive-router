@@ -23,7 +23,7 @@ class RouteResultTest extends TestCase
 {
     private $middleware;
 
-    public function setUp()
+    protected function setUp() : void
     {
         $this->middleware = function ($req, $res, $next) {
         };
