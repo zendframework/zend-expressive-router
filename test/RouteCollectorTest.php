@@ -39,7 +39,7 @@ class RouteCollectorTest extends TestCase
     /** @var MiddlewareInterface */
     private $noopMiddleware;
 
-    public function setUp()
+    protected function setUp() : void
     {
         $this->router    = $this->prophesize(RouterInterface::class);
         $this->response  = $this->prophesize(ResponseInterface::class);
@@ -203,7 +203,7 @@ class RouteCollectorTest extends TestCase
 
         $routes = $this->collector->getRoutes();
 
-        $this->assertInternalType('array', $routes);
+        $this->assertIsArray($routes);
         $this->assertCount(2, $routes);
         $this->assertContainsOnlyInstancesOf(Route::class, $routes);
 

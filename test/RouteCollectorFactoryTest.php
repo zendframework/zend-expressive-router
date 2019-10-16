@@ -25,7 +25,7 @@ class RouteCollectorFactoryTest extends TestCase
     /** @var RouteCollectorFactory */
     private $factory;
 
-    public function setUp()
+    protected function setUp() : void
     {
         $this->container = $this->prophesize(ContainerInterface::class);
         $this->factory = new RouteCollectorFactory();

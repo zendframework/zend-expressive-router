@@ -25,7 +25,7 @@ class RouteMiddlewareFactoryTest extends TestCase
     /** @var RouteMiddlewareFactory */
     private $factory;
 
-    public function setUp()
+    protected function setUp() : void
     {
         $this->container = $this->prophesize(ContainerInterface::class);
         $this->factory = new RouteMiddlewareFactory();

@@ -34,7 +34,7 @@ class MethodNotAllowedMiddlewareTest extends TestCase
     /** @var ResponseInterface|ObjectProphecy */
     private $response;
 
-    public function setUp()
+    protected function setUp() : void
     {
         $this->handler = $this->prophesize(RequestHandlerInterface::class);
         $this->request = $this->prophesize(ServerRequestInterface::class);
