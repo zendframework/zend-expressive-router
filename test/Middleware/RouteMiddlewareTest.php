@@ -37,7 +37,7 @@ class RouteMiddlewareTest extends TestCase
     /** @var RequestHandlerInterface|ObjectProphecy */
     private $handler;
 
-    public function setUp()
+    protected function setUp() : void
     {
         $this->router     = $this->prophesize(RouterInterface::class);
         $this->request = $this->prophesize(ServerRequestInterface::class);

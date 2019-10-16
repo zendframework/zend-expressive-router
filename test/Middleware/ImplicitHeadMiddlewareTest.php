@@ -36,7 +36,7 @@ class ImplicitHeadMiddlewareTest extends TestCase
     /** @var StreamInterface|ObjectProphecy */
     private $stream;
 
-    public function setUp()
+    protected function setUp() : void
     {
         $this->router = $this->prophesize(RouterInterface::class);
         $this->stream = $this->prophesize(StreamInterface::class);
