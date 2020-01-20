@@ -2,7 +2,7 @@
 
 > ## Repository abandoned 2019-12-31
 >
-> This repository has moved to mezzio/mezzio-router.
+> This repository has moved to [mezzio/mezzio-router](https://github.com/mezzio/mezzio-router).
 
 [![Build Status](https://secure.travis-ci.org/zendframework/zend-expressive-router.svg?branch=master)](https://secure.travis-ci.org/zendframework/zend-expressive-router)
 [![Coverage Status](https://coveralls.io/repos/github/zendframework/zend-expressive-router/badge.svg?branch=master)](https://coveralls.io/github/zendframework/zend-expressive-router?branch=master)
