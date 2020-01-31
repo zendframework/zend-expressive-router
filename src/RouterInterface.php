@@ -25,13 +25,6 @@ interface RouterInterface
      * `generateUri()` is called.  This is required to allow consumers to
      * modify route instances before matching (e.g., to provide route options,
      * inject a name, etc.).
-     *
-     * The method MUST raise Exception\RuntimeException if called after either `match()`
-     * or `generateUri()` have already been called, to ensure integrity of the
-     * router between invocations of either of those methods.
-     *
-     * @throws Exception\RuntimeException when called after match() or
-     *     generateUri() have been called.
      */
     public function addRoute(Route $route) : void;
 
